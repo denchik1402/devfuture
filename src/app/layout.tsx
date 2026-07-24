@@ -9,6 +9,7 @@ import {
 import { FAQ_ITEMS } from "@/lib/content";
 import { JsonLd } from "@/components/JsonLd";
 import { YandexMetrika } from "@/components/YandexMetrika";
+import { MotionProvider } from "@/components/MotionProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -42,8 +43,10 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased bg-void text-zinc-100">
-        <YandexMetrika />
-        {children}
+        <MotionProvider>
+          <YandexMetrika />
+          {children}
+        </MotionProvider>
       </body>
     </html>
   );

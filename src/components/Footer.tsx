@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import { Send, Mail } from "lucide-react";
+import { Send } from "lucide-react";
 import NeonButton from "./NeonButton";
 import Reveal from "./Reveal";
 import { siteConfig } from "@/lib/site";
@@ -16,11 +16,6 @@ const LINKS = [
 ];
 
 function Footer() {
-  const socials = [
-    { label: "Telegram", href: siteConfig.telegramUrl, icon: Send },
-    { label: "Email", href: `mailto:${siteConfig.email}`, icon: Mail },
-  ];
-
   return (
     <footer className="relative border-t border-white/5 pt-16 pb-10">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,240,255,0.05),transparent_55%)]" />
@@ -33,8 +28,7 @@ function Footer() {
                 DevFuture
               </p>
               <p className="mt-3 max-w-md text-sm text-zinc-400">
-                Быстрее ответим в Telegram. Почта — для формальной переписки и
-                документов.
+                Пишите в Telegram — так быстрее всего ответим по задаче и срокам.
               </p>
             </div>
             <NeonButton href={siteConfig.telegramUrl} pulse>
@@ -56,20 +50,15 @@ function Footer() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
-            {socials.map(({ label, href, icon: Icon }) => (
-              <a
-                key={label}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                aria-label={label}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-zinc-500 transition-colors hover:border-cyan-neon/40 hover:text-cyan-neon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
-              >
-                <Icon className="h-4 w-4" strokeWidth={1.5} />
-              </a>
-            ))}
-          </div>
+          <a
+            href={siteConfig.telegramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Telegram"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-zinc-500 transition-colors hover:border-cyan-neon/40 hover:text-cyan-neon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
+          >
+            <Send className="h-4 w-4" strokeWidth={1.5} />
+          </a>
         </div>
 
         <p className="mt-10 text-xs text-zinc-600">

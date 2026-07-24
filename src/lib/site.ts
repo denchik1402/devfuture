@@ -10,7 +10,6 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://devfuture.ru",
   locale: "ru_RU",
   language: "ru",
-  email: process.env.NEXT_PUBLIC_EMAIL ?? "hello@devfuture.ru",
   phone: process.env.NEXT_PUBLIC_PHONE || undefined,
   telegramUsername,
   telegramUrl:
@@ -53,7 +52,6 @@ export const siteConfig = {
   url: string;
   locale: string;
   language: string;
-  email: string;
   phone: string | undefined;
   telegramUsername: string;
   telegramUrl: string;

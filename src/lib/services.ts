@@ -66,7 +66,7 @@ export const SERVICE_PAGES: ServicePage[] = [
     highlights: [
       "Современный стек (Next.js) и быстрая загрузка",
       "Базовое SEO: мета, структура, sitemap",
-      "Форма заявок в Telegram / на почту",
+      "Форма заявок в Telegram",
       "Адаптив под телефон и десктоп",
     ],
     process: [

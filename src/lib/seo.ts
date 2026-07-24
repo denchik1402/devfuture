@@ -9,7 +9,6 @@ export function buildOrganizationSchema() {
     legalName: siteConfig.legalName,
     url: siteConfig.url,
     description: siteConfig.description,
-    email: siteConfig.email,
     image: `${siteConfig.url}/opengraph-image`,
     logo: {
       "@type": "ImageObject",

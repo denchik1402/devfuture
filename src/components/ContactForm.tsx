@@ -121,9 +121,6 @@ function ContactForm() {
               <NeonButton href={siteConfig.telegramUrl} pulse>
                 Telegram
               </NeonButton>
-              <NeonButton href={`mailto:${siteConfig.email}`} variant="ghost">
-                {siteConfig.email}
-              </NeonButton>
             </div>
           </Reveal>
 
