@@ -52,8 +52,8 @@ npm run dev
 
 ## Деплой и CI/CD
 
-- Пошагово с GitHub Actions и FirstByte: **[CICD.md](./CICD.md)** (куда кликать, DNS, SSH-ключи, Secrets)
-- Ручной подъём VPS: **[DEPLOY.md](./DEPLOY.md)**
+- Автодеплой через GitHub (один раз настроить, дальше `git push`): **[CICD.md](./CICD.md)**
+- Ручной bootstrap VPS (если нужно): **[DEPLOY.md](./DEPLOY.md)** / `scripts/bootstrap-server.sh`
 
 ## Сборка
 

@@ -1,0 +1,59 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cicd-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://devfuture.ru
+          NEXT_PUBLIC_TELEGRAM_USERNAME: devfuture
+          NEXT_PUBLIC_TELEGRAM_URL: https://t.me/devfuture
+          NEXT_PUBLIC_EMAIL: hello@devfuture.ru
+
+  deploy:
+    name: Deploy to FirstByte
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: >
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    steps:
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script_stop: true
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            cd /var/www/devfuture
+            bash scripts/deploy.sh
