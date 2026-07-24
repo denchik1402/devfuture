@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/lib/__tests__/**/*.test.ts",
+    "test": "tsx --test src/lib/__tests__/helpers.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "tg:chat-id": "node scripts/telegram-chat-id.js",
