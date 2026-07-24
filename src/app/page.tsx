@@ -38,10 +38,10 @@ export default function Home() {
       <Process />
       <BotDemo />
       <Cases />
-      <Testimonials />
       <BriefQuiz />
       <Faq />
       <ContactForm />
+      <Testimonials />
       <Footer />
       <TelegramFloat />
     </main>
