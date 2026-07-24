@@ -52,7 +52,7 @@ const SKILLS: Skill[] = [
     title: "Telegram-боты",
     subtitle: "Заявки, уведомления, сервис",
     description:
-      "Боты для заявок, каталога, записи и рассылок. Простой сценарий часто готов в тот же день; сложнее — за несколько дней с админкой.",
+      "Боты для заявок, каталога, записи и рассылок. От простого меню до сценариев с админкой и уведомлениями.",
     icon: Bot,
     tags: ["Aiogram", "Bot API", "Уведомления"],
   },
@@ -128,7 +128,7 @@ function Skills() {
 
       <div
         ref={trackRef}
-        className="skills-track mt-12 flex gap-5 overflow-x-auto px-6 pb-4 snap-x snap-mandatory md:px-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]"
+        className="skills-track mt-12 md:mt-14 flex gap-5 overflow-x-auto px-6 pb-4 snap-x snap-mandatory md:px-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]"
       >
         {SKILLS.map((skill, i) => {
           const Icon = skill.icon;

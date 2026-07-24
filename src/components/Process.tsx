@@ -17,7 +17,7 @@ const STEPS = [
     num: "02",
     title: "Прототип",
     description:
-      "Быстрый MVP: простые сценарии и боты часто показываем в тот же день или на следующий. Смотрите, правите, утверждаете — и идём в доработку.",
+      "Быстрый MVP: сначала смотрите рабочий каркас, правите сценарий и утверждаете — потом идём в доработку.",
     icon: PenTool,
   },
   {
@@ -62,7 +62,7 @@ function Process() {
           </p>
         </Reveal>
 
-        <div ref={containerRef} className="relative mt-16 md:mt-20">
+        <div ref={containerRef} className="relative mt-12 md:mt-14">
           {/* Vertical timeline line (desktop) — scaleY is GPU-composited */}
           <div className="absolute left-6 top-0 bottom-0 w-px bg-white/10 md:left-1/2 md:-translate-x-px hidden sm:block">
             <motion.div

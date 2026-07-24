@@ -20,11 +20,11 @@ function OfferStrip() {
           </span>
           <div>
             <p className="font-display text-sm font-semibold text-white sm:text-base">
-              Простой бот или прототип — демо в день обращения
+              Напишите задачу — ответим и предложим формат работ
             </p>
             <p className="mt-1 text-xs text-zinc-400 sm:text-sm">
-              Напишите задачу в Telegram или оставьте бриф — оценим слот и срок
-              в тот же день.
+              Telegram в один клик или короткий бриф на сайте. Оценка срока и
+              пакета без длинной переписки.
             </p>
           </div>
         </div>

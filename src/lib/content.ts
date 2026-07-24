@@ -57,7 +57,7 @@ export const PACKAGES = [
     priceFrom: "15 000 ₽",
     badge: "Демо в день",
     description:
-      "Простой сценарий в Telegram: заявки, меню, уведомления. Базовый прототип часто показываем в день обращения.",
+      "Простой сценарий в Telegram: заявки, меню, уведомления. Каркас и кликабельное демо в мессенджере.",
     includes: ["Сценарий и меню", "Приём заявок", "Демо в Telegram", "1 итерация правок"],
     highlight: true,
   },
@@ -143,7 +143,7 @@ export const FEATURED_CASE = {
 export const SCENARIO_CASES = [
   {
     title: "Бот записи клиентов",
-    category: "Telegram · демо в день",
+    category: "Telegram · быстрый старт",
     description:
       "Меню услуг → выбор слота → контакт → напоминание. Базовый сценарий собираем и показываем в день старта.",
     stack: ["Aiogram", "Bot API"],

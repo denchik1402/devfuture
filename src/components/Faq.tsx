@@ -23,7 +23,7 @@ function Faq() {
           </h2>
         </Reveal>
 
-        <div className="mt-12 space-y-3">
+        <div className="mt-12 md:mt-14 space-y-3">
           {FAQ_ITEMS.map((item, i) => {
             const isOpen = open === i;
             return (

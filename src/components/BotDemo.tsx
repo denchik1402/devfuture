@@ -57,7 +57,7 @@ function BotDemo() {
   return (
     <section
       id="demo"
-      className="relative border-y border-white/5 bg-white/[0.02] py-16 md:py-20"
+      className="relative border-y border-white/5 bg-white/[0.02] py-24 md:py-32"
     >
       <div className="mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-2 lg:items-center">
         <div>
@@ -68,8 +68,8 @@ function BotDemo() {
             Так выглядит простой бот записи
           </h2>
           <p className="mt-4 text-zinc-400">
-            Нажмите варианты ответа справа — это пример сценария, который часто
-            собираем и показываем в день обращения.
+            Нажмите варианты ответа справа — живой пример сценария: меню, слот,
+            заявка. Так клиент проходит путь от клика до записи.
           </p>
           <div className="mt-8">
             <NeonButton

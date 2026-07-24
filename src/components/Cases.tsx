@@ -29,7 +29,7 @@ function Cases() {
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 md:mt-14 grid gap-4 md:grid-cols-3">
           {DAY_ONE_STEPS.map((item, i) => (
             <Reveal key={item.step} delay={i * 0.08}>
               <article className="glass relative h-full rounded-2xl p-6">
@@ -55,7 +55,7 @@ function Cases() {
           ))}
         </div>
 
-        <Reveal className="mt-20">
+        <Reveal className="mt-16 md:mt-20">
           <p className="mb-3 font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">
             Кейсы и сценарии
           </p>
@@ -72,7 +72,7 @@ function Cases() {
           </p>
         </Reveal>
 
-        <Reveal className="mt-10">
+        <Reveal className="mt-12 md:mt-14">
           <motion.article
             whileHover={{ y: -4 }}
             transition={{ type: "spring", stiffness: 300, damping: 24 }}
@@ -130,7 +130,7 @@ function Cases() {
           </motion.article>
         </Reveal>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2">
+        <div className="mt-12 md:mt-14 grid gap-5 sm:grid-cols-2">
           {SCENARIO_CASES.map((item, i) => (
             <Reveal key={item.title} delay={i * 0.08}>
               <motion.article
@@ -188,7 +188,7 @@ function Cases() {
           ))}
         </div>
 
-        <Reveal className="mt-10">
+        <Reveal className="mt-12 md:mt-14">
           <NeonButton
             href={siteConfig.telegramUrl}
             onClick={() => reachGoal("click_telegram", { place: "cases" })}

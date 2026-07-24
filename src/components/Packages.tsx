@@ -27,7 +27,7 @@ function Packages() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 md:mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {PACKAGES.map((pkg, i) => {
             const brief = [
               `Интересует пакет «${pkg.name}» (от ${pkg.priceFrom}).`,

@@ -9,7 +9,7 @@ import { reachGoal } from "@/lib/analytics";
 
 function ServicesIntro() {
   return (
-    <section id="services" className="relative py-20 md:py-24">
+    <section id="services" className="relative py-24 md:py-32">
       <div className="pointer-events-none absolute inset-0 dot-grid opacity-20" />
 
       <div className="relative mx-auto max-w-6xl px-6">
@@ -27,7 +27,7 @@ function ServicesIntro() {
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2">
+        <div className="mt-12 md:mt-14 grid gap-5 sm:grid-cols-2">
           {SERVICE_PAGES.map((s, i) => (
             <Reveal key={s.slug} delay={i * 0.06}>
               <Link

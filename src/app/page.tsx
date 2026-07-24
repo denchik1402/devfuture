@@ -40,8 +40,8 @@ export default function Home() {
       <Cases />
       <BriefQuiz />
       <Faq />
-      <ContactForm />
       <Testimonials />
+      <ContactForm />
       <Footer />
       <TelegramFloat />
     </main>

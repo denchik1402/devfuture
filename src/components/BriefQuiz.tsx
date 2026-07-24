@@ -8,7 +8,7 @@ import { telegramBriefLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 const TIMELINES = [
-  { id: "asap", label: "Как можно скорее / демо в день" },
+  { id: "asap", label: "Как можно скорее" },
   { id: "week", label: "В течение 1–2 недель" },
   { id: "month", label: "В горизонте месяца" },
 ] as const;
@@ -46,7 +46,7 @@ function BriefQuiz() {
   }, [type, timeline, budget]);
 
   return (
-    <section id="quiz" className="relative py-24 md:py-28">
+    <section id="quiz" className="relative py-24 md:py-32">
       <div className="relative mx-auto max-w-6xl px-6">
         <Reveal>
           <p className="mb-3 font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">
@@ -61,7 +61,7 @@ function BriefQuiz() {
           </p>
         </Reveal>
 
-        <Reveal delay={0.08} className="mt-10">
+        <Reveal delay={0.08} className="mt-12 md:mt-14">
           <div className="glass rounded-2xl p-6 md:p-8">
             <Step
               title="1. Что нужно?"

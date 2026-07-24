@@ -7,7 +7,7 @@ import { TESTIMONIALS } from "@/lib/content";
 
 function Testimonials() {
   return (
-    <section id="reviews" className="relative py-24 md:py-28">
+    <section id="reviews" className="relative py-24 md:py-32">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_right,rgba(176,38,255,0.06),transparent_50%)]" />
       <div className="relative mx-auto max-w-6xl px-6">
         <Reveal>
@@ -23,7 +23,7 @@ function Testimonials() {
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
+        <div className="mt-12 md:mt-14 grid gap-5 md:grid-cols-3">
           {TESTIMONIALS.map((item, i) => (
             <Reveal key={item.name} delay={i * 0.08}>
               <blockquote className="glass flex h-full flex-col rounded-2xl p-6">
