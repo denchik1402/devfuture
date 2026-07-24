@@ -35,9 +35,9 @@ function Hero() {
       <div className="absolute inset-0 dot-grid opacity-60" />
       <div className="absolute inset-0 bg-neon-radial" />
 
-      <ParticleSphere className="absolute inset-0 z-[1]" />
+      <ParticleSphere className="absolute inset-0 z-[1] [contain:strict]" />
 
-      <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,10,10,0.55)_78%,#0A0A0A_100%)]" />
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,transparent_30%,#0A0A0A_85%)]" />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pt-24 pb-16 text-center">
         <motion.p
