@@ -1,0 +1,44 @@
+{
+  "name": "devfuture",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/lib/__tests__/**/*.test.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "tg:chat-id": "node scripts/telegram-chat-id.js",
+    "tg:set-webhook": "node scripts/telegram-set-webhook.js",
+    "tg:poll": "node scripts/telegram-poll.js"
+  },
+  "dependencies": {
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.468.0",
+    "next": "14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.171.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/three": "^0.171.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8.4.49",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    "tailwindcss": "^3.4.16",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}
