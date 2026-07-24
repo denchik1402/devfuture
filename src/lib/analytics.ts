@@ -8,6 +8,7 @@ declare global {
 
 export type MetrikaGoal =
   | "click_telegram"
+  | "click_phone"
   | "submit_brief"
   | "open_packages"
   | "open_service"

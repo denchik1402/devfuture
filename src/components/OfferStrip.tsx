@@ -3,7 +3,8 @@
 import { memo } from "react";
 import { Zap } from "lucide-react";
 import NeonButton from "./NeonButton";
-import { siteConfig } from "@/lib/site";
+import { telegramContactLink } from "@/lib/site";
+import { reachGoal } from "@/lib/analytics";
 
 function OfferStrip() {
   return (
@@ -29,11 +30,18 @@ function OfferStrip() {
         </div>
 
         <div className="flex w-full flex-wrap gap-3 sm:w-auto">
-          <NeonButton href={siteConfig.telegramUrl} pulse className="w-full sm:w-auto">
-            Запросить слот
+          <NeonButton
+            href={telegramContactLink()}
+            pulse
+            className="w-full sm:w-auto"
+            onClick={() =>
+              reachGoal("click_telegram", { place: "offer_1click" })
+            }
+          >
+            Связаться в 1 клик
           </NeonButton>
-          <NeonButton href="#contact" variant="ghost" className="w-full sm:w-auto">
-            Оставить бриф
+          <NeonButton href="#quiz" variant="ghost" className="w-full sm:w-auto">
+            Собрать бриф
           </NeonButton>
         </div>
       </div>

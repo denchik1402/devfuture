@@ -9,6 +9,9 @@ export function buildOrganizationSchema() {
     legalName: siteConfig.legalName,
     url: siteConfig.url,
     description: siteConfig.description,
+    ...(siteConfig.phone
+      ? { telephone: siteConfig.phone.replace(/[^\d+]/g, "") }
+      : {}),
     image: `${siteConfig.url}/opengraph-image`,
     logo: {
       "@type": "ImageObject",

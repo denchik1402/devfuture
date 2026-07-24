@@ -3,6 +3,8 @@
 const telegramUsername =
   process.env.NEXT_PUBLIC_TELEGRAM_USERNAME?.replace(/^@/, "") || "devfuture";
 
+const phoneRaw = process.env.NEXT_PUBLIC_PHONE?.trim() || "";
+
 export const siteConfig = {
   name: "DevFuture",
   legalName: "DevFuture",
@@ -10,7 +12,12 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://devfuture.ru",
   locale: "ru_RU",
   language: "ru",
-  phone: process.env.NEXT_PUBLIC_PHONE || undefined,
+  /** Display number, e.g. +7 (900) 123-45-67 */
+  phone: phoneRaw || undefined,
+  /** tel:+79001234567 */
+  phoneTel: phoneRaw
+    ? `tel:${phoneRaw.replace(/[^\d+]/g, "")}`
+    : undefined,
   telegramUsername,
   telegramUrl:
     process.env.NEXT_PUBLIC_TELEGRAM_URL ?? `https://t.me/${telegramUsername}`,
@@ -53,6 +60,7 @@ export const siteConfig = {
   locale: string;
   language: string;
   phone: string | undefined;
+  phoneTel: string | undefined;
   telegramUsername: string;
   telegramUrl: string;
   sameAs: string[];
@@ -68,4 +76,11 @@ export type SiteConfig = typeof siteConfig;
 export function telegramBriefLink(text: string) {
   const encoded = encodeURIComponent(text);
   return `https://t.me/${siteConfig.telegramUsername}?text=${encoded}`;
+}
+
+/** One-click «хочу связаться» message */
+export function telegramContactLink() {
+  return telegramBriefLink(
+    "Здравствуйте! Хочу обсудить проект с DevFuture."
+  );
 }

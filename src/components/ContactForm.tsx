@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
 import { BRIEF_TYPES } from "@/lib/content";
-import { siteConfig, telegramBriefLink } from "@/lib/site";
+import { siteConfig, telegramBriefLink, telegramContactLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 type BriefType = (typeof BRIEF_TYPES)[number]["value"];
@@ -118,10 +118,29 @@ function ContactForm() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <NeonButton href={siteConfig.telegramUrl} pulse>
-                Telegram
+              <NeonButton
+                href={telegramContactLink()}
+                pulse
+                onClick={() =>
+                  reachGoal("click_telegram", { place: "contact_1click" })
+                }
+              >
+                Связаться в 1 клик
               </NeonButton>
+              {siteConfig.phoneTel && siteConfig.phone && (
+                <NeonButton
+                  href={siteConfig.phoneTel}
+                  variant="ghost"
+                  onClick={() => reachGoal("click_phone")}
+                >
+                  {siteConfig.phone}
+                </NeonButton>
+              )}
             </div>
+            <p className="mt-3 text-xs text-zinc-500">
+              1 клик откроет Telegram с готовым сообщением. Или заполните бриф
+              справа.
+            </p>
           </Reveal>
 
           <Reveal delay={0.1}>
