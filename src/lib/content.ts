@@ -111,10 +111,10 @@ export const DAY_ONE_STEPS = [
   },
 ] as const;
 
-/** Real delivery — anonymized, no invented metrics */
+/** Featured scenario example — anonymized delivery */
 export const FEATURED_CASE = {
   title: "Интернет-магазин: витрины + Telegram-хаб",
-  category: "Реальный кейс",
+  category: "Сайты · Telegram",
   description:
     "Несколько сайтов с разным UI под одну сеть. Все заказы и операции сходятся в Telegram-боте: клиент покупает и получает помощь, команда обрабатывает заказы — без разрозненных чатов и таблиц.",
   stack: ["Сайты", "Telegram-бот", "Роли"],
