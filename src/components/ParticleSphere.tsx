@@ -24,15 +24,8 @@ function ParticleSphere({ className }: ParticleSphereProps) {
     const container = containerRef.current;
     if (!container) return;
 
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    if (reducedMotion) {
-      // Static soft glow instead of WebGL for a11y
-      container.style.background =
-        "radial-gradient(ellipse at center, rgba(0,240,255,0.1), transparent 60%)";
-      return;
-    }
+    // Ambient brand sphere always runs — do not gate on prefers-reduced-motion
+    // (Windows "Animation effects" off would otherwise hide it for many users).
 
     const particleCount = getParticleCount();
     const mouse = { x: 0, y: 0 };
