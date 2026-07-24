@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, Clock3 } from "lucide-react";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
-import { DAY_ONE_STEPS, SCENARIO_CASES } from "@/lib/content";
+import { DAY_ONE_STEPS, FEATURED_CASE, SCENARIO_CASES } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
@@ -57,18 +57,77 @@ function Cases() {
 
         <Reveal className="mt-20">
           <p className="mb-3 font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">
-            Сценарии
+            Кейсы и сценарии
           </p>
           <h2 className="font-display text-3xl font-bold text-white md:text-4xl">
             Примеры сценариев
           </h2>
           <p className="mt-4 max-w-2xl text-zinc-400">
-            Откройте карточку услуги или попробуйте{" "}
+            Реальный кейс и типовые сценарии. Откройте карточку услуги или
+            попробуйте{" "}
             <a href="#demo" className="text-cyan-neon hover:underline">
               интерактивное демо бота
             </a>
             .
           </p>
+        </Reveal>
+
+        <Reveal className="mt-10">
+          <motion.article
+            whileHover={{ y: -4 }}
+            transition={{ type: "spring", stiffness: 300, damping: 24 }}
+            className="glass group relative overflow-hidden rounded-2xl p-7 md:p-8"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-cyan-neon/15 via-transparent to-purple-neon/20 opacity-80" />
+
+            <div className="relative flex flex-wrap items-start justify-between gap-3">
+              <span className="rounded-full border border-cyan-neon/30 bg-cyan-neon/10 px-3 py-1 text-[11px] uppercase tracking-wider text-cyan-neon">
+                {FEATURED_CASE.category}
+              </span>
+              <Link
+                href={FEATURED_CASE.href}
+                aria-label={`Подробнее: ${FEATURED_CASE.title}`}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-zinc-500 transition-all duration-300 hover:rotate-45 hover:border-cyan-neon/40 hover:text-cyan-neon"
+              >
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <h3 className="relative mt-6 font-display text-2xl font-semibold text-white md:text-3xl">
+              {FEATURED_CASE.title}
+            </h3>
+            <p className="relative mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400 md:text-base">
+              {FEATURED_CASE.description}
+            </p>
+
+            <ul className="relative mt-6 grid gap-3 sm:grid-cols-2">
+              {FEATURED_CASE.roles.map((role) => (
+                <li
+                  key={role.name}
+                  className="rounded-xl border border-white/10 bg-void/40 px-4 py-3"
+                >
+                  <p className="font-display text-sm font-semibold text-white">
+                    {role.name}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                    {role.text}
+                  </p>
+                </li>
+              ))}
+            </ul>
+
+            <p className="relative mt-5 text-sm text-cyan-neon/80">
+              Итог: {FEATURED_CASE.result}
+            </p>
+
+            <div className="relative mt-6 flex flex-wrap items-center gap-3 border-t border-white/5 pt-5">
+              {FEATURED_CASE.stack.map((tech) => (
+                <span key={tech} className="text-xs text-zinc-500">
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </motion.article>
         </Reveal>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2">
