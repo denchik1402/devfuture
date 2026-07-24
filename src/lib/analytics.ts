@@ -2,11 +2,7 @@
 
 declare global {
   interface Window {
-    ym?: (
-      id: number,
-      method: string,
-      ...args: unknown[]
-    ) => void;
+    ym?: (id: number, method: string, ...args: unknown[]) => void;
   }
 }
 
@@ -14,7 +10,11 @@ export type MetrikaGoal =
   | "click_telegram"
   | "submit_brief"
   | "open_packages"
-  | "open_service";
+  | "open_service"
+  | "open_demo"
+  | "click_package"
+  | "scroll_75"
+  | "quiz_complete";
 
 export function getMetrikaId(): number | null {
   const raw = process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID;

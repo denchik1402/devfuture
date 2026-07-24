@@ -13,7 +13,7 @@ import {
   SERVICE_PAGES,
 } from "@/lib/services";
 import { siteConfig } from "@/lib/site";
-import { buildFaqSchema } from "@/lib/seo";
+import { buildFaqSchema, buildBreadcrumbSchema } from "@/lib/seo";
 
 type Props = { params: { slug: string } };
 
@@ -65,9 +65,15 @@ export default function ServicePage({ params }: Props) {
     },
   };
 
+  const crumbs = buildBreadcrumbSchema([
+    { name: "Главная", path: "/" },
+    { name: "Услуги", path: "/uslugi" },
+    { name: service.shortName, path: `/uslugi/${service.slug}` },
+  ]);
+
   return (
     <main className="relative min-h-screen bg-void">
-      <JsonLd data={[serviceSchema, buildFaqSchema(service.faq)]} />
+      <JsonLd data={[serviceSchema, buildFaqSchema(service.faq), crumbs]} />
       <Navbar />
 
       <article className="relative overflow-hidden pb-8 pt-28 md:pt-32">

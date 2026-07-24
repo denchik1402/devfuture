@@ -10,6 +10,9 @@ import Process from "@/components/Process";
 import ContactForm from "@/components/ContactForm";
 import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
+import Testimonials from "@/components/Testimonials";
+import BriefQuiz from "@/components/BriefQuiz";
+import ScrollGoals from "@/components/ScrollGoals";
 
 const BotDemo = dynamic(() => import("@/components/BotDemo"), {
   loading: () => <section className="min-h-[20rem]" aria-hidden />,
@@ -24,16 +27,19 @@ const Faq = dynamic(() => import("@/components/Faq"), {
 export default function Home() {
   return (
     <main className="relative min-h-screen bg-void">
+      <ScrollGoals />
       <Navbar />
       <Hero />
       <OfferStrip />
+      <BotDemo />
       <Stats />
       <ServicesIntro />
       <Skills />
       <Packages />
       <Process />
-      <BotDemo />
       <Cases />
+      <Testimonials />
+      <BriefQuiz />
       <Faq />
       <ContactForm />
       <Footer />

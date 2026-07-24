@@ -9,10 +9,10 @@ import { reachGoal } from "@/lib/analytics";
 
 const NAV = [
   { label: "Услуги", href: "/uslugi" },
+  { label: "Решения", href: "/resheniya" },
   { label: "Пакеты", href: "/#packages" },
-  { label: "Процесс", href: "/#process" },
   { label: "Демо", href: "/#demo" },
-  { label: "FAQ", href: "/#faq" },
+  { label: "Блог", href: "/blog" },
 ];
 
 function Navbar() {

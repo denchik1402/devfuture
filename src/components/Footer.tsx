@@ -9,10 +9,11 @@ import { siteConfig } from "@/lib/site";
 
 const LINKS = [
   { label: "Услуги", href: "/uslugi" },
+  { label: "Решения", href: "/resheniya" },
   { label: "Пакеты", href: "/#packages" },
   { label: "Демо", href: "/#demo" },
-  { label: "FAQ", href: "/#faq" },
-  { label: "Бриф", href: "/#contact" },
+  { label: "Блог", href: "/blog" },
+  { label: "Бриф", href: "/#quiz" },
 ];
 
 function Footer() {

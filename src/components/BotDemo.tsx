@@ -40,6 +40,7 @@ function BotDemo() {
   useEffect(() => {
     setStep(0);
     setPicked([]);
+    reachGoal("open_demo");
   }, []);
 
   const visible = DEMO_STEPS.slice(0, step + 1);
