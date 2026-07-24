@@ -28,9 +28,8 @@ function ParticleSphere({ className }: ParticleSphereProps) {
       "(prefers-reduced-motion: reduce)"
     ).matches;
     if (reducedMotion) {
-      // Static soft glow instead of WebGL for a11y
       container.style.background =
-        "radial-gradient(ellipse at center, rgba(0,240,255,0.1), transparent 60%)";
+        "radial-gradient(ellipse at center, rgba(0,240,255,0.12), transparent 60%)";
       return;
     }
 
@@ -40,15 +39,12 @@ function ParticleSphere({ className }: ParticleSphereProps) {
     let visible = true;
     let pageVisible = true;
     let raf = 0;
-
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || window.innerHeight;
+    let disposed = false;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
     camera.position.z = 4.2;
 
-    // Lower DPR + no AA = big FPS win on Windows/integrated GPUs
     const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     const renderer = new THREE.WebGLRenderer({
       antialias: false,
@@ -58,11 +54,22 @@ function ParticleSphere({ className }: ParticleSphereProps) {
       depth: false,
     });
     renderer.setPixelRatio(dpr);
-    renderer.setSize(width, height, false);
     renderer.setClearColor(0x000000, 0);
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
+    renderer.domElement.style.display = "block";
     container.appendChild(renderer.domElement);
+
+    const syncSize = () => {
+      const w = container.clientWidth || window.innerWidth;
+      const h = container.clientHeight || window.innerHeight;
+      if (!w || !h) return false;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+      return true;
+    };
+    syncSize();
 
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
@@ -90,10 +97,10 @@ function ParticleSphere({ className }: ParticleSphereProps) {
     geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 0.022,
+      size: 0.035,
       vertexColors: true,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.95,
       depthWrite: false,
       depthTest: false,
       blending: THREE.AdditiveBlending,
@@ -107,7 +114,7 @@ function ParticleSphere({ className }: ParticleSphereProps) {
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0x00f0ff,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.14,
       side: THREE.DoubleSide,
       depthWrite: false,
       depthTest: false,
@@ -124,26 +131,27 @@ function ParticleSphere({ className }: ParticleSphereProps) {
 
     let resizeQueued = false;
     const onResize = () => {
-      if (resizeQueued) return;
+      if (resizeQueued || disposed) return;
       resizeQueued = true;
       requestAnimationFrame(() => {
         resizeQueued = false;
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        if (!w || !h) return;
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h, false);
+        syncSize();
       });
     };
 
-    // Pause when hero leaves viewport — biggest scroll FPS win
     const io = new IntersectionObserver(
       ([entry]) => {
+        // Ignore zero-size false negatives (layout not ready yet)
+        if (
+          !entry.isIntersecting &&
+          (container.clientWidth === 0 || container.clientHeight === 0)
+        ) {
+          return;
+        }
         visible = entry.isIntersecting;
         if (visible && pageVisible && !raf) animate();
       },
-      { threshold: 0.05 }
+      { threshold: 0 }
     );
     io.observe(container);
 
@@ -157,12 +165,11 @@ function ParticleSphere({ className }: ParticleSphereProps) {
     document.addEventListener("visibilitychange", onVisibility);
 
     const clock = new THREE.Clock();
-    // Cap ~30fps — looks smooth enough for ambient bg, halves GPU cost
     const frameInterval = 1000 / 30;
     let lastFrame = 0;
 
     const animate = () => {
-      if (!visible || !pageVisible) {
+      if (disposed || !visible || !pageVisible) {
         raf = 0;
         return;
       }
@@ -183,9 +190,16 @@ function ParticleSphere({ className }: ParticleSphereProps) {
 
       renderer.render(scene, camera);
     };
-    animate();
+
+    // Layout can be 0 on first tick — retry once after paint
+    requestAnimationFrame(() => {
+      if (disposed) return;
+      syncSize();
+      if (!raf) animate();
+    });
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(raf);
       raf = 0;
       io.disconnect();
@@ -208,7 +222,9 @@ function ParticleSphere({ className }: ParticleSphereProps) {
       ref={containerRef}
       className={className}
       aria-hidden="true"
-      style={{ pointerEvents: "none", contain: "strict" }}
+      // Do NOT use contain:strict — size containment can collapse to 0×0
+      // and IntersectionObserver then never starts the animation loop.
+      style={{ pointerEvents: "none", width: "100%", height: "100%" }}
     />
   );
 }
