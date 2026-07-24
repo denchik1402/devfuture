@@ -6,11 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, Clock3 } from "lucide-react";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
-import {
-  DAY_ONE_STEPS,
-  REAL_CASES,
-  SCENARIO_CASES,
-} from "@/lib/content";
+import { DAY_ONE_STEPS, SCENARIO_CASES } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
@@ -22,54 +18,6 @@ function Cases() {
       <div className="relative mx-auto max-w-6xl px-6">
         <Reveal>
           <p className="mb-3 font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">
-            Кейсы
-          </p>
-          <h2 className="font-display text-3xl font-bold text-white md:text-4xl">
-            Было → сделали → результат
-          </h2>
-          <p className="mt-4 max-w-2xl text-zinc-400">
-            Анонимизированные истории с конкретным эффектом. Похожий сценарий
-            можем разобрать под ваш процесс в Telegram.
-          </p>
-        </Reveal>
-
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {REAL_CASES.map((item, i) => (
-            <Reveal key={item.title} delay={i * 0.08}>
-              <article className="glass flex h-full flex-col rounded-2xl p-6">
-                <h3 className="font-display text-lg font-semibold text-white">
-                  {item.title}
-                </h3>
-                <dl className="mt-5 space-y-4 text-sm">
-                  <div>
-                    <dt className="text-[11px] uppercase tracking-wider text-zinc-500">
-                      Было
-                    </dt>
-                    <dd className="mt-1 text-zinc-400">{item.before}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[11px] uppercase tracking-wider text-zinc-500">
-                      Сделали
-                    </dt>
-                    <dd className="mt-1 text-zinc-300">{item.did}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[11px] uppercase tracking-wider text-cyan-neon/70">
-                      Результат
-                    </dt>
-                    <dd className="mt-1 font-medium text-cyan-neon">
-                      {item.result}
-                    </dd>
-                  </div>
-                </dl>
-                <p className="mt-auto pt-5 text-xs text-zinc-500">{item.term}</p>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal className="mt-20">
-          <p className="mb-3 font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">
             Результат за день
           </p>
           <h2 className="font-display text-3xl font-bold text-white md:text-4xl">
@@ -77,7 +25,7 @@ function Cases() {
           </h2>
           <p className="mt-4 max-w-2xl text-zinc-400">
             Для простого бота или прототипа путь короткий: бриф → сценарий →
-            рабочее демо.
+            рабочее демо. Дальше итерации под ваш процесс.
           </p>
         </Reveal>
 

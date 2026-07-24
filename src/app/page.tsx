@@ -31,12 +31,12 @@ export default function Home() {
       <Navbar />
       <Hero />
       <OfferStrip />
-      <BotDemo />
       <Stats />
       <ServicesIntro />
       <Skills />
       <Packages />
       <Process />
+      <BotDemo />
       <Cases />
       <Testimonials />
       <BriefQuiz />
