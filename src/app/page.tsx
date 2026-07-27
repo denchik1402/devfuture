@@ -2,26 +2,51 @@ import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import OfferStrip from "@/components/OfferStrip";
-import Stats from "@/components/Stats";
-import ServicesIntro from "@/components/ServicesIntro";
-import Skills from "@/components/Skills";
-import Packages from "@/components/Packages";
-import Process from "@/components/Process";
-import ContactForm from "@/components/ContactForm";
-import Footer from "@/components/Footer";
-import TelegramFloat from "@/components/TelegramFloat";
-import Testimonials from "@/components/Testimonials";
-import BriefQuiz from "@/components/BriefQuiz";
 import ScrollGoals from "@/components/ScrollGoals";
 
+const sectionFallback = (minHeight: string) => (
+  <section className={minHeight} aria-hidden />
+);
+
+/** Below-the-fold: code-split to shrink first JS parse/hydrate */
+const Stats = dynamic(() => import("@/components/Stats"), {
+  loading: () => sectionFallback("min-h-[18rem]"),
+});
+const ServicesIntro = dynamic(() => import("@/components/ServicesIntro"), {
+  loading: () => sectionFallback("min-h-[22rem]"),
+});
+const Skills = dynamic(() => import("@/components/Skills"), {
+  loading: () => sectionFallback("min-h-[22rem]"),
+});
+const Packages = dynamic(() => import("@/components/Packages"), {
+  loading: () => sectionFallback("min-h-[24rem]"),
+});
+const Process = dynamic(() => import("@/components/Process"), {
+  loading: () => sectionFallback("min-h-[28rem]"),
+});
 const BotDemo = dynamic(() => import("@/components/BotDemo"), {
-  loading: () => <section className="min-h-[20rem]" aria-hidden />,
+  loading: () => sectionFallback("min-h-[20rem]"),
 });
 const Cases = dynamic(() => import("@/components/Cases"), {
-  loading: () => <section className="min-h-[20rem]" aria-hidden />,
+  loading: () => sectionFallback("min-h-[20rem]"),
+});
+const BriefQuiz = dynamic(() => import("@/components/BriefQuiz"), {
+  loading: () => sectionFallback("min-h-[22rem]"),
 });
 const Faq = dynamic(() => import("@/components/Faq"), {
-  loading: () => <section className="min-h-[16rem]" aria-hidden />,
+  loading: () => sectionFallback("min-h-[16rem]"),
+});
+const Testimonials = dynamic(() => import("@/components/Testimonials"), {
+  loading: () => sectionFallback("min-h-[18rem]"),
+});
+const ContactForm = dynamic(() => import("@/components/ContactForm"), {
+  loading: () => sectionFallback("min-h-[28rem]"),
+});
+const Footer = dynamic(() => import("@/components/Footer"), {
+  loading: () => sectionFallback("min-h-[12rem]"),
+});
+const TelegramFloat = dynamic(() => import("@/components/TelegramFloat"), {
+  ssr: false,
 });
 
 export default function Home() {

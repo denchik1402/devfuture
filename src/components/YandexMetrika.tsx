@@ -28,7 +28,7 @@ export function YandexMetrika() {
 
   return (
     <>
-      <Script id="yandex-metrika" strategy="afterInteractive">
+      <Script id="yandex-metrika" strategy="lazyOnload">
         {snippet}
       </Script>
       <noscript>

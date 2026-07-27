@@ -1,7 +1,6 @@
 "use client";
 
 import { memo } from "react";
-import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import NeonButton from "./NeonButton";
 import TechMarquee from "./TechMarquee";
@@ -15,20 +14,6 @@ const ParticleSphere = dynamic(() => import("./ParticleSphere"), {
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.08),transparent_60%)]" />
   ),
 });
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring" as const,
-      stiffness: 80,
-      damping: 18,
-      delay: 0.2 + i * 0.2,
-    },
-  }),
-};
 
 function triggerBurst() {
   if (typeof window !== "undefined") {
@@ -48,47 +33,23 @@ function Hero() {
       <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,transparent_30%,#0A0A0A_85%)]" />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-16 pt-24 text-center">
-        <motion.p
-          custom={0}
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          className="mb-6 font-display text-xs uppercase tracking-[0.35em] text-cyan-neon/80"
-        >
+        <p className="hero-fade-up mb-6 font-display text-xs uppercase tracking-[0.35em] text-cyan-neon/80">
           DevFuture · цифровые продукты
-        </motion.p>
+        </p>
 
-        <motion.h1
-          custom={1}
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          className="max-w-5xl font-display text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
-        >
+        <h1 className="hero-fade-up hero-fade-up-delay-1 max-w-5xl font-display text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
           МЫ РЕШАЕМ ЗАДАЧИ,
           <br />
           <span className="text-neon">КОТОРЫЕ НЕ МОГУТ ДРУГИЕ</span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          custom={2}
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          className="mt-6 max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg"
-        >
+        <p className="hero-fade-up hero-fade-up-delay-2 mt-6 max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg">
           Сайты, веб-приложения, десктопные программы, Telegram-боты,
           автоматизация и AI — под ключ. Простой бот или MVP можем показать уже
           в день обращения
-        </motion.p>
+        </p>
 
-        <motion.div
-          custom={3}
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          className="mt-10 flex flex-wrap items-center justify-center gap-4"
-        >
+        <div className="hero-fade-up hero-fade-up-delay-3 mt-10 flex flex-wrap items-center justify-center gap-4">
           <span
             onMouseEnter={triggerBurst}
             onFocus={triggerBurst}
@@ -105,7 +66,7 @@ function Hero() {
           <NeonButton href="#packages" variant="ghost">
             Пакеты и сроки
           </NeonButton>
-        </motion.div>
+        </div>
       </div>
 
       <div className="relative z-10 mt-auto">

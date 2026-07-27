@@ -14,14 +14,18 @@ import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
   display: "swap",
+  preload: true,
 });
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin", "latin-ext"],
+  weight: ["500", "600", "700"],
   variable: "--font-space-grotesk",
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = rootMetadata;

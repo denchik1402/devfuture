@@ -64,14 +64,32 @@ body {
   border-radius: 3px;
 }
 
-/* Keep brand CSS animations even if OS requests reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .animate-marquee {
-    animation: marquee 40s linear infinite !important;
+/* Fast first paint: hero copy without waiting on Framer */
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
   }
-  .animate-pulseGlow {
-    animation: pulseGlow 2.4s ease-in-out infinite !important;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+.hero-fade-up {
+  animation: hero-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-fade-up-delay-1 {
+  animation-delay: 0.12s;
+}
+
+.hero-fade-up-delay-2 {
+  animation-delay: 0.24s;
+}
+
+.hero-fade-up-delay-3 {
+  animation-delay: 0.36s;
 }
 
 /* Horizontal skills scroll hide scrollbar */

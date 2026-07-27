@@ -29,6 +29,14 @@ function ParticleSphere({ className }: ParticleSphereProps) {
 
     const start = () => {
       if (cancelled || !containerRef.current) return;
+
+      const conn = (
+        navigator as Navigator & {
+          connection?: { saveData?: boolean; effectiveType?: string };
+        }
+      ).connection;
+      if (conn?.saveData || conn?.effectiveType === "2g") return;
+
       const el = containerRef.current;
 
       const particleCount = getParticleCount();
@@ -233,18 +241,29 @@ function ParticleSphere({ className }: ParticleSphereProps) {
       };
     };
 
-    // Defer WebGL until after first paint / idle — protects LCP
+    // Defer WebGL well after first paint — protects LCP / INP on first visit
+    const mem = (navigator as Navigator & { deviceMemory?: number })
+      .deviceMemory;
+    const isLowEnd =
+      window.matchMedia("(max-width: 768px)").matches ||
+      (typeof mem === "number" && mem <= 4);
+    const deferMs = isLowEnd ? 2200 : 1400;
+
     const ric = (
       window as Window & {
-        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        requestIdleCallback?: (
+          cb: () => void,
+          opts?: { timeout: number }
+        ) => number;
       }
     ).requestIdleCallback;
     let idleId = 0;
     let timeoutId = 0;
+
     if (typeof ric === "function") {
-      idleId = ric(() => start(), { timeout: 1200 });
+      idleId = ric(() => start(), { timeout: deferMs + 800 });
     } else {
-      timeoutId = window.setTimeout(start, 400);
+      timeoutId = window.setTimeout(start, deferMs);
     }
 
     return () => {
