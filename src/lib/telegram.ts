@@ -1,4 +1,15 @@
-const TELEGRAM_API = "https://api.telegram.org";
+import dns from "node:dns";
+
+/** Many VPS prefer broken IPv6 routes to Telegram — force IPv4 first */
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch {
+  /* older Node */
+}
+
+const TELEGRAM_API = (
+  process.env.TELEGRAM_API_BASE?.trim() || "https://api.telegram.org"
+).replace(/\/$/, "");
 
 export function getBotToken() {
   return process.env.TELEGRAM_BOT_TOKEN?.trim() || "";
@@ -30,17 +41,30 @@ export async function tgApi(
     return { ok: false, description: "TELEGRAM_BOT_TOKEN не задан" };
   }
 
-  const res = await fetch(`${TELEGRAM_API}/bot${token}/${method}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  try {
+    const res = await fetch(`${TELEGRAM_API}/bot${token}/${method}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(25_000),
+    });
 
-  const data = (await res.json().catch(() => ({}))) as TelegramResponse;
-  if (!res.ok || !data.ok) {
-    console.error("[telegram]", method, data.description || res.status);
+    const data = (await res.json().catch(() => ({}))) as TelegramResponse;
+    if (!res.ok || !data.ok) {
+      console.error("[telegram]", method, data.description || res.status);
+    }
+    return data;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(
+      "[telegram]",
+      method,
+      "network error:",
+      message,
+      `(api=${TELEGRAM_API}). VPS may block api.telegram.org — try IPv4 or TELEGRAM_API_BASE proxy.`
+    );
+    return { ok: false, description: message };
   }
-  return data;
 }
 
 export async function sendMessage(
