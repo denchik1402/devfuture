@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Решения под ключ — боты, лендинги, кабинеты, MVP",
   description:
-    "Посадочные страницы DevFuture под частые задачи: Telegram-бот под ключ, лендинг, личный кабинет, MVP за день.",
+    "Посадочные страницы DevFuture: Telegram-бот под ключ, запись клиентов, бот для магазина, лендинг, кабинет, MVP за день.",
   alternates: { canonical: "/resheniya" },
   openGraph: {
     title: "Решения DevFuture",

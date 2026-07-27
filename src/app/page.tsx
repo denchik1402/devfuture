@@ -3,6 +3,9 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import OfferStrip from "@/components/OfferStrip";
 import ScrollGoals from "@/components/ScrollGoals";
+import { JsonLd } from "@/components/JsonLd";
+import { FAQ_ITEMS } from "@/lib/content";
+import { buildFaqSchema } from "@/lib/seo";
 
 const sectionFallback = (minHeight: string) => (
   <section className={minHeight} aria-hidden />
@@ -52,6 +55,7 @@ const TelegramFloat = dynamic(() => import("@/components/TelegramFloat"), {
 export default function Home() {
   return (
     <main className="relative min-h-screen bg-void">
+      <JsonLd data={buildFaqSchema(FAQ_ITEMS)} />
       <ScrollGoals />
       <Navbar />
       <Hero />

@@ -11,6 +11,7 @@ import {
   getAllSeoLandingSlugs,
   getSeoLanding,
 } from "@/lib/seo-landings";
+import { getBlogPost } from "@/lib/blog";
 import { siteConfig } from "@/lib/site";
 import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/seo";
 
@@ -127,6 +128,19 @@ export default function SeoLandingPage({ params }: Props) {
             </ul>
           </section>
 
+          {page.sections.map((section) => (
+            <section key={section.heading} className="mt-14 max-w-3xl">
+              <h2 className="font-display text-2xl font-bold text-white">
+                {section.heading}
+              </h2>
+              <div className="mt-4 space-y-4 text-sm leading-relaxed text-zinc-400 md:text-base">
+                {section.paragraphs.map((p) => (
+                  <p key={p.slice(0, 48)}>{p}</p>
+                ))}
+              </div>
+            </section>
+          ))}
+
           <section className="mt-14">
             <h2 className="font-display text-2xl font-bold text-white">
               Частые вопросы
@@ -145,16 +159,54 @@ export default function SeoLandingPage({ params }: Props) {
             </div>
           </section>
 
-          {page.relatedService && (
-            <p className="mt-12 text-sm text-zinc-500">
-              Подробнее об услуге:{" "}
-              <Link
-                href={`/uslugi/${page.relatedService}`}
-                className="text-cyan-neon hover:underline"
-              >
-                открыть карточку
-              </Link>
-            </p>
+          {(page.relatedLandings?.length ||
+            page.relatedPosts?.length ||
+            page.relatedService) && (
+            <section className="mt-14 border-t border-white/5 pt-10">
+              <h2 className="font-display text-xl font-semibold text-white">
+                Читайте также
+              </h2>
+              <ul className="mt-4 flex flex-col gap-2 text-sm text-zinc-400">
+                {page.relatedService && (
+                  <li>
+                    <Link
+                      href={`/uslugi/${page.relatedService}`}
+                      className="text-cyan-neon hover:underline"
+                    >
+                      Услуга: подробнее
+                    </Link>
+                  </li>
+                )}
+                {page.relatedLandings?.map((slug) => {
+                  const rel = getSeoLanding(slug);
+                  if (!rel) return null;
+                  return (
+                    <li key={slug}>
+                      <Link
+                        href={`/resheniya/${slug}`}
+                        className="text-cyan-neon hover:underline"
+                      >
+                        {rel.h1}
+                      </Link>
+                    </li>
+                  );
+                })}
+                {page.relatedPosts?.map((slug) => {
+                  const post = getBlogPost(slug);
+                  if (!post) return null;
+                  return (
+                    <li key={slug}>
+                      <Link
+                        href={`/blog/${slug}`}
+                        className="text-cyan-neon hover:underline"
+                      >
+                        {post.title}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
           )}
         </div>
       </article>

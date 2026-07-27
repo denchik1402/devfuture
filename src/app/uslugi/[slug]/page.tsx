@@ -12,6 +12,8 @@ import {
   getServiceBySlug,
   SERVICE_PAGES,
 } from "@/lib/services";
+import { getSeoLanding } from "@/lib/seo-landings";
+import { getBlogPost } from "@/lib/blog";
 import { siteConfig } from "@/lib/site";
 import { buildFaqSchema, buildBreadcrumbSchema } from "@/lib/seo";
 
@@ -152,6 +154,19 @@ export default function ServicePage({ params }: Props) {
             </section>
           </div>
 
+          {service.sections.map((section) => (
+            <section key={section.heading} className="mt-14 max-w-3xl">
+              <h2 className="font-display text-2xl font-bold text-white">
+                {section.heading}
+              </h2>
+              <div className="mt-4 space-y-4 text-sm leading-relaxed text-zinc-400 md:text-base">
+                {section.paragraphs.map((p) => (
+                  <p key={p.slice(0, 48)}>{p}</p>
+                ))}
+              </div>
+            </section>
+          ))}
+
           <section className="mt-16">
             <h2 className="font-display text-2xl font-bold text-white">
               Частые вопросы
@@ -186,6 +201,44 @@ export default function ServicePage({ params }: Props) {
               ))}
             </div>
           </section>
+
+          {(service.relatedLandings?.length || service.relatedPosts?.length) && (
+            <section className="mt-12 border-t border-white/5 pt-10">
+              <h2 className="font-display text-xl font-semibold text-white">
+                Решения и статьи
+              </h2>
+              <ul className="mt-4 flex flex-col gap-2 text-sm">
+                {service.relatedLandings?.map((slug) => {
+                  const landing = getSeoLanding(slug);
+                  if (!landing) return null;
+                  return (
+                    <li key={slug}>
+                      <Link
+                        href={`/resheniya/${slug}`}
+                        className="text-cyan-neon hover:underline"
+                      >
+                        {landing.h1}
+                      </Link>
+                    </li>
+                  );
+                })}
+                {service.relatedPosts?.map((slug) => {
+                  const post = getBlogPost(slug);
+                  if (!post) return null;
+                  return (
+                    <li key={slug}>
+                      <Link
+                        href={`/blog/${slug}`}
+                        className="text-cyan-neon hover:underline"
+                      >
+                        {post.title}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
         </div>
       </article>
 

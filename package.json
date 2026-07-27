@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "tg:chat-id": "node scripts/telegram-chat-id.js",
     "tg:set-webhook": "node scripts/telegram-set-webhook.js",
-    "tg:poll": "node scripts/telegram-poll.js"
+    "tg:poll": "node scripts/telegram-poll.js",
+    "tg:check": "node scripts/telegram-check.js"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",

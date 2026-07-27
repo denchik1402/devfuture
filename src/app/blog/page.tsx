@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Блог DevFuture — боты, MVP, практика разработки",
   description:
-    "Короткие заметки о Telegram-ботах, MVP за день и практичной разработке цифровых продуктов.",
+    "Заметки DevFuture: боты заявок, роли в Telegram, стоимость бота, MVP за день и практика разработки.",
   alternates: { canonical: "/blog" },
   openGraph: {
     title: "Блог DevFuture",

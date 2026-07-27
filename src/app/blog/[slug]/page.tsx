@@ -8,6 +8,8 @@ import TelegramFloat from "@/components/TelegramFloat";
 import NeonButton from "@/components/NeonButton";
 import { JsonLd } from "@/components/JsonLd";
 import { getAllBlogSlugs, getBlogPost } from "@/lib/blog";
+import { getSeoLanding } from "@/lib/seo-landings";
+import { getServiceBySlug } from "@/lib/services";
 import { siteConfig } from "@/lib/site";
 import { buildBreadcrumbSchema } from "@/lib/seo";
 
@@ -84,6 +86,45 @@ export default function BlogPostPage({ params }: Props) {
             <p key={p.slice(0, 40)}>{p}</p>
           ))}
         </div>
+
+        {(post.relatedLandings?.length || post.relatedServices?.length) && (
+          <section className="mt-12 border-t border-white/5 pt-8">
+            <h2 className="font-display text-lg font-semibold text-white">
+              Полезные ссылки
+            </h2>
+            <ul className="mt-4 space-y-2 text-sm">
+              {post.relatedLandings?.map((slug) => {
+                const landing = getSeoLanding(slug);
+                if (!landing) return null;
+                return (
+                  <li key={slug}>
+                    <Link
+                      href={`/resheniya/${slug}`}
+                      className="text-cyan-neon hover:underline"
+                    >
+                      {landing.h1}
+                    </Link>
+                  </li>
+                );
+              })}
+              {post.relatedServices?.map((slug) => {
+                const service = getServiceBySlug(slug);
+                if (!service) return null;
+                return (
+                  <li key={slug}>
+                    <Link
+                      href={`/uslugi/${slug}`}
+                      className="text-cyan-neon hover:underline"
+                    >
+                      {service.name}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
         <div className="mt-12">
           <NeonButton href={siteConfig.telegramUrl} pulse>
             Обсудить задачу в Telegram

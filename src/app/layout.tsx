@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { rootMetadata } from "@/lib/metadata";
-import {
-  buildFaqSchema,
-  buildOrganizationSchema,
-  buildWebsiteSchema,
-} from "@/lib/seo";
-import { FAQ_ITEMS } from "@/lib/content";
+import { buildOrganizationSchema, buildWebsiteSchema } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 import { YandexMetrika } from "@/components/YandexMetrika";
 import { MotionProvider } from "@/components/MotionProvider";
@@ -39,11 +34,7 @@ export default function RootLayout({
     <html lang="ru" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
         <JsonLd
-          data={[
-            buildOrganizationSchema(),
-            buildWebsiteSchema(),
-            buildFaqSchema(FAQ_ITEMS),
-          ]}
+          data={[buildOrganizationSchema(), buildWebsiteSchema()]}
         />
       </head>
       <body className="font-sans antialiased bg-void text-zinc-100">
