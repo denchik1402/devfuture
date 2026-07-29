@@ -1,9 +1,18 @@
 import {
+  adminKeyboard,
+  adminWelcomeText,
+  formatAdminStats,
+  formatRecentLeads,
+  isAdmin,
+} from "@/lib/bot-admin";
+import {
+  clearAllDrafts,
   deleteDraft,
   getDraft,
   setDraft,
   type LeadDraft,
 } from "@/lib/bot-drafts";
+import { addLead } from "@/lib/bot-leads";
 import { siteConfig } from "@/lib/site";
 import { SERVICE_PAGES } from "@/lib/services";
 import {
@@ -53,23 +62,25 @@ function managerUrl() {
   return siteConfig.telegramUrl;
 }
 
-function mainKeyboard() {
-  return {
-    inline_keyboard: [
-      [
-        { text: "🚀 Оставить заявку", callback_data: "order" },
-        { text: "🛠 Услуги", callback_data: "services" },
-      ],
-      [
-        { text: "⚡ Демо за 1 день", callback_data: "speed" },
-        { text: "💰 Пакеты и цены", url: siteUrl("/#packages") },
-      ],
-      [
-        { text: "🌐 Сайт", url: siteUrl("/") },
-        { text: "👤 Написать менеджеру", url: managerUrl() },
-      ],
+function mainKeyboard(admin = false) {
+  const rows = [
+    [
+      { text: "🚀 Оставить заявку", callback_data: "order" },
+      { text: "🛠 Услуги", callback_data: "services" },
     ],
-  };
+    [
+      { text: "⚡ Демо за 1 день", callback_data: "speed" },
+      { text: "💰 Пакеты и цены", url: siteUrl("/#packages") },
+    ],
+    [
+      { text: "🌐 Сайт", url: siteUrl("/") },
+      { text: "👤 Написать менеджеру", url: managerUrl() },
+    ],
+  ];
+  if (admin) {
+    rows.push([{ text: "🔐 Админ", callback_data: "admin" }]);
+  }
+  return { inline_keyboard: rows };
 }
 
 function servicesKeyboard() {
@@ -107,6 +118,41 @@ function welcomeText(name?: string) {
   ].join("\n");
 }
 
+async function showClientMenu(
+  chatId: number,
+  userId: number | undefined,
+  firstName: string | undefined,
+  messageId?: number
+) {
+  const text = welcomeText(firstName);
+  const markup = mainKeyboard(isAdmin(userId));
+  if (messageId) {
+    await editMessageText(chatId, messageId, text, { reply_markup: markup });
+  } else {
+    await sendMessage(chatId, text, { reply_markup: markup });
+  }
+}
+
+async function showAdminPanel(
+  chatId: number,
+  userId: number,
+  messageId?: number
+) {
+  if (!isAdmin(userId)) {
+    await sendMessage(chatId, "Недостаточно прав.", {
+      reply_markup: mainKeyboard(false),
+    });
+    return;
+  }
+  const text = adminWelcomeText();
+  const markup = adminKeyboard();
+  if (messageId) {
+    await editMessageText(chatId, messageId, text, { reply_markup: markup });
+  } else {
+    await sendMessage(chatId, text, { reply_markup: markup });
+  }
+}
+
 export async function handleTelegramUpdate(update: TelegramUpdate) {
   if (update.callback_query) {
     await handleCallback(update.callback_query);
@@ -121,27 +167,36 @@ async function handleMessage(message: TgMessage) {
   const chatId = message.chat.id;
   const text = (message.text || "").trim();
   const firstName = message.from?.first_name;
+  const userId = message.from?.id;
 
   if (text === "/start" || text.startsWith("/start ")) {
     deleteDraft(chatId);
-    await sendMessage(chatId, welcomeText(firstName), {
-      reply_markup: mainKeyboard(),
-    });
+    await showClientMenu(chatId, userId, firstName);
+    return;
+  }
+
+  if (text === "/admin") {
+    if (!isAdmin(userId)) {
+      await sendMessage(chatId, "Команда недоступна.", {
+        reply_markup: mainKeyboard(false),
+      });
+      return;
+    }
+    deleteDraft(chatId);
+    await showAdminPanel(chatId, userId!);
     return;
   }
 
   if (text === "/help" || text === "/menu") {
     deleteDraft(chatId);
-    await sendMessage(chatId, welcomeText(firstName), {
-      reply_markup: mainKeyboard(),
-    });
+    await showClientMenu(chatId, userId, firstName);
     return;
   }
 
   if (text === "/cancel") {
     deleteDraft(chatId);
     await sendMessage(chatId, "Заявку отменил. Чем ещё помочь?", {
-      reply_markup: mainKeyboard(),
+      reply_markup: mainKeyboard(isAdmin(userId)),
     });
     return;
   }
@@ -155,7 +210,7 @@ async function handleMessage(message: TgMessage) {
   await sendMessage(
     chatId,
     "Напишите /start или нажмите кнопку ниже — так удобнее 👇",
-    { reply_markup: mainKeyboard() }
+    { reply_markup: mainKeyboard(isAdmin(userId)) }
   );
 }
 
@@ -192,8 +247,18 @@ async function handleDraftStep(
   if (draft.step === "task") {
     const task = text.slice(0, 2000);
     const name = draft.name || from?.first_name || "Клиент";
-    const contact = draft.contact || (from?.username ? `@${from.username}` : "—");
+    const contact =
+      draft.contact || (from?.username ? `@${from.username}` : "—");
     deleteDraft(chatId);
+
+    addLead({
+      chatId,
+      name,
+      contact,
+      task,
+      fromId: from?.id,
+      username: from?.username,
+    });
 
     await sendMessage(
       chatId,
@@ -203,7 +268,7 @@ async function handleDraftStep(
         "Мы получили её и скоро ответим.",
         "Можно также написать менеджеру напрямую.",
       ].join("\n"),
-      { reply_markup: mainKeyboard() }
+      { reply_markup: mainKeyboard(isAdmin(from?.id)) }
     );
 
     const owner = getOwnerChatId();
@@ -243,33 +308,99 @@ async function handleDraftStep(
   }
 }
 
+async function handleAdminCallback(
+  data: string,
+  chatId: number,
+  userId: number,
+  messageId?: number
+) {
+  if (!isAdmin(userId)) {
+    await sendMessage(chatId, "Недостаточно прав.");
+    return;
+  }
+
+  if (data === "admin" || data === "admin:home") {
+    await showAdminPanel(chatId, userId, messageId);
+    return;
+  }
+
+  if (data === "admin:stats") {
+    const text = formatAdminStats();
+    const markup = adminKeyboard();
+    if (messageId) {
+      await editMessageText(chatId, messageId, text, { reply_markup: markup });
+    } else {
+      await sendMessage(chatId, text, { reply_markup: markup });
+    }
+    return;
+  }
+
+  if (data === "admin:leads") {
+    const text = formatRecentLeads(5);
+    const markup = adminKeyboard();
+    if (messageId) {
+      await editMessageText(chatId, messageId, text, { reply_markup: markup });
+    } else {
+      await sendMessage(chatId, text, { reply_markup: markup });
+    }
+    return;
+  }
+
+  if (data === "admin:drafts") {
+    const cleared = clearAllDrafts();
+    const text = [
+      "<b>🧹 Черновики</b>",
+      "",
+      cleared
+        ? `Очищено незавершённых заявок: <b>${cleared}</b>.`
+        : "Открытых черновиков не было.",
+    ].join("\n");
+    const markup = adminKeyboard();
+    if (messageId) {
+      await editMessageText(chatId, messageId, text, { reply_markup: markup });
+    } else {
+      await sendMessage(chatId, text, { reply_markup: markup });
+    }
+    return;
+  }
+
+  if (data === "admin:ping") {
+    await sendMessage(
+      chatId,
+      `🔔 Пинг OK · ${new Date().toLocaleString("ru-RU", {
+        timeZone: "Europe/Moscow",
+      })} (МСК)`,
+      { reply_markup: adminKeyboard() }
+    );
+  }
+}
+
 async function handleCallback(cb: TgCallback) {
   const data = cb.data || "";
   const chatId = cb.message?.chat.id;
   const messageId = cb.message?.message_id;
+  const userId = cb.from.id;
 
   await answerCallbackQuery(cb.id);
 
   if (!chatId) return;
 
+  if (data === "admin" || data.startsWith("admin:")) {
+    await handleAdminCallback(data, chatId, userId, messageId);
+    return;
+  }
+
   if (data === "cancel") {
     deleteDraft(chatId);
     await sendMessage(chatId, "Ок, отменил. Выберите действие:", {
-      reply_markup: mainKeyboard(),
+      reply_markup: mainKeyboard(isAdmin(userId)),
     });
     return;
   }
 
   if (data === "menu") {
     deleteDraft(chatId);
-    const text = welcomeText(cb.from.first_name);
-    if (messageId) {
-      await editMessageText(chatId, messageId, text, {
-        reply_markup: mainKeyboard(),
-      });
-    } else {
-      await sendMessage(chatId, text, { reply_markup: mainKeyboard() });
-    }
+    await showClientMenu(chatId, userId, cb.from.first_name, messageId);
     return;
   }
 
@@ -278,7 +409,8 @@ async function handleCallback(cb: TgCallback) {
       "<b>Наши услуги</b>",
       "",
       ...SERVICE_PAGES.map(
-        (s) => `• <b>${escapeHtml(s.shortName)}</b> — от ${escapeHtml(s.priceFrom)}`
+        (s) =>
+          `• <b>${escapeHtml(s.shortName)}</b> — от ${escapeHtml(s.priceFrom)}`
       ),
       "",
       "Откройте карточку или оставьте заявку:",

@@ -60,3 +60,16 @@ export function deleteDraft(chatId: number) {
   memory.delete(chatId);
   persist();
 }
+
+export function draftsCount(): number {
+  hydrate();
+  return memory.size;
+}
+
+export function clearAllDrafts(): number {
+  hydrate();
+  const n = memory.size;
+  memory.clear();
+  persist();
+  return n;
+}

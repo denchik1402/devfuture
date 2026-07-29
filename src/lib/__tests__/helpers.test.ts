@@ -6,6 +6,7 @@ import {
   isValidContactBody,
 } from "../contact-validation";
 import { rateLimit } from "../rate-limit";
+import { isAdmin, getAdminIds } from "../bot-admin";
 
 describe("escapeHtml", () => {
   it("escapes &, <, >", () => {
@@ -56,5 +57,27 @@ describe("rateLimit", () => {
     const blocked = rateLimit(key, 2, 60_000);
     assert.equal(blocked.ok, false);
     if (!blocked.ok) assert.ok(blocked.retryAfterSec >= 1);
+  });
+});
+
+describe("bot admin", () => {
+  it("treats TELEGRAM_CHAT_ID and TELEGRAM_ADMIN_IDS as admins", () => {
+    const prevChat = process.env.TELEGRAM_CHAT_ID;
+    const prevAdmins = process.env.TELEGRAM_ADMIN_IDS;
+    process.env.TELEGRAM_CHAT_ID = "111";
+    process.env.TELEGRAM_ADMIN_IDS = "222, 333";
+    try {
+      assert.equal(isAdmin(111), true);
+      assert.equal(isAdmin(222), true);
+      assert.equal(isAdmin(333), true);
+      assert.equal(isAdmin(999), false);
+      assert.equal(isAdmin(undefined), false);
+      assert.ok(getAdminIds().has(111));
+    } finally {
+      if (prevChat === undefined) delete process.env.TELEGRAM_CHAT_ID;
+      else process.env.TELEGRAM_CHAT_ID = prevChat;
+      if (prevAdmins === undefined) delete process.env.TELEGRAM_ADMIN_IDS;
+      else process.env.TELEGRAM_ADMIN_IDS = prevAdmins;
+    }
   });
 });
