@@ -89,21 +89,38 @@ function siteUrl(path = "") {
   return `${base}${path}`;
 }
 
+function miniAppUrl() {
+  const explicit = process.env.NEXT_PUBLIC_TELEGRAM_MINI_APP_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  return siteUrl("/tg");
+}
+
 function mainKeyboard(admin = false) {
-  const rows: { text: string; callback_data?: string; url?: string }[][] = [
+  const rows: {
+    text: string;
+    callback_data?: string;
+    url?: string;
+    web_app?: { url: string };
+  }[][] = [
     [
-      { text: "🚀 Оставить заявку", callback_data: "order" },
-      { text: "🛠 Услуги", callback_data: "services" },
+      {
+        text: "📱 Приложение",
+        web_app: { url: miniAppUrl() },
+      },
+      { text: "🚀 Заявка", callback_data: "order" },
     ],
     [
-      { text: "⚡ Демо за 1 день", callback_data: "speed" },
+      { text: "🛠 Услуги", callback_data: "services" },
       { text: "💰 Пакеты", callback_data: "packages" },
     ],
     [
+      { text: "⚡ Демо за 1 день", callback_data: "speed" },
       { text: "❓ FAQ", callback_data: "faq" },
-      { text: "💬 Задать вопрос", callback_data: "ask" },
     ],
-    [{ text: "🌐 Сайт", url: siteUrl("/") }],
+    [
+      { text: "💬 Задать вопрос", callback_data: "ask" },
+      { text: "🌐 Сайт", url: siteUrl("/") },
+    ],
   ];
   if (admin) {
     rows.push([{ text: "🔐 Админ", callback_data: "admin" }]);

@@ -38,6 +38,9 @@ npm run dev
 | `npm test` | Юнит-тесты |
 | `npm run tg:chat-id` | Узнать TELEGRAM_CHAT_ID |
 | `npm run tg:set-webhook` | Webhook на прод-домен |
+| `npm run tg:menu-button` | Menu button → Mini App (`/tg`) |
+| `npm run tg:check` | Диагностика токена / прокси |
+| `npm run tg:probe` | Полный прогон Node→прокси→webhook |
 | `npm run tg:poll` | Локальный long-poll → webhook |
 
 ## Заявки в Telegram-бота
@@ -49,6 +52,14 @@ npm run dev
 5. Перезапустите `npm run dev`
 
 На проде webhook **обязателен** с секретом. Без `TELEGRAM_WEBHOOK_SECRET` endpoint в production отвечает 500.
+
+## Telegram Mini App
+
+URL: `https://devfuture.ru/tg` (noindex).
+
+1. После деплоя: `npm run tg:menu-button` (или BotFather → Bot Settings → Menu Button → URL)
+2. В боте `/start` → кнопка **📱 Приложение**
+3. Опционально: `NEXT_PUBLIC_TELEGRAM_MINI_APP_URL=https://devfuture.ru/tg`
 
 ## Деплой и CI/CD
 

@@ -86,6 +86,7 @@ export async function POST(request: Request) {
   const contact = body.contact.trim();
   const type = body.type.trim();
   const message = body.message.trim();
+  const source = body.source?.trim() || "";
   const when = new Date().toLocaleString("ru-RU", {
     timeZone: "Europe/Moscow",
   });
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
   const text = [
     "🆕 <b>Новая заявка DevFuture</b>",
     `🕐 ${escapeHtml(when)} (МСК)`,
+    source ? `🏷 Источник: <code>${escapeHtml(source)}</code>` : "",
     "",
     `👤 <b>Имя:</b> ${escapeHtml(name)}`,
     `📱 <b>Контакт:</b> ${escapeHtml(contact)}`,
@@ -100,7 +102,9 @@ export async function POST(request: Request) {
     "",
     "<b>Задача:</b>",
     escapeHtml(message),
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const tgUser = extractTelegramUsername(contact);
   const replyMarkup = tgUser

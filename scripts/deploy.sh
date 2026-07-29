@@ -36,6 +36,8 @@ if [ -f .env.local ] && grep -q '^TELEGRAM_BOT_TOKEN=.\+' .env.local 2>/dev/null
   else
     echo "warn: TELEGRAM_WEBHOOK_SECRET missing — skip set-webhook"
   fi
+  echo "==> telegram menu button (Mini App)"
+  npm run tg:menu-button || echo "warn: menu-button failed"
 fi
 
 echo "==> done"

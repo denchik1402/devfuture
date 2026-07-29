@@ -198,6 +198,15 @@ npm run tg:set-webhook
 `tg:check` должен показать `Bot OK`.  
 `tg:set-webhook` — URL `https://devfuture.ru/api/telegram/webhook`.
 
+### B2.1. Mini App menu button
+
+```bash
+npm run tg:menu-button
+# Menu button → https://devfuture.ru/tg
+```
+
+Либо в BotFather: Bot Settings → Menu Button → `https://devfuture.ru/tg`.
+
 ### B3. Тест бота
 
 Напишите боту `/start`. Должны появиться кнопки.

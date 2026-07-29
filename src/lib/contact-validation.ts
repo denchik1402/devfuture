@@ -4,6 +4,8 @@ export type ContactBody = {
   type?: string;
   message?: string;
   company?: string;
+  /** e.g. telegram_mini_app */
+  source?: string;
 };
 
 export function isValidContactBody(

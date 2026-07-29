@@ -104,3 +104,10 @@ export function telegramBotStartLink(payload?: string) {
   }
   return `https://t.me/${bot}`;
 }
+
+/** URL Telegram Mini App (HTTPS на том же домене) */
+export function telegramMiniAppUrl() {
+  const explicit = process.env.NEXT_PUBLIC_TELEGRAM_MINI_APP_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  return `${siteConfig.url.replace(/\/$/, "")}/tg`;
+}
