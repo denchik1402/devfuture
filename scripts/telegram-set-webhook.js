@@ -2,9 +2,10 @@
  * Registers Telegram webhook. Prefers curl -4 (IPv4) for VPS.
  *
  * Usage: npm run tg:set-webhook
- * Or from PC (when VPS cannot reach Telegram):
- *   set NEXT_PUBLIC_SITE_URL=https://devfuture.ru
- *   npm run tg:set-webhook
+ *
+ * If Telegram cannot reach the site host (getWebhookInfo → Connection timed out),
+ * set TELEGRAM_WEBHOOK_URL to the foreign proxy relay, e.g.:
+ *   TELEGRAM_WEBHOOK_URL=https://tg-proxy.devfuture.ru/webhook
  */
 
 const { loadEnvFiles, tgPost, tgGet } = require("./telegram-cli-shared");
@@ -12,18 +13,24 @@ const { loadEnvFiles, tgPost, tgGet } = require("./telegram-cli-shared");
 async function main() {
   loadEnvFiles();
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim();
+  const webhookOverride = process.env.TELEGRAM_WEBHOOK_URL?.trim();
 
   if (!token) {
     console.error("Нет TELEGRAM_BOT_TOKEN");
     process.exit(1);
   }
-  if (!base || base.includes("localhost")) {
-    console.error(
-      "NEXT_PUBLIC_SITE_URL должен быть публичным https://доменом (не localhost)."
-    );
-    process.exit(1);
+
+  let url = webhookOverride || "";
+  if (!url) {
+    if (!site || site.includes("localhost")) {
+      console.error(
+        "Нужен TELEGRAM_WEBHOOK_URL или публичный NEXT_PUBLIC_SITE_URL."
+      );
+      process.exit(1);
+    }
+    url = `${site}/api/telegram/webhook`;
   }
 
   if (!secret) {
@@ -32,7 +39,6 @@ async function main() {
     );
   }
 
-  const url = `${base}/api/telegram/webhook`;
   const body = {
     url,
     allowed_updates: ["message", "callback_query"],
@@ -46,10 +52,7 @@ async function main() {
   } catch (e) {
     console.error("setWebhook network error:", e.message);
     console.error(
-      "С VPS нет доступа к Telegram. Поставьте webhook с домашнего ПК:\n" +
-        "  1) Скопируйте TELEGRAM_* из серверного .env.local в локальный\n" +
-        "  2) NEXT_PUBLIC_SITE_URL=https://devfuture.ru\n" +
-        "  3) npm run tg:set-webhook"
+      "С VPS нет доступа к Telegram. Проверьте TELEGRAM_API_BASE / прокси."
     );
     process.exit(1);
   }
@@ -59,15 +62,23 @@ async function main() {
   try {
     const info = await tgGet(`/bot${token}/getWebhookInfo`);
     console.log("Webhook info:", JSON.stringify(info.result, null, 2));
+    if (info.result?.last_error_message) {
+      console.warn(
+        "\n⚠ Telegram ещё видит ошибку доставки:",
+        info.result.last_error_message
+      );
+      console.warn(
+        "Если Connection timed out на сайт — используйте relay:\n" +
+          "  TELEGRAM_WEBHOOK_URL=https://tg-proxy.ВАШ_ДОМЕН/webhook"
+      );
+    }
   } catch {
     /* ignore */
   }
 
   if (data.ok) {
-    console.log(`\nГотово. Напишите боту /start.`);
-    console.log(
-      "Если бот всё ещё молчит — VPS не может вызвать sendMessage (тот же блок api.telegram.org)."
-    );
+    console.log(`\nГотово. Webhook → ${url}`);
+    console.log("Напишите боту /start.");
   } else {
     process.exit(1);
   }

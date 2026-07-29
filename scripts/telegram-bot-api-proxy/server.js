@@ -1,12 +1,15 @@
 /**
- * Minimal HTTPS-ready Telegram Bot API reverse proxy.
+ * Minimal HTTPS-ready Telegram Bot API reverse proxy + webhook relay.
  *
- * Forwards:  /botTOKEN/method  →  https://api.telegram.org/botTOKEN/method
+ * Bot API forwards:  /botTOKEN/method  →  https://api.telegram.org/botTOKEN/method
+ * Webhook relay:     POST /webhook     →  WEBHOOK_RELAY_URL (FirstByte), when Telegram
+ *                    cannot reach the site host (Connection timed out on getWebhookInfo).
  *
  * Env:
  *   PORT=8080
  *   PROXY_SECRET=long-random   (required) — clients send header X-Telegram-Proxy-Secret
  *   ALLOWED_IPS=132.243.16.225 (optional, comma-separated; empty = any IP with valid secret)
+ *   WEBHOOK_RELAY_URL=https://devfuture.ru/api/telegram/webhook  (optional)
  *
  * Run behind nginx/caddy with TLS, or: node server.js (HTTP only — use TLS terminator).
  */
@@ -21,6 +24,7 @@ const ALLOWED_IPS = (process.env.ALLOWED_IPS || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+const WEBHOOK_RELAY_URL = (process.env.WEBHOOK_RELAY_URL || "").trim();
 const UPSTREAM = "api.telegram.org";
 
 if (!PROXY_SECRET || PROXY_SECRET.length < 16) {
@@ -54,7 +58,97 @@ function authorized(req) {
   return ALLOWED_IPS.includes(ip);
 }
 
-function forward(req, res) {
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on("data", (c) => chunks.push(c));
+    req.on("end", () => resolve(Buffer.concat(chunks)));
+    req.on("error", reject);
+  });
+}
+
+function requestJson(urlStr, { method, headers, body, family = 4 }) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(urlStr);
+    const lib = url.protocol === "https:" ? https : http;
+    const req = lib.request(
+      {
+        hostname: url.hostname,
+        port: url.port || (url.protocol === "https:" ? 443 : 80),
+        path: `${url.pathname}${url.search}`,
+        method,
+        headers,
+        family,
+        servername: url.hostname,
+        timeout: 25_000,
+      },
+      (res) => {
+        const chunks = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () => {
+          resolve({
+            status: res.statusCode || 0,
+            headers: res.headers,
+            body: Buffer.concat(chunks),
+          });
+        });
+      }
+    );
+    req.on("timeout", () => req.destroy(new Error("timeout")));
+    req.on("error", reject);
+    if (body && body.length) req.write(body);
+    req.end();
+  });
+}
+
+async function relayWebhook(req, res) {
+  if (!WEBHOOK_RELAY_URL) {
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ ok: false, description: "Webhook relay off" }));
+    return;
+  }
+
+  const ip = normalizeIp(clientIp(req));
+  const body = await readBody(req);
+  const secretHeader = req.headers["x-telegram-bot-api-secret-token"];
+  console.log(
+    `[relay] ${ip} POST /webhook → ${WEBHOOK_RELAY_URL} (${body.length}b)`
+  );
+
+  try {
+    const headers = {
+      "content-type": req.headers["content-type"] || "application/json",
+      "content-length": body.length,
+      "user-agent": "DevFuture-Telegram-Webhook-Relay/1.0",
+      accept: "application/json",
+    };
+    if (typeof secretHeader === "string" && secretHeader) {
+      headers["x-telegram-bot-api-secret-token"] = secretHeader;
+    }
+
+    const upstream = await requestJson(WEBHOOK_RELAY_URL, {
+      method: "POST",
+      headers,
+      body,
+    });
+
+    const outType =
+      upstream.headers["content-type"] || "application/json; charset=utf-8";
+    res.writeHead(upstream.status || 502, { "content-type": outType });
+    res.end(upstream.body);
+  } catch (err) {
+    console.error("[relay] error:", err.message);
+    res.writeHead(502, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        ok: false,
+        description: `Relay error: ${err.message}`,
+      })
+    );
+  }
+}
+
+function forwardBotApi(req, res) {
   const ip = normalizeIp(clientIp(req));
   if (!authorized(req)) {
     console.warn(`[proxy] 403 from ${ip} ${req.method} ${req.url}`);
@@ -74,10 +168,7 @@ function forward(req, res) {
   const apiMethod = methodMatch ? methodMatch[1] : "?";
   console.log(`[proxy] ${ip} ${req.method} ${apiMethod}`);
 
-  const chunks = [];
-  req.on("data", (c) => chunks.push(c));
-  req.on("end", () => {
-    const body = Buffer.concat(chunks);
+  readBody(req).then((body) => {
     const headers = {
       host: UPSTREAM,
       "content-type":
@@ -130,12 +221,36 @@ function forward(req, res) {
 }
 
 const server = http.createServer((req, res) => {
-  if (req.method === "GET" && (req.url === "/" || req.url === "/health")) {
+  const pathOnly = (req.url || "").split("?")[0];
+
+  if (req.method === "GET" && (pathOnly === "/" || pathOnly === "/health")) {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ ok: true, service: "telegram-bot-api-proxy" }));
+    res.end(
+      JSON.stringify({
+        ok: true,
+        service: "telegram-bot-api-proxy",
+        webhookRelay: Boolean(WEBHOOK_RELAY_URL),
+      })
+    );
     return;
   }
-  forward(req, res);
+
+  if (
+    WEBHOOK_RELAY_URL &&
+    req.method === "POST" &&
+    (pathOnly === "/webhook" || pathOnly === "/hook")
+  ) {
+    relayWebhook(req, res).catch((err) => {
+      console.error("[relay] fatal:", err);
+      if (!res.headersSent) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false }));
+      }
+    });
+    return;
+  }
+
+  forwardBotApi(req, res);
 });
 
 server.listen(PORT, "127.0.0.1", () => {
@@ -145,4 +260,9 @@ server.listen(PORT, "127.0.0.1", () => {
   console.log(
     `ALLOWED_IPS: ${ALLOWED_IPS.length ? ALLOWED_IPS.join(", ") : "(any with secret)"}`
   );
+  if (WEBHOOK_RELAY_URL) {
+    console.log(`Webhook relay: POST /webhook → ${WEBHOOK_RELAY_URL}`);
+  } else {
+    console.log("Webhook relay: off (set WEBHOOK_RELAY_URL to enable)");
+  }
 });

@@ -67,6 +67,7 @@ cat > /opt/tg-proxy/.env <<EOF
 PORT=8080
 PROXY_SECRET=$SECRET
 ALLOWED_IPS=132.243.16.225
+WEBHOOK_RELAY_URL=https://devfuture.ru/api/telegram/webhook
 EOF
 chmod 600 /opt/tg-proxy/.env
 ```
@@ -170,9 +171,10 @@ TELEGRAM_WEBHOOK_SECRET=...
 
 TELEGRAM_API_BASE=https://tg-proxy.ВАШ_ДОМЕН
 TELEGRAM_PROXY_SECRET=тот_же_SECRET_что_на_прокси
+TELEGRAM_WEBHOOK_URL=https://tg-proxy.ВАШ_ДОМЕН/webhook
 ```
 
-Без слэша в конце `TELEGRAM_API_BASE`.
+Без слэша в конце `TELEGRAM_API_BASE`. `TELEGRAM_WEBHOOK_URL` нужен, если Telegram не достучится до FirstByte напрямую.
 
 ### B2. Деплой кода с поддержкой прокси
 
@@ -218,8 +220,38 @@ curl -4 -sS --max-time 20 \
 | `403` от прокси | Неверный `TELEGRAM_PROXY_SECRET` или IP не в `ALLOWED_IPS` |
 | `502` от прокси | На зарубежном VPS нет доступа к Telegram (`curl api.telegram.org`) |
 | `tg:check` timeout | На FirstByte не задан `TELEGRAM_API_BASE` или nginx/DNS прокси |
-| Webhook ok, бот молчит | `pm2 logs devfuture` — ошибки sendMessage; секрет/база |
+| Webhook ok, бот молчит | `getWebhookInfo` → `Connection timed out` = Telegram не достучится до FirstByte |
+| `Connection timed out` на webhook | Включите relay: `WEBHOOK_RELAY_URL` на прокси + `TELEGRAM_WEBHOOK_URL=…/webhook` |
 | `ALLOWED_IPS` режет | На FirstByte: `curl -4 ifconfig.me` — сравнить с `.env` прокси |
+
+### Relay webhook (когда Telegram → FirstByte timeout)
+
+На зарубежном VPS в `/opt/tg-proxy/.env` добавьте:
+
+```env
+WEBHOOK_RELAY_URL=https://devfuture.ru/api/telegram/webhook
+```
+
+Обновите `server.js`, затем:
+
+```bash
+systemctl restart tg-proxy
+curl -sS http://127.0.0.1:8080/health
+# webhookRelay:true
+```
+
+На FirstByte в `.env.local`:
+
+```env
+TELEGRAM_WEBHOOK_URL=https://tg-proxy.ВАШ_ДОМЕН/webhook
+```
+
+```bash
+pm2 restart devfuture --update-env
+npm run tg:set-webhook
+```
+
+Цепочка: Telegram → зарубежный VPS `/webhook` → FirstByte `/api/telegram/webhook` → ответ через Bot API proxy.
 
 Логи прокси:
 
