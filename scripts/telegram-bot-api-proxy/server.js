@@ -55,7 +55,9 @@ function authorized(req) {
 }
 
 function forward(req, res) {
+  const ip = normalizeIp(clientIp(req));
   if (!authorized(req)) {
+    console.warn(`[proxy] 403 from ${ip} ${req.method} ${req.url}`);
     res.writeHead(403, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ ok: false, description: "Forbidden" }));
     return;
@@ -67,6 +69,10 @@ function forward(req, res) {
     res.end(JSON.stringify({ ok: false, description: "Not found" }));
     return;
   }
+
+  const methodMatch = (req.url || "").match(/\/bot[^/]+\/([A-Za-z0-9_]+)/);
+  const apiMethod = methodMatch ? methodMatch[1] : "?";
+  console.log(`[proxy] ${ip} ${req.method} ${apiMethod}`);
 
   const chunks = [];
   req.on("data", (c) => chunks.push(c));

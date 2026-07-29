@@ -58,6 +58,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
+  const kind = update.callback_query
+    ? `callback:${update.callback_query.data || "?"}`
+    : update.message?.text
+      ? `message:${update.message.text.slice(0, 40)}`
+      : "empty";
+  console.log(`[telegram webhook] update_id=${update.update_id} ${kind}`);
+
   try {
     await handleTelegramUpdate(update);
   } catch (err) {

@@ -1,6 +1,9 @@
 import dns from "node:dns";
+import http from "node:http";
+import https from "node:https";
+import { URL } from "node:url";
 
-/** Many VPS prefer broken IPv6 routes to Telegram — force IPv4 first */
+/** Many VPS prefer broken IPv6 routes — force IPv4 first */
 try {
   dns.setDefaultResultOrder("ipv4first");
 } catch {
@@ -35,6 +38,59 @@ type TelegramResponse = {
   result?: unknown;
 };
 
+/**
+ * Prefer Node https with family:4 over fetch.
+ * On FirstByte, fetch often hangs on broken IPv6 while curl -4 works.
+ */
+function postJson(
+  urlStr: string,
+  headers: Record<string, string>,
+  body: string
+): Promise<{ status: number; data: TelegramResponse }> {
+  return new Promise((resolve, reject) => {
+    const url = new URL(urlStr);
+    const lib = url.protocol === "https:" ? https : http;
+    const req = lib.request(
+      {
+        hostname: url.hostname,
+        port: url.port || (url.protocol === "https:" ? 443 : 80),
+        path: `${url.pathname}${url.search}`,
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-length": Buffer.byteLength(body),
+        },
+        family: 4,
+        servername: url.hostname,
+        timeout: 25_000,
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () => {
+          const raw = Buffer.concat(chunks).toString("utf8");
+          let data: TelegramResponse;
+          try {
+            data = JSON.parse(raw) as TelegramResponse;
+          } catch {
+            data = {
+              ok: false,
+              description: `Non-JSON ${res.statusCode}: ${raw.slice(0, 180)}`,
+            };
+          }
+          resolve({ status: res.statusCode || 0, data });
+        });
+      }
+    );
+    req.on("timeout", () => {
+      req.destroy(new Error("timeout"));
+    });
+    req.on("error", reject);
+    req.write(body);
+    req.end();
+  });
+}
+
 export async function tgApi(
   method: string,
   body: Record<string, unknown>
@@ -45,29 +101,26 @@ export async function tgApi(
   }
 
   const api = telegramApiBase();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+  const proxySecret = process.env["TELEGRAM_PROXY_SECRET"]?.trim();
+  if (proxySecret) {
+    headers["X-Telegram-Proxy-Secret"] = proxySecret;
+  }
 
   try {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    const proxySecret = process.env["TELEGRAM_PROXY_SECRET"]?.trim();
-    if (proxySecret) {
-      headers["X-Telegram-Proxy-Secret"] = proxySecret;
-    }
-
-    const res = await fetch(`${api}/bot${token}/${method}`, {
-      method: "POST",
+    const { status, data } = await postJson(
+      `${api}/bot${token}/${method}`,
       headers,
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(25_000),
-    });
-
-    const data = (await res.json().catch(() => ({}))) as TelegramResponse;
-    if (!res.ok || !data.ok) {
+      JSON.stringify(body)
+    );
+    if (status < 200 || status >= 300 || !data.ok) {
       console.error(
         "[telegram]",
         method,
-        data.description || res.status,
+        data.description || status,
         `(api=${api})`
       );
     }

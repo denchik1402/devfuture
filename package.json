@@ -17,7 +17,8 @@
     "tg:chat-id": "node scripts/telegram-chat-id.js",
     "tg:set-webhook": "node scripts/telegram-set-webhook.js",
     "tg:poll": "node scripts/telegram-poll.js",
-    "tg:check": "node scripts/telegram-check.js"
+    "tg:check": "node scripts/telegram-check.js",
+    "tg:probe": "node scripts/telegram-probe-node.js"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",
