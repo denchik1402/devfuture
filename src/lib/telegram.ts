@@ -7,16 +7,19 @@ try {
   /* older Node */
 }
 
-const TELEGRAM_API = (
-  process.env.TELEGRAM_API_BASE?.trim() || "https://api.telegram.org"
-).replace(/\/$/, "");
+/** Read at call-time — Next may inline module-level process.env at build */
+function telegramApiBase() {
+  return (
+    process.env["TELEGRAM_API_BASE"]?.trim() || "https://api.telegram.org"
+  ).replace(/\/$/, "");
+}
 
 export function getBotToken() {
-  return process.env.TELEGRAM_BOT_TOKEN?.trim() || "";
+  return process.env["TELEGRAM_BOT_TOKEN"]?.trim() || "";
 }
 
 export function getOwnerChatId() {
-  return process.env.TELEGRAM_CHAT_ID?.trim() || "";
+  return process.env["TELEGRAM_CHAT_ID"]?.trim() || "";
 }
 
 export function escapeHtml(s: string) {
@@ -41,16 +44,18 @@ export async function tgApi(
     return { ok: false, description: "TELEGRAM_BOT_TOKEN не задан" };
   }
 
+  const api = telegramApiBase();
+
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    const proxySecret = process.env.TELEGRAM_PROXY_SECRET?.trim();
+    const proxySecret = process.env["TELEGRAM_PROXY_SECRET"]?.trim();
     if (proxySecret) {
       headers["X-Telegram-Proxy-Secret"] = proxySecret;
     }
 
-    const res = await fetch(`${TELEGRAM_API}/bot${token}/${method}`, {
+    const res = await fetch(`${api}/bot${token}/${method}`, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
@@ -59,7 +64,12 @@ export async function tgApi(
 
     const data = (await res.json().catch(() => ({}))) as TelegramResponse;
     if (!res.ok || !data.ok) {
-      console.error("[telegram]", method, data.description || res.status);
+      console.error(
+        "[telegram]",
+        method,
+        data.description || res.status,
+        `(api=${api})`
+      );
     }
     return data;
   } catch (err) {
@@ -69,7 +79,7 @@ export async function tgApi(
       method,
       "network error:",
       message,
-      `(api=${TELEGRAM_API}). VPS may block api.telegram.org — try IPv4 or TELEGRAM_API_BASE proxy.`
+      `(api=${api}). Check TELEGRAM_API_BASE / TELEGRAM_PROXY_SECRET.`
     );
     return { ok: false, description: message };
   }
