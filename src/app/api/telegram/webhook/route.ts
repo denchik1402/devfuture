@@ -34,6 +34,9 @@ export async function POST(request: Request) {
   if (secret) {
     const header = request.headers.get("x-telegram-bot-api-secret-token");
     if (header !== secret) {
+      console.warn(
+        "[telegram webhook] 401 bad secret-token (header missing or mismatch)"
+      );
       return NextResponse.json({ ok: false }, { status: 401 });
     }
   }
