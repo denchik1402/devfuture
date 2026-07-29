@@ -41,6 +41,12 @@ function apiBase() {
   );
 }
 
+function proxyHeaders() {
+  const secret = process.env.TELEGRAM_PROXY_SECRET?.trim();
+  if (!secret) return [];
+  return ["-H", `X-Telegram-Proxy-Secret: ${secret}`];
+}
+
 /**
  * Prefer curl -4 (IPv4): Node fetch often hangs on broken IPv6 to Telegram from VPS.
  */
@@ -52,10 +58,11 @@ function curlJson(url, { method = "GET", body } = {}) {
     "25",
     "-H",
     "Content-Type: application/json",
+    ...proxyHeaders(),
     url,
   ];
   if (method === "POST") {
-    args.push("-X", "POST", "-d", body || "{}");
+    args.splice(args.length - 1, 0, "-X", "POST", "-d", body || "{}");
   }
   try {
     const out = execFileSync("curl", args, {
@@ -69,12 +76,22 @@ function curlJson(url, { method = "GET", body } = {}) {
   }
 }
 
+function fetchHeaders() {
+  const headers = { "Content-Type": "application/json" };
+  const secret = process.env.TELEGRAM_PROXY_SECRET?.trim();
+  if (secret) headers["X-Telegram-Proxy-Secret"] = secret;
+  return headers;
+}
+
 async function tgGet(pathSuffix) {
   const url = `${apiBase()}${pathSuffix}`;
   try {
     return curlJson(url);
   } catch (curlErr) {
-    const res = await fetch(url, { signal: AbortSignal.timeout(25_000) });
+    const res = await fetch(url, {
+      headers: fetchHeaders(),
+      signal: AbortSignal.timeout(25_000),
+    });
     return res.json();
   }
 }
@@ -87,7 +104,7 @@ async function tgPost(pathSuffix, body) {
   } catch (curlErr) {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: fetchHeaders(),
       body: payload,
       signal: AbortSignal.timeout(25_000),
     });

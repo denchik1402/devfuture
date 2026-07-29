@@ -1,0 +1,15 @@
+[Unit]
+Description=DevFuture Telegram Bot API proxy
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/tg-proxy
+EnvironmentFile=/opt/tg-proxy/.env
+ExecStart=/usr/bin/node /opt/tg-proxy/server.js
+Restart=always
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target

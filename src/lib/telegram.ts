@@ -42,9 +42,17 @@ export async function tgApi(
   }
 
   try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    const proxySecret = process.env.TELEGRAM_PROXY_SECRET?.trim();
+    if (proxySecret) {
+      headers["X-Telegram-Proxy-Secret"] = proxySecret;
+    }
+
     const res = await fetch(`${TELEGRAM_API}/bot${token}/${method}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(25_000),
     });
