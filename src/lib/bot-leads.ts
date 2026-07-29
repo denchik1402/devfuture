@@ -102,6 +102,15 @@ export function listLeads(limit = 10): BotLead[] {
   return load().slice(0, Math.max(1, limit));
 }
 
+export function deleteLead(id: string): BotLead | undefined {
+  const leads = load();
+  const idx = leads.findIndex((l) => l.id === id);
+  if (idx === -1) return undefined;
+  const [removed] = leads.splice(idx, 1);
+  save(leads);
+  return removed;
+}
+
 export const STATUS_LABEL: Record<LeadStatus, string> = {
   new: "🆕 Новая",
   progress: "🔄 В работе",

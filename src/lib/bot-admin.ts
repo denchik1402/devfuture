@@ -102,8 +102,19 @@ export function formatRecentLeads(limit = 5) {
     "",
     ...leads.map((l, i) => formatLead(l, i)),
     "",
-    "Статус меняйте кнопками под уведомлением о заявке.",
+    "Статус — кнопками под уведомлением. Удаление — 🗑 ниже.",
   ].join("\n\n");
+}
+
+export function leadsManageKeyboard(leads: BotLead[]) {
+  const rows = leads.map((l) => [
+    {
+      text: `🗑 ${l.name.slice(0, 28) || l.id}`,
+      callback_data: `ld:${l.id}`,
+    },
+  ]);
+  rows.push([{ text: "⬅️ В админку", callback_data: "admin" }]);
+  return { inline_keyboard: rows };
 }
 
 export function leadNotifyMarkup(lead: BotLead) {
@@ -113,7 +124,10 @@ export function leadNotifyMarkup(lead: BotLead) {
       { text: "🔄 В работе", callback_data: `ls:progress:${lead.id}` },
       { text: "✅ Закрыть", callback_data: `ls:done:${lead.id}` },
     ],
-    [{ text: "💬 Ответить в боте", callback_data: `reply:${lead.chatId}` }],
+    [
+      { text: "💬 Ответить", callback_data: `reply:${lead.chatId}` },
+      { text: "🗑 Удалить", callback_data: `ld:${lead.id}` },
+    ],
   ];
   if (lead.username) {
     rows.push([
@@ -121,6 +135,14 @@ export function leadNotifyMarkup(lead: BotLead) {
     ]);
   }
   return { inline_keyboard: rows };
+}
+
+export function questionNotifyMarkup(fromChatId: number) {
+  return {
+    inline_keyboard: [
+      [{ text: "💬 Ответить", callback_data: `reply:${fromChatId}` }],
+    ],
+  };
 }
 
 export function parseLeadStatusCallback(

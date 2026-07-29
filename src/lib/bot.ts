@@ -3,9 +3,12 @@ import {
   adminWelcomeText,
   formatAdminStats,
   formatRecentLeads,
+  getAdminIds,
   isAdmin,
   leadNotifyMarkup,
+  leadsManageKeyboard,
   parseLeadStatusCallback,
+  questionNotifyMarkup,
 } from "@/lib/bot-admin";
 import {
   faqAnswer,
@@ -29,14 +32,16 @@ import {
 } from "@/lib/bot-drafts";
 import {
   addLead,
+  deleteLead,
   getLead,
+  listLeads,
   STATUS_LABEL,
   updateLeadStatus,
 } from "@/lib/bot-leads";
 import {
-  clearAdminSession,
-  getAdminSession,
-  setAdminSession,
+  clearSession,
+  getSession,
+  setSession,
 } from "@/lib/bot-sessions";
 import { listUserChatIds, touchUser, usersCount } from "@/lib/bot-users";
 import { siteConfig } from "@/lib/site";
@@ -84,10 +89,6 @@ function siteUrl(path = "") {
   return `${base}${path}`;
 }
 
-function managerUrl() {
-  return siteConfig.telegramUrl;
-}
-
 function mainKeyboard(admin = false) {
   const rows: { text: string; callback_data?: string; url?: string }[][] = [
     [
@@ -100,9 +101,9 @@ function mainKeyboard(admin = false) {
     ],
     [
       { text: "❓ FAQ", callback_data: "faq" },
-      { text: "🌐 Сайт", url: siteUrl("/") },
+      { text: "💬 Задать вопрос", callback_data: "ask" },
     ],
-    [{ text: "👤 Написать менеджеру", url: managerUrl() }],
+    [{ text: "🌐 Сайт", url: siteUrl("/") }],
   ];
   if (admin) {
     rows.push([{ text: "🔐 Админ", callback_data: "admin" }]);
@@ -213,10 +214,10 @@ async function handleMessage(message: TgMessage) {
   touchUser(chatId, message.from?.username);
 
   if (userId && isAdmin(userId)) {
-    const session = getAdminSession(userId);
+    const session = getSession(userId);
     if (session?.type === "reply") {
       if (text === "/cancel" || text === "отмена") {
-        clearAdminSession(userId);
+        clearSession(userId);
         await sendMessage(chatId, "Ответ отменён.", {
           reply_markup: adminKeyboard(),
         });
@@ -225,16 +226,16 @@ async function handleMessage(message: TgMessage) {
       const result = await sendMessage(
         session.targetChatId,
         [
-          "<b>Сообщение от DevFuture</b>",
+          "<b>Ответ от DevFuture</b>",
           "",
           escapeHtml(text.slice(0, 3500)),
         ].join("\n")
       );
-      clearAdminSession(userId);
+      clearSession(userId);
       await sendMessage(
         chatId,
         result.ok
-          ? "✅ Отправлено клиенту."
+          ? "✅ Отправлено."
           : `Не удалось отправить: ${escapeHtml(result.description || "error")}`,
         { reply_markup: adminKeyboard() }
       );
@@ -242,14 +243,14 @@ async function handleMessage(message: TgMessage) {
     }
     if (session?.type === "broadcast" && !session.text) {
       if (text === "/cancel" || text === "отмена") {
-        clearAdminSession(userId);
+        clearSession(userId);
         await sendMessage(chatId, "Рассылка отменена.", {
           reply_markup: adminKeyboard(),
         });
         return;
       }
       const body = text.slice(0, 3500);
-      setAdminSession(userId, { type: "broadcast", text: body });
+      setSession(userId, { type: "broadcast", text: body });
       const n = usersCount();
       await sendMessage(
         chatId,
@@ -279,9 +280,24 @@ async function handleMessage(message: TgMessage) {
     }
   }
 
+  const askSession = getSession(chatId);
+  if (askSession?.type === "ask") {
+    if (text === "/cancel" || text === "отмена") {
+      clearSession(chatId);
+      await sendMessage(chatId, "Вопрос отменён.", {
+        reply_markup: mainKeyboard(isAdmin(userId)),
+      });
+      return;
+    }
+    clearSession(chatId);
+    await deliverQuestion(chatId, text, message.from);
+    return;
+  }
+
   if (text === "/start" || text.startsWith("/start ") || text.startsWith("/start@")) {
     deleteDraft(chatId);
-    if (userId) clearAdminSession(userId);
+    clearSession(chatId);
+    if (userId) clearSession(userId);
     await handleStart(chatId, userId, firstName, text);
     return;
   }
@@ -300,13 +316,15 @@ async function handleMessage(message: TgMessage) {
 
   if (text === "/help" || text === "/menu") {
     deleteDraft(chatId);
+    clearSession(chatId);
     await showClientMenu(chatId, userId, firstName);
     return;
   }
 
   if (text === "/cancel") {
     deleteDraft(chatId);
-    if (userId) clearAdminSession(userId);
+    clearSession(chatId);
+    if (userId) clearSession(userId);
     await sendMessage(chatId, "Отменил. Чем ещё помочь?", {
       reply_markup: mainKeyboard(isAdmin(userId)),
     });
@@ -324,6 +342,51 @@ async function handleMessage(message: TgMessage) {
     "Напишите /start или нажмите кнопку ниже — так удобнее 👇",
     { reply_markup: mainKeyboard(isAdmin(userId)) }
   );
+}
+
+async function deliverQuestion(chatId: number, question: string, from?: TgUser) {
+  await sendMessage(
+    chatId,
+    [
+      "✅ <b>Вопрос отправлен</b>",
+      "",
+      "Менеджер ответит здесь же в боте.",
+    ].join("\n"),
+    { reply_markup: mainKeyboard(isAdmin(from?.id)) }
+  );
+
+  const when = new Date().toLocaleString("ru-RU", {
+    timeZone: "Europe/Moscow",
+  });
+  const who = from?.username
+    ? `@${escapeHtml(from.username)} (id: ${from.id})`
+    : `id ${from?.id ?? chatId}`;
+  const name = from?.first_name
+    ? escapeHtml(from.first_name)
+    : "Клиент";
+  const notify = [
+    "💬 <b>Вопрос из бота</b>",
+    `🕐 ${escapeHtml(when)} (МСК)`,
+    `👤 ${name} · ${who}`,
+    "",
+    escapeHtml(question.slice(0, 3500)),
+  ].join("\n");
+
+  const markup = questionNotifyMarkup(chatId);
+  const admins = Array.from(getAdminIds());
+  const owner = getOwnerChatId();
+  const targets = new Set<string>();
+  if (owner) targets.add(owner);
+  for (const id of admins) targets.add(String(id));
+
+  if (!targets.size) {
+    console.error("[bot] no admin to receive question");
+    return;
+  }
+
+  for (const target of Array.from(targets)) {
+    await sendMessage(target, notify, { reply_markup: markup });
+  }
 }
 
 async function handleStart(
@@ -536,13 +599,17 @@ async function handleAdminCallback(
   }
 
   if (data === "admin:leads") {
+    const leads = listLeads(5);
     const text = formatRecentLeads(5);
+    const markup = leads.length
+      ? leadsManageKeyboard(leads)
+      : adminKeyboard();
     if (messageId) {
       await editMessageText(chatId, messageId, text, {
-        reply_markup: adminKeyboard(),
+        reply_markup: markup,
       });
     } else {
-      await sendMessage(chatId, text, { reply_markup: adminKeyboard() });
+      await sendMessage(chatId, text, { reply_markup: markup });
     }
     return;
   }
@@ -578,7 +645,7 @@ async function handleAdminCallback(
   }
 
   if (data === "admin:broadcast") {
-    setAdminSession(userId, { type: "broadcast" });
+    setSession(userId, { type: "broadcast" });
     await sendMessage(
       chatId,
       [
@@ -600,7 +667,7 @@ async function handleAdminCallback(
   }
 
   if (data === "admin:broadcast:no") {
-    clearAdminSession(userId);
+    clearSession(userId);
     await sendMessage(chatId, "Рассылка отменена.", {
       reply_markup: adminKeyboard(),
     });
@@ -608,7 +675,7 @@ async function handleAdminCallback(
   }
 
   if (data === "admin:broadcast:yes") {
-    const session = getAdminSession(userId);
+    const session = getSession(userId);
     if (session?.type !== "broadcast" || !session.text) {
       await sendMessage(chatId, "Нет текста для рассылки. Начните снова.", {
         reply_markup: adminKeyboard(),
@@ -616,7 +683,7 @@ async function handleAdminCallback(
       return;
     }
     const body = session.text;
-    clearAdminSession(userId);
+    clearSession(userId);
     await runBroadcast(chatId, body);
   }
 }
@@ -654,6 +721,23 @@ async function handleCallback(cb: TgCallback) {
     return;
   }
 
+  if (data.startsWith("ld:")) {
+    if (!isAdmin(userId)) {
+      await sendMessage(chatId, "Недостаточно прав.");
+      return;
+    }
+    const id = data.slice(3);
+    const removed = deleteLead(id);
+    await sendMessage(
+      chatId,
+      removed
+        ? `🗑 Заявка удалена: <b>${escapeHtml(removed.name)}</b> (<code>${escapeHtml(id)}</code>)`
+        : "Заявка не найдена или уже удалена.",
+      { reply_markup: adminKeyboard() }
+    );
+    return;
+  }
+
   if (data.startsWith("reply:")) {
     if (!isAdmin(userId)) {
       await sendMessage(chatId, "Недостаточно прав.");
@@ -661,7 +745,7 @@ async function handleCallback(cb: TgCallback) {
     }
     const target = Number(data.slice("reply:".length));
     if (!Number.isFinite(target)) return;
-    setAdminSession(userId, { type: "reply", targetChatId: target });
+    setSession(userId, { type: "reply", targetChatId: target });
     await sendMessage(
       chatId,
       [
@@ -686,15 +770,37 @@ async function handleCallback(cb: TgCallback) {
 
   if (data === "cancel") {
     deleteDraft(chatId);
-    clearAdminSession(userId);
+    clearSession(chatId);
+    clearSession(userId);
     await sendMessage(chatId, "Ок, отменил. Выберите действие:", {
       reply_markup: mainKeyboard(isAdmin(userId)),
     });
     return;
   }
 
+  if (data === "ask") {
+    deleteDraft(chatId);
+    setSession(chatId, { type: "ask" });
+    await sendMessage(
+      chatId,
+      [
+        "<b>💬 Задать вопрос</b>",
+        "",
+        "Напишите вопрос одним сообщением — менеджер ответит здесь же в боте.",
+        "Отмена: /cancel",
+      ].join("\n"),
+      {
+        reply_markup: {
+          inline_keyboard: [[{ text: "❌ Отмена", callback_data: "cancel" }]],
+        },
+      }
+    );
+    return;
+  }
+
   if (data === "menu") {
     deleteDraft(chatId);
+    clearSession(chatId);
     await showClientMenu(chatId, userId, cb.from.first_name, messageId);
     return;
   }
