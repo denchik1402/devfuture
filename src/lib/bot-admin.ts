@@ -1,5 +1,12 @@
 import { draftsCount } from "@/lib/bot-drafts";
-import { leadStats, listLeads, type BotLead } from "@/lib/bot-leads";
+import {
+  leadStats,
+  listLeads,
+  STATUS_LABEL,
+  type BotLead,
+  type LeadStatus,
+} from "@/lib/bot-leads";
+import { usersCount } from "@/lib/bot-users";
 import { escapeHtml, getOwnerChatId } from "@/lib/telegram";
 
 /** Owner chat id + optional TELEGRAM_ADMIN_IDS=123,456 */
@@ -31,10 +38,13 @@ export function adminKeyboard() {
         { text: "📋 Заявки", callback_data: "admin:leads" },
       ],
       [
+        { text: "📣 Рассылка", callback_data: "admin:broadcast" },
         { text: "🧹 Черновики", callback_data: "admin:drafts" },
-        { text: "🔔 Тест-пинг", callback_data: "admin:ping" },
       ],
-      [{ text: "⬅️ В клиентское меню", callback_data: "menu" }],
+      [
+        { text: "🔔 Тест-пинг", callback_data: "admin:ping" },
+        { text: "⬅️ Клиентское меню", callback_data: "menu" },
+      ],
     ],
   };
 }
@@ -43,19 +53,23 @@ export function adminWelcomeText() {
   return [
     "<b>Админ-панель DevFuture</b>",
     "",
-    "Видно только вам (по TELEGRAM_CHAT_ID / TELEGRAM_ADMIN_IDS).",
+    "Только для TELEGRAM_CHAT_ID / TELEGRAM_ADMIN_IDS.",
     "Выберите действие:",
   ].join("\n");
 }
 
 export function formatAdminStats() {
-  const { total, today } = leadStats();
+  const stats = leadStats();
   const drafts = draftsCount();
+  const users = usersCount();
   return [
     "<b>📊 Статистика бота</b>",
     "",
-    `Заявок всего: <b>${total}</b>`,
-    `Заявок сегодня: <b>${today}</b>`,
+    `Пользователей бота: <b>${users}</b>`,
+    `Заявок всего: <b>${stats.total}</b> (сегодня: <b>${stats.today}</b>)`,
+    `🆕 Новые: <b>${stats.new}</b>`,
+    `🔄 В работе: <b>${stats.progress}</b>`,
+    `✅ Закрыты: <b>${stats.done}</b>`,
     `Открытых черновиков: <b>${drafts}</b>`,
   ].join("\n");
 }
@@ -68,22 +82,51 @@ function formatLead(lead: BotLead, index: number) {
     ? `@${escapeHtml(lead.username)}`
     : `id ${lead.fromId ?? lead.chatId}`;
   const task =
-    lead.task.length > 160 ? `${lead.task.slice(0, 160)}…` : lead.task;
+    lead.task.length > 140 ? `${lead.task.slice(0, 140)}…` : lead.task;
   return [
-    `<b>${index + 1}.</b> ${escapeHtml(lead.name)} · ${escapeHtml(when)}`,
-    `📱 ${escapeHtml(lead.contact)} · ${tg}`,
+    `<b>${index + 1}.</b> ${STATUS_LABEL[lead.status]} · ${escapeHtml(lead.name)}`,
+    `${escapeHtml(when)} · ${tg}`,
+    `📱 ${escapeHtml(lead.contact)}`,
     escapeHtml(task),
+    `<code>${escapeHtml(lead.id)}</code>`,
   ].join("\n");
 }
 
 export function formatRecentLeads(limit = 5) {
   const leads = listLeads(limit);
   if (!leads.length) {
-    return "<b>📋 Заявки</b>\n\nПока пусто — клиенты ещё не оставляли заявки через бота.";
+    return "<b>📋 Заявки</b>\n\nПока пусто.";
   }
   return [
-    `<b>📋 Последние заявки</b> (${leads.length})`,
+    `<b>📋 Последние заявки</b>`,
     "",
     ...leads.map((l, i) => formatLead(l, i)),
+    "",
+    "Статус меняйте кнопками под уведомлением о заявке.",
   ].join("\n\n");
+}
+
+export function leadNotifyMarkup(lead: BotLead) {
+  const rows: { text: string; callback_data?: string; url?: string }[][] = [
+    [
+      { text: "🆕 Новая", callback_data: `ls:new:${lead.id}` },
+      { text: "🔄 В работе", callback_data: `ls:progress:${lead.id}` },
+      { text: "✅ Закрыть", callback_data: `ls:done:${lead.id}` },
+    ],
+    [{ text: "💬 Ответить в боте", callback_data: `reply:${lead.chatId}` }],
+  ];
+  if (lead.username) {
+    rows.push([
+      { text: "Написать в TG", url: `https://t.me/${lead.username}` },
+    ]);
+  }
+  return { inline_keyboard: rows };
+}
+
+export function parseLeadStatusCallback(
+  data: string
+): { status: LeadStatus; id: string } | null {
+  const m = data.match(/^ls:(new|progress|done):([A-Za-z0-9]+)$/);
+  if (!m) return null;
+  return { status: m[1] as LeadStatus, id: m[2] };
 }

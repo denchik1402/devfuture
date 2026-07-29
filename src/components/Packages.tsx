@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
 import { PACKAGES } from "@/lib/content";
-import { telegramBriefLink } from "@/lib/site";
+import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 function Packages() {
@@ -29,11 +29,7 @@ function Packages() {
 
         <div className="mt-12 md:mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {PACKAGES.map((pkg, i) => {
-            const brief = [
-              `Интересует пакет «${pkg.name}» (от ${pkg.priceFrom}).`,
-              "",
-              "Коротко о задаче:",
-            ].join("\n");
+            const botHref = telegramBotStartLink(`pkg_${pkg.id}`);
             return (
               <Reveal key={pkg.id} delay={i * 0.06}>
                 <article
@@ -72,14 +68,14 @@ function Packages() {
                     ))}
                   </ul>
                   <NeonButton
-                    href={telegramBriefLink(brief)}
+                    href={botHref}
                     variant={pkg.highlight ? "primary" : "ghost"}
                     className="mt-6 w-full text-center"
                     onClick={() =>
                       reachGoal("click_package", { package: pkg.id })
                     }
                   >
-                    Написать про этот пакет
+                    Открыть в боте
                   </NeonButton>
                 </article>
               </Reveal>

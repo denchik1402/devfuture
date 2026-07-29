@@ -72,7 +72,7 @@ export const siteConfig = {
 
 export type SiteConfig = typeof siteConfig;
 
-/** Deep-link with prefilled brief for Telegram */
+/** Deep-link with prefilled brief for Telegram (личный аккаунт менеджера) */
 export function telegramBriefLink(text: string) {
   const encoded = encodeURIComponent(text);
   return `https://t.me/${siteConfig.telegramUsername}?text=${encoded}`;
@@ -83,4 +83,24 @@ export function telegramContactLink() {
   return telegramBriefLink(
     "Здравствуйте! Хочу обсудить проект с DevFuture."
   );
+}
+
+/**
+ * Username бота (не личного аккаунта). Для deep-link /start.
+ * NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=dfuture_bot
+ */
+export function telegramBotUsername() {
+  return (
+    process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, "") ||
+    siteConfig.telegramUsername
+  );
+}
+
+/** Deep-link в бота: https://t.me/bot?start=payload */
+export function telegramBotStartLink(payload?: string) {
+  const bot = telegramBotUsername();
+  if (payload) {
+    return `https://t.me/${bot}?start=${encodeURIComponent(payload)}`;
+  }
+  return `https://t.me/${bot}`;
 }

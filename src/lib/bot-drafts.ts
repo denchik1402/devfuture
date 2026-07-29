@@ -5,6 +5,8 @@ export type LeadDraft = {
   step: "name" | "contact" | "task";
   name?: string;
   contact?: string;
+  /** Deep-link / package / service source tag */
+  source?: string;
 };
 
 const memory = new Map<number, LeadDraft>();

@@ -1,15 +1,19 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 
+export type LeadStatus = "new" | "progress" | "done";
+
 export type BotLead = {
   id: string;
   at: string;
+  status: LeadStatus;
   chatId: number;
   name: string;
   contact: string;
   task: string;
   fromId?: number;
   username?: string;
+  source?: string;
 };
 
 const dataDir = path.join(process.cwd(), ".data");
@@ -26,7 +30,12 @@ function load(): BotLead[] {
       return cache;
     }
     const raw = JSON.parse(readFileSync(leadsFile, "utf8")) as BotLead[];
-    cache = Array.isArray(raw) ? raw : [];
+    cache = Array.isArray(raw)
+      ? raw.map((l) => ({
+          ...l,
+          status: l.status || "new",
+        }))
+      : [];
   } catch (err) {
     console.error("[bot-leads] load failed", err);
     cache = [];
@@ -44,17 +53,28 @@ function save(leads: BotLead[]) {
   }
 }
 
-export function addLead(lead: Omit<BotLead, "id" | "at"> & { at?: string }) {
+function makeId() {
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+}
+
+export function addLead(
+  lead: Omit<BotLead, "id" | "at" | "status"> & {
+    at?: string;
+    status?: LeadStatus;
+  }
+) {
   const leads = load();
   const entry: BotLead = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: makeId(),
     at: lead.at || new Date().toISOString(),
+    status: lead.status || "new",
     chatId: lead.chatId,
     name: lead.name,
     contact: lead.contact,
     task: lead.task,
     fromId: lead.fromId,
     username: lead.username,
+    source: lead.source,
   };
   leads.unshift(entry);
   if (leads.length > MAX_LEADS) leads.length = MAX_LEADS;
@@ -62,9 +82,31 @@ export function addLead(lead: Omit<BotLead, "id" | "at"> & { at?: string }) {
   return entry;
 }
 
+export function getLead(id: string): BotLead | undefined {
+  return load().find((l) => l.id === id);
+}
+
+export function updateLeadStatus(
+  id: string,
+  status: LeadStatus
+): BotLead | undefined {
+  const leads = load();
+  const lead = leads.find((l) => l.id === id);
+  if (!lead) return undefined;
+  lead.status = status;
+  save(leads);
+  return lead;
+}
+
 export function listLeads(limit = 10): BotLead[] {
   return load().slice(0, Math.max(1, limit));
 }
+
+export const STATUS_LABEL: Record<LeadStatus, string> = {
+  new: "🆕 Новая",
+  progress: "🔄 В работе",
+  done: "✅ Закрыта",
+};
 
 export function leadStats() {
   const leads = load();
@@ -72,5 +114,11 @@ export function leadStats() {
   startOfDay.setHours(0, 0, 0, 0);
   const todayIso = startOfDay.toISOString();
   const today = leads.filter((l) => l.at >= todayIso).length;
-  return { total: leads.length, today };
+  return {
+    total: leads.length,
+    today,
+    new: leads.filter((l) => l.status === "new").length,
+    progress: leads.filter((l) => l.status === "progress").length,
+    done: leads.filter((l) => l.status === "done").length,
+  };
 }

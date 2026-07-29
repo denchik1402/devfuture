@@ -33,6 +33,7 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://devfuture.ru
           NEXT_PUBLIC_TELEGRAM_USERNAME: devfuture
           NEXT_PUBLIC_TELEGRAM_URL: https://t.me/devfuture
+          NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: dfuture_bot
 
   deploy:
     name: Deploy to FirstByte

@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { Zap } from "lucide-react";
 import NeonButton from "./NeonButton";
-import { telegramContactLink } from "@/lib/site";
+import { telegramBotStartLink, telegramContactLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 function OfferStrip() {
@@ -31,14 +31,24 @@ function OfferStrip() {
 
         <div className="flex w-full flex-wrap gap-3 sm:w-auto">
           <NeonButton
-            href={telegramContactLink()}
+            href={telegramBotStartLink("order")}
             pulse
             className="w-full sm:w-auto"
             onClick={() =>
               reachGoal("click_telegram", { place: "offer_1click" })
             }
           >
-            Связаться в 1 клик
+            Заявка в боте
+          </NeonButton>
+          <NeonButton
+            href={telegramContactLink()}
+            variant="ghost"
+            className="w-full sm:w-auto"
+            onClick={() =>
+              reachGoal("click_telegram", { place: "offer_manager" })
+            }
+          >
+            Менеджеру
           </NeonButton>
           <NeonButton href="#quiz" variant="ghost" className="w-full sm:w-auto">
             Собрать бриф

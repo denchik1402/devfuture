@@ -12,7 +12,11 @@ git fetch origin
 git reset --hard origin/main
 
 echo "==> npm ci"
-npm ci
+if ! npm ci; then
+  echo "==> npm ci failed — clean install"
+  rm -rf node_modules
+  npm ci
+fi
 
 echo "==> build"
 npm run build

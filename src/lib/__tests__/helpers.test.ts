@@ -7,6 +7,7 @@ import {
 } from "../contact-validation";
 import { rateLimit } from "../rate-limit";
 import { isAdmin, getAdminIds } from "../bot-admin";
+import { parseStartPayload } from "../bot-content";
 
 describe("escapeHtml", () => {
   it("escapes &, <, >", () => {
@@ -79,5 +80,21 @@ describe("bot admin", () => {
       if (prevAdmins === undefined) delete process.env.TELEGRAM_ADMIN_IDS;
       else process.env.TELEGRAM_ADMIN_IDS = prevAdmins;
     }
+  });
+});
+
+describe("parseStartPayload", () => {
+  it("parses deep-link payloads", () => {
+    assert.deepEqual(parseStartPayload("/start"), { kind: "menu" });
+    assert.deepEqual(parseStartPayload("/start order"), { kind: "order" });
+    assert.deepEqual(parseStartPayload("/start faq"), { kind: "faq" });
+    assert.deepEqual(parseStartPayload("/start pkg_bot"), {
+      kind: "package",
+      id: "bot",
+    });
+    assert.deepEqual(parseStartPayload("/start svc_telegram-boty"), {
+      kind: "service",
+      slug: "telegram-boty",
+    });
   });
 });
