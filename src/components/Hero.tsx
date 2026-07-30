@@ -34,7 +34,7 @@ function Hero() {
 
   const vignette =
     theme === "light"
-      ? "bg-[radial-gradient(ellipse_at_center,transparent_38%,#e6eef8_96%)]"
+      ? "bg-[radial-gradient(ellipse_at_center,transparent_38%,#e8f1fb_96%)]"
       : "bg-[radial-gradient(ellipse_at_center,transparent_30%,#0A0A0A_85%)]";
 
   return (

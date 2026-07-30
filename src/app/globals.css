@@ -24,25 +24,25 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="light"] {
-  /* Cool page with vivid cyan/purple — neon energy, not muted slate */
-  --void: #e6eef8;
+  /* Sky-blue accents read clearer on light than pure cyan neon */
+  --void: #e8f1fb;
   --void-elevated: #ffffff;
-  --cyan: #00b8d4;
-  --purple: #9d4edd;
-  --cyan-readable: #0891b2;
+  --cyan: #0ea5e9;
+  --purple: #8b5cf6;
+  --cyan-readable: #0284c7;
   --purple-readable: #7c3aed;
-  --glass: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(8, 145, 178, 0.22);
+  --glass: rgba(255, 255, 255, 0.94);
+  --glass-border: rgba(2, 132, 199, 0.22);
   --text: #0f172a;
   --text-muted: #475569;
-  --surface-input: #eef6fb;
-  --border-soft: rgba(8, 145, 178, 0.18);
-  --dot: rgba(8, 145, 178, 0.14);
+  --surface-input: #eef6fc;
+  --border-soft: rgba(2, 132, 199, 0.18);
+  --dot: rgba(14, 165, 233, 0.16);
   --on-neon: #0a0a0a;
-  --selection-bg: rgba(0, 184, 212, 0.28);
+  --selection-bg: rgba(14, 165, 233, 0.28);
   --selection-fg: #0f172a;
-  --glow-cyan: rgba(0, 200, 230, 0.45);
-  --glow-purple: rgba(157, 78, 221, 0.35);
+  --glow-cyan: rgba(14, 165, 233, 0.5);
+  --glow-purple: rgba(139, 92, 246, 0.35);
   color-scheme: light;
 }
 
@@ -79,9 +79,9 @@ body {
 
 html[data-theme="light"] .glass {
   box-shadow:
-    0 0 0 1px rgba(0, 184, 212, 0.08),
+    0 0 0 1px rgba(14, 165, 233, 0.1),
     0 4px 16px rgba(15, 23, 42, 0.06),
-    0 12px 40px rgba(0, 184, 212, 0.1);
+    0 12px 40px rgba(14, 165, 233, 0.12);
 }
 
 /* Neon text gradient */
@@ -166,13 +166,13 @@ html[data-theme="light"] .bg-void {
   background-color: var(--void) !important;
 }
 html[data-theme="light"] .bg-void\/90 {
-  background-color: rgb(230 238 248 / 0.92) !important;
+  background-color: rgb(232 241 251 / 0.92) !important;
 }
 html[data-theme="light"] .bg-void\/95 {
-  background-color: rgb(230 238 248 / 0.95) !important;
+  background-color: rgb(232 241 251 / 0.95) !important;
 }
 html[data-theme="light"] .bg-void\/80 {
-  background-color: rgb(230 238 248 / 0.9) !important;
+  background-color: rgb(232 241 251 / 0.9) !important;
 }
 html[data-theme="light"] .bg-void\/40,
 html[data-theme="light"] .bg-void\/50,
@@ -182,16 +182,16 @@ html[data-theme="light"] .bg-void\/30 {
 
 /* Tailwind bakes #0A0A0A into via-void stops — force light mid-stop */
 html[data-theme="light"] .via-void {
-  --tw-gradient-stops: var(--tw-gradient-from), #e6eef8 var(--tw-gradient-via-position),
+  --tw-gradient-stops: var(--tw-gradient-from), #e8f1fb var(--tw-gradient-via-position),
     var(--tw-gradient-to) !important;
 }
 html[data-theme="light"] .from-void {
-  --tw-gradient-from: #e6eef8 var(--tw-gradient-from-position) !important;
-  --tw-gradient-to: rgb(230 238 248 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-from: #e8f1fb var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(232 241 251 / 0) var(--tw-gradient-to-position) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
 html[data-theme="light"] .to-void {
-  --tw-gradient-to: #e6eef8 var(--tw-gradient-to-position) !important;
+  --tw-gradient-to: #e8f1fb var(--tw-gradient-to-position) !important;
 }
 
 /* Ink on neon CTAs must stay near-black */
@@ -231,30 +231,30 @@ html[data-theme="light"] .hover\:text-zinc-400:hover {
   color: #475569 !important;
 }
 
-/* Accents: vivid cyan/purple + soft glow so light theme still “pops” */
+/* Accents: sky-blue + violet — clearer on light than teal neon */
 html[data-theme="light"] .text-cyan-neon {
-  color: #0891b2 !important;
-  text-shadow: 0 0 18px rgba(0, 200, 230, 0.4);
+  color: #0284c7 !important;
+  text-shadow: 0 0 18px rgba(14, 165, 233, 0.45);
 }
 html[data-theme="light"] .text-cyan-neon\/70 {
-  color: rgb(8 145 178 / 0.92) !important;
-  text-shadow: 0 0 14px rgba(0, 200, 230, 0.28);
+  color: rgb(2 132 199 / 0.92) !important;
+  text-shadow: 0 0 14px rgba(14, 165, 233, 0.3);
 }
 html[data-theme="light"] .text-cyan-neon\/80 {
-  color: #0891b2 !important;
-  text-shadow: 0 0 16px rgba(0, 200, 230, 0.32);
+  color: #0284c7 !important;
+  text-shadow: 0 0 16px rgba(14, 165, 233, 0.35);
 }
 html[data-theme="light"] .text-cyan-neon\/90 {
-  color: #0e7490 !important;
-  text-shadow: 0 0 16px rgba(0, 200, 230, 0.35);
+  color: #0369a1 !important;
+  text-shadow: 0 0 16px rgba(14, 165, 233, 0.4);
 }
 html[data-theme="light"] .text-purple-neon {
   color: #7c3aed !important;
-  text-shadow: 0 0 16px rgba(157, 78, 221, 0.35);
+  text-shadow: 0 0 16px rgba(139, 92, 246, 0.35);
 }
 html[data-theme="light"] .hover\:text-cyan-neon:hover {
-  color: #0e7490 !important;
-  text-shadow: 0 0 22px rgba(0, 200, 230, 0.55);
+  color: #0369a1 !important;
+  text-shadow: 0 0 22px rgba(14, 165, 233, 0.6);
 }
 
 html[data-theme="light"] .border-white\/5 {
@@ -278,18 +278,18 @@ html[data-theme="light"] .border-cyan-neon\/25,
 html[data-theme="light"] .border-cyan-neon\/30,
 html[data-theme="light"] .border-cyan-neon\/40,
 html[data-theme="light"] .border-cyan-neon\/50 {
-  border-color: rgb(0 184 212 / 0.55) !important;
+  border-color: rgb(14 165 233 / 0.55) !important;
 }
 html[data-theme="light"] .border-purple-neon\/25 {
-  border-color: rgb(157 78 221 / 0.45) !important;
+  border-color: rgb(139 92 246 / 0.45) !important;
 }
 html[data-theme="light"] .hover\:border-cyan-neon\/25:hover,
 html[data-theme="light"] .hover\:border-cyan-neon\/40:hover {
-  border-color: rgb(0 184 212 / 0.75) !important;
-  box-shadow: 0 0 20px rgba(0, 200, 230, 0.22);
+  border-color: rgb(14 165 233 / 0.75) !important;
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.28);
 }
 html[data-theme="light"] .hover\:border-purple-neon\/40:hover {
-  border-color: rgb(157 78 221 / 0.6) !important;
+  border-color: rgb(139 92 246 / 0.6) !important;
 }
 
 html[data-theme="light"] .bg-white\/5,
@@ -300,11 +300,11 @@ html[data-theme="light"] .hover\:bg-white\/5:hover {
 html[data-theme="light"] .bg-cyan-neon\/5,
 html[data-theme="light"] .bg-cyan-neon\/10,
 html[data-theme="light"] .bg-cyan-neon\/15 {
-  background-color: rgb(0 184 212 / 0.14) !important;
+  background-color: rgb(14 165 233 / 0.14) !important;
 }
 html[data-theme="light"] .bg-purple-neon\/10,
 html[data-theme="light"] .bg-purple-neon\/90 {
-  background-color: rgb(157 78 221 / 0.14) !important;
+  background-color: rgb(139 92 246 / 0.14) !important;
 }
 html[data-theme="light"] .bg-purple-neon\/90 {
   background-color: #7c3aed !important;
@@ -323,8 +323,8 @@ html[data-theme="light"] .bg-neon-radial {
   opacity: 1 !important;
   background-image: radial-gradient(
     ellipse at center,
-    rgba(0, 200, 230, 0.28) 0%,
-    rgba(157, 78, 221, 0.12) 42%,
+    rgba(14, 165, 233, 0.3) 0%,
+    rgba(139, 92, 246, 0.12) 42%,
     transparent 72%
   ) !important;
 }
@@ -333,47 +333,47 @@ html[data-theme="light"] .bg-\[radial-gradient\(ellipse_at_center\,rgba\(0\,240\
   opacity: 1 !important;
   background-image: radial-gradient(
     ellipse at center,
-    rgba(0, 200, 230, 0.22),
+    rgba(14, 165, 233, 0.24),
     transparent 58%
   ) !important;
 }
 html[data-theme="light"] .bg-\[radial-gradient\(ellipse_at_left\,rgba\(0\,240\,255\,0\.06\)\,transparent_50\%\)\] {
   background-image: radial-gradient(
     ellipse at left,
-    rgba(0, 200, 230, 0.18),
+    rgba(14, 165, 233, 0.2),
     transparent 55%
   ) !important;
 }
 
 html[data-theme="light"] .from-cyan-neon\/10 {
-  --tw-gradient-from: rgb(0 184 212 / 0.18) var(--tw-gradient-from-position);
+  --tw-gradient-from: rgb(14 165 233 / 0.2) var(--tw-gradient-from-position);
 }
 html[data-theme="light"] .to-purple-neon\/10 {
-  --tw-gradient-to: rgb(157 78 221 / 0.14) var(--tw-gradient-to-position);
+  --tw-gradient-to: rgb(139 92 246 / 0.14) var(--tw-gradient-to-position);
 }
 
 html[data-theme="light"] .shadow-neon {
   box-shadow:
-    0 0 18px rgba(0, 200, 230, 0.45),
-    0 0 40px rgba(157, 78, 221, 0.28),
-    0 8px 24px rgba(8, 145, 178, 0.2) !important;
+    0 0 18px rgba(14, 165, 233, 0.5),
+    0 0 40px rgba(139, 92, 246, 0.28),
+    0 8px 24px rgba(2, 132, 199, 0.22) !important;
 }
 html[data-theme="light"] .shadow-\[0_0_40px_rgba\(0\,240\,255\,0\.08\)\],
 html[data-theme="light"] .shadow-\[0_8px_32px_rgba\(42\,171\,238\,0\.45\)\] {
   box-shadow:
-    0 0 24px rgba(0, 200, 230, 0.35),
-    0 8px 28px rgba(42, 171, 238, 0.28) !important;
+    0 0 24px rgba(14, 165, 233, 0.4),
+    0 8px 28px rgba(42, 171, 238, 0.3) !important;
 }
 html[data-theme="light"] .shadow-\[0_0_0_1px_rgba\(0\,240\,255\,0\.12\)\] {
   box-shadow:
-    0 0 0 1px rgb(0 184 212 / 0.35),
-    0 0 20px rgba(0, 200, 230, 0.2) !important;
+    0 0 0 1px rgb(14 165 233 / 0.4),
+    0 0 20px rgba(14, 165, 233, 0.22) !important;
 }
 html[data-theme="light"] .hover\:shadow-\[0_0_32px_rgba\(0\,240\,255\,0\.18\)\]:hover,
 html[data-theme="light"] .hover\:shadow-\[0_0_28px_rgba\(0\,240\,255\,0\.1\)\]:hover {
   box-shadow:
-    0 0 32px rgba(0, 200, 230, 0.4),
-    0 8px 28px rgba(157, 78, 221, 0.2) !important;
+    0 0 32px rgba(14, 165, 233, 0.45),
+    0 8px 28px rgba(139, 92, 246, 0.22) !important;
 }
 
 /* Stronger pulse on light so CTA glow is obvious */
@@ -386,37 +386,37 @@ html[data-theme="light"] .animate-pulseGlow {
   100% {
     filter: brightness(1);
     box-shadow:
-      0 0 18px rgba(0, 200, 230, 0.45),
-      0 0 40px rgba(157, 78, 221, 0.28);
+      0 0 18px rgba(14, 165, 233, 0.5),
+      0 0 40px rgba(139, 92, 246, 0.28);
   }
   50% {
     filter: brightness(1.08);
     box-shadow:
-      0 0 28px rgba(0, 200, 230, 0.65),
-      0 0 56px rgba(157, 78, 221, 0.4);
+      0 0 28px rgba(14, 165, 233, 0.7),
+      0 0 56px rgba(139, 92, 246, 0.4);
   }
 }
 
 /* Outline focus remains visible */
 html[data-theme="light"] .focus-visible\:outline-white:focus-visible {
-  outline-color: #0e7490 !important;
+  outline-color: #0284c7 !important;
 }
 html[data-theme="light"] .focus-visible\:outline-cyan-neon:focus-visible {
-  outline-color: #0e7490 !important;
+  outline-color: #0284c7 !important;
 }
 
 /* Sticky / float chrome */
 html[data-theme="light"] .backdrop-blur-md {
-  background-color: rgb(230 238 248 / 0.92) !important;
+  background-color: rgb(232 241 251 / 0.92) !important;
 }
 
 /* Marquee diamonds more visible on light */
 html[data-theme="light"] .text-cyan-neon\/60 {
-  color: rgb(8 145 178 / 0.85) !important;
-  text-shadow: 0 0 12px rgba(0, 200, 230, 0.35);
+  color: rgb(2 132 199 / 0.88) !important;
+  text-shadow: 0 0 12px rgba(14, 165, 233, 0.4);
 }
 
-/* Process / neon gradient line stays vivid */
+/* CTA / process line: sky → violet */
 html[data-theme="light"] .bg-neon-gradient {
-  background-image: linear-gradient(135deg, #00c4d8 0%, #9d4edd 100%) !important;
+  background-image: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%) !important;
 }

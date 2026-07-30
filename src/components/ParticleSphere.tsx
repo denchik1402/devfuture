@@ -76,8 +76,8 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
       const positions = new Float32Array(particleCount * 3);
       const basePositions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
-      const colorCyan = new THREE.Color(isLight ? "#00a8c4" : "#00F0FF");
-      const colorPurple = new THREE.Color(isLight ? "#8b3ddb" : "#B026FF");
+      const colorCyan = new THREE.Color(isLight ? "#0284c7" : "#00F0FF");
+      const colorPurple = new THREE.Color(isLight ? "#7c3aed" : "#B026FF");
       const colorMix = new THREE.Color();
 
       for (let i = 0; i < particleCount; i++) {
@@ -119,7 +119,7 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
 
       const ringGeo = new THREE.RingGeometry(2.05, 2.08, 64);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: isLight ? 0x00a8c4 : 0x00f0ff,
+        color: isLight ? 0x0284c7 : 0x00f0ff,
         transparent: true,
         opacity: isLight ? 0.55 : 0.14,
         side: THREE.DoubleSide,
