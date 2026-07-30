@@ -48,4 +48,4 @@ curl -sS https://devfuture.ru/api/health
 
 Ожидаем `"ok":true`, `telegramToken`, `dataWritable`.
 
-CRM (опционально): задайте `LEADS_WEBHOOK_URL` в `.env.local` (Make/Zapier/Sheets) — см. `.env.example` и `METRIKA.md` для целей аналитики.
+CRM (опционально): задайте `LEADS_WEBHOOK_URL` в `.env.local` (Make/Zapier/Sheets) — см. `.env.example` и **[OPS.md](./OPS.md)** (пошагово cron + webhook). Цели Метрики: `METRIKA.md`.

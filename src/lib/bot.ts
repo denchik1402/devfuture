@@ -47,6 +47,7 @@ import {
   updateLeadStatus,
 } from "@/lib/bot-leads";
 import { ingestLeadAndNotify, notifyAdmins } from "@/lib/bot-notify";
+import { flushCrmQueue } from "@/lib/bot-crm";
 import {
   clearSession,
   getSession,
@@ -233,6 +234,9 @@ async function startOrder(
 export async function handleTelegramUpdate(update: TelegramUpdate) {
   void maybePingSla(4).catch((err) =>
     console.error("[bot-sla]", err)
+  );
+  void flushCrmQueue().catch((err) =>
+    console.error("[bot-crm] flush", err)
   );
   if (update.callback_query) {
     await handleCallback(update.callback_query);
