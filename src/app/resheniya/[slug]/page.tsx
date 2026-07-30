@@ -13,6 +13,7 @@ import {
   getSeoLanding,
 } from "@/lib/seo-landings";
 import { getBlogPost } from "@/lib/blog";
+import { getCasePage } from "@/lib/cases";
 import { siteConfig } from "@/lib/site";
 import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/seo";
 
@@ -214,6 +215,30 @@ export default function SeoLandingPage({ params }: Props) {
               </ul>
             </section>
           )}
+
+          {page.relatedCases?.length ? (
+            <section className="mt-10 border-t border-white/5 pt-10">
+              <h2 className="font-display text-xl font-semibold text-white">
+                Кейсы
+              </h2>
+              <ul className="mt-4 flex flex-col gap-2 text-sm text-zinc-400">
+                {page.relatedCases.map((slug) => {
+                  const c = getCasePage(slug);
+                  if (!c) return null;
+                  return (
+                    <li key={slug}>
+                      <Link
+                        href={`/keysy/${slug}`}
+                        className="text-cyan-neon hover:underline"
+                      >
+                        {c.h1}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
         </div>
       </article>
 

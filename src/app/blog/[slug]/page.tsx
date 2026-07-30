@@ -9,6 +9,7 @@ import NeonButton from "@/components/NeonButton";
 import { JsonLd } from "@/components/JsonLd";
 import { getAllBlogSlugs, getBlogPost } from "@/lib/blog";
 import { getSeoLanding } from "@/lib/seo-landings";
+import { getCasePage } from "@/lib/cases";
 import { getServiceBySlug } from "@/lib/services";
 import { siteConfig } from "@/lib/site";
 import { buildBreadcrumbSchema } from "@/lib/seo";
@@ -87,7 +88,9 @@ export default function BlogPostPage({ params }: Props) {
           ))}
         </div>
 
-        {(post.relatedLandings?.length || post.relatedServices?.length) && (
+        {(post.relatedLandings?.length ||
+          post.relatedServices?.length ||
+          post.relatedCases?.length) && (
           <section className="mt-12 border-t border-white/5 pt-8">
             <h2 className="font-display text-lg font-semibold text-white">
               Полезные ссылки
@@ -103,6 +106,20 @@ export default function BlogPostPage({ params }: Props) {
                       className="text-cyan-neon hover:underline"
                     >
                       {landing.h1}
+                    </Link>
+                  </li>
+                );
+              })}
+              {post.relatedCases?.map((slug) => {
+                const c = getCasePage(slug);
+                if (!c) return null;
+                return (
+                  <li key={slug}>
+                    <Link
+                      href={`/keysy/${slug}`}
+                      className="text-cyan-neon hover:underline"
+                    >
+                      Кейс: {c.h1}
                     </Link>
                   </li>
                 );

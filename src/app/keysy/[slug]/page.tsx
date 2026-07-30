@@ -9,9 +9,14 @@ import NeonButton from "@/components/NeonButton";
 import { JsonLd } from "@/components/JsonLd";
 import { getAllCaseSlugs, getCasePage } from "@/lib/cases";
 import { getSeoLanding } from "@/lib/seo-landings";
+import { getBlogPost } from "@/lib/blog";
 import { getServiceBySlug } from "@/lib/services";
 import { siteConfig, telegramBotStartLink } from "@/lib/site";
-import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/seo";
+import {
+  buildBreadcrumbSchema,
+  buildCaseStudySchema,
+  buildFaqSchema,
+} from "@/lib/seo";
 
 type Props = { params: { slug: string } };
 
@@ -48,11 +53,21 @@ export default function CasePage({ params }: Props) {
     { name: page.h1, path: `/keysy/${page.slug}` },
   ]);
 
+  const caseUrl = `${siteConfig.url}/keysy/${page.slug}`;
+  const caseSchema = buildCaseStudySchema({
+    h1: page.h1,
+    description: page.description,
+    before: page.before,
+    after: page.after,
+    result: page.result,
+    url: caseUrl,
+  });
+
   const botHref = telegramBotStartLink(page.demoStart || "order");
 
   return (
     <main className="relative min-h-screen bg-void">
-      <JsonLd data={[buildFaqSchema(page.faq), crumbs]} />
+      <JsonLd data={[caseSchema, buildFaqSchema(page.faq), crumbs]} />
       <Navbar />
 
       <article className="relative overflow-hidden pb-8 pt-28 md:pt-32">
@@ -155,7 +170,9 @@ export default function CasePage({ params }: Props) {
             </div>
           </section>
 
-          {(page.relatedLandings?.length || page.relatedServices?.length) && (
+          {(page.relatedLandings?.length ||
+            page.relatedServices?.length ||
+            page.relatedPosts?.length) && (
             <section className="mt-14 border-t border-white/5 pt-10">
               <h2 className="font-display text-xl font-semibold text-white">
                 Читайте также
@@ -185,6 +202,20 @@ export default function CasePage({ params }: Props) {
                         className="text-cyan-neon hover:underline"
                       >
                         {rel.h1}
+                      </Link>
+                    </li>
+                  );
+                })}
+                {page.relatedPosts?.map((slug) => {
+                  const post = getBlogPost(slug);
+                  if (!post) return null;
+                  return (
+                    <li key={slug}>
+                      <Link
+                        href={`/blog/${slug}`}
+                        className="text-cyan-neon hover:underline"
+                      >
+                        {post.title}
                       </Link>
                     </li>
                   );

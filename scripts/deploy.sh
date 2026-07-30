@@ -14,6 +14,8 @@ git reset --hard origin/main
 echo "==> ensure .data survives deploys (bot leads/users)"
 mkdir -p "$APP_DIR/.data"
 chmod 700 "$APP_DIR/.data" || true
+chmod +x "$APP_DIR/scripts/backup-bot-data.sh" || true
+mkdir -p /var/backups/devfuture || true
 
 echo "==> npm ci"
 if ! npm ci; then
@@ -43,6 +45,9 @@ if [ -f .env.local ] && grep -q '^TELEGRAM_BOT_TOKEN=.\+' .env.local 2>/dev/null
   echo "==> telegram menu button (Mini App)"
   npm run tg:menu-button || echo "warn: menu-button failed"
 fi
+
+echo "==> IndexNow ping (optional INDEXNOW_KEY)"
+npm run seo:indexnow || echo "warn: indexnow skipped/failed"
 
 echo "==> done"
 pm2 status "$APP_NAME"

@@ -141,3 +141,20 @@ FORMSPREE_ID=xxxxxxxx
 ```
 
 в `.env.local` + `pm2 restart`. Это запасной канал, не замена боту.
+
+---
+
+## 5. IndexNow (Yandex)
+
+После деплоя `scripts/deploy.sh` вызывает `npm run seo:indexnow`. Нужны:
+
+1. Файл `public/indexnow-key.txt` — одна строка с ключом (уже в репо как плейсхолдер).
+2. В `.env.local` на сервере тот же ключ:
+
+```
+INDEXNOW_KEY=ваш_ключ_без_пробелов
+```
+
+Сгенерировать ключ: `openssl rand -hex 16`. Положите его и в `public/indexnow-key.txt`, и в `INDEXNOW_KEY`. После `git pull` + деплоя файл должен открываться как `https://devfuture.ru/indexnow-key.txt`.
+
+Ручной прогон: `cd /var/www/devfuture && npm run seo:indexnow`. Без `INDEXNOW_KEY` скрипт тихо пропускается.

@@ -13,6 +13,7 @@ export type SeoLanding = {
   relatedService?: string;
   relatedLandings?: string[];
   relatedPosts?: string[];
+  relatedCases?: string[];
 };
 
 export const SEO_LANDINGS: SeoLanding[] = [
@@ -398,6 +399,8 @@ export const SEO_LANDINGS: SeoLanding[] = [
       "telegram-bot-pod-klyuch",
       "bot-zapisi-klientov",
     ],
+    relatedPosts: ["avtomatizaciya-cherez-telegram"],
+    relatedCases: ["status-cabinet"],
   },
   {
     slug: "integraciya-crm-telegram",
@@ -443,6 +446,7 @@ export const SEO_LANDINGS: SeoLanding[] = [
       "avtomatizaciya-biznes-processov",
       "telegram-bot-pod-klyuch",
     ],
+    relatedPosts: ["integraciya-sajta-i-crm"],
   },
   {
     slug: "bot-zapisi-dlya-salona",
@@ -500,6 +504,8 @@ export const SEO_LANDINGS: SeoLanding[] = [
       "telegram-bot-pod-klyuch",
       "mvp-za-1-den",
     ],
+    relatedPosts: ["kak-ustroen-bot-zayavok", "bot-vs-whatsapp"],
+    relatedCases: ["salon-booking"],
   },
   {
     slug: "bot-dlya-kliniki",
@@ -557,6 +563,8 @@ export const SEO_LANDINGS: SeoLanding[] = [
       "telegram-bot-pod-klyuch",
       "avtomatizaciya-biznes-processov",
     ],
+    relatedPosts: ["bot-zapisi-dlya-kliniki"],
+    relatedCases: ["clinic-booking"],
   },
   {
     slug: "bot-dostavki",
@@ -614,6 +622,8 @@ export const SEO_LANDINGS: SeoLanding[] = [
       "telegram-bot-pod-klyuch",
       "avtomatizaciya-biznes-processov",
     ],
+    relatedPosts: ["bot-dostavki-kak-ustroit"],
+    relatedCases: ["delivery-bot"],
   },
   {
     slug: "bot-dlya-online-shkoly",
@@ -670,6 +680,8 @@ export const SEO_LANDINGS: SeoLanding[] = [
       "bot-zapisi-klientov",
       "avtomatizaciya-biznes-processov",
     ],
+    relatedPosts: ["bot-dlya-kursov-online"],
+    relatedCases: ["online-school-bot"],
   },
   {
     slug: "bot-b2b-zayavok",
@@ -727,6 +739,8 @@ export const SEO_LANDINGS: SeoLanding[] = [
       "avtomatizaciya-biznes-processov",
       "integraciya-crm-telegram",
     ],
+    relatedPosts: ["brief-za-30-secund", "kak-ustroen-bot-zayavok"],
+    relatedCases: ["landing-leads"],
   },
 ];
 

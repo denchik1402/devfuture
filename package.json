@@ -20,7 +20,8 @@
     "tg:check": "node scripts/telegram-check.js",
     "tg:probe": "node scripts/telegram-probe-node.js",
     "tg:menu-button": "node scripts/telegram-set-menu-button.js",
-    "backup:data": "bash scripts/backup-bot-data.sh"
+    "backup:data": "bash scripts/backup-bot-data.sh",
+    "seo:indexnow": "node scripts/indexnow-ping.js"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",

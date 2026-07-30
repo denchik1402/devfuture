@@ -70,7 +70,11 @@ function Cases() {
               Примеры с результатом
             </h2>
             <p className="mt-4 max-w-2xl text-zinc-400">
-              Откройте карточку услуги или попробуйте{" "}
+              Подробные разборы — в разделе{" "}
+              <Link href="/keysy" className="text-cyan-neon hover:underline">
+                кейсов
+              </Link>
+              . Или попробуйте{" "}
               <a href="#demo" className="text-cyan-neon hover:underline">
                 интерактивное демо бота
               </a>
@@ -80,7 +84,7 @@ function Cases() {
 
           <Reveal className="mt-12 md:mt-14">
             <motion.article
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 300, damping: 24 }}
               className="glass group relative overflow-hidden rounded-2xl p-7 md:p-8"
             >
@@ -140,7 +144,7 @@ function Cases() {
             {SCENARIO_CASES.map((item, i) => (
               <Reveal key={item.title} delay={i * 0.08}>
                 <motion.article
-                  whileHover={{ y: -6 }}
+                  whileHover={{ y: -2 }}
                   transition={{ type: "spring", stiffness: 300, damping: 24 }}
                   className="glass group relative flex h-full flex-col overflow-hidden rounded-2xl p-7"
                 >
@@ -194,9 +198,11 @@ function Cases() {
             ))}
           </div>
 
-          <Reveal className="mt-12 md:mt-14">
+          <Reveal className="mt-12 md:mt-14 flex flex-wrap gap-3">
+            <NeonButton href="/keysy">Все кейсы</NeonButton>
             <NeonButton
               href={siteConfig.telegramUrl}
+              variant="ghost"
               onClick={() => reachGoal("click_telegram", { place: "cases" })}
             >
               Запросить похожий сценарий

@@ -84,3 +84,50 @@ export function buildBreadcrumbSchema(
     })),
   };
 }
+
+export function buildCaseStudySchema(page: {
+  h1: string;
+  description: string;
+  before: string;
+  after: string;
+  result: string;
+  url: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: page.h1,
+    description: page.description,
+    url: page.url,
+    mainEntityOfPage: page.url,
+    author: { "@type": "Organization", name: siteConfig.name },
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    about: {
+      "@type": "Thing",
+      name: page.h1,
+      description: `${page.before} → ${page.after}. ${page.result}`,
+    },
+  };
+}
+
+export function buildItemListSchema(
+  name: string,
+  items: { name: string; url: string }[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      url: item.url,
+    })),
+  };
+}

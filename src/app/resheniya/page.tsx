@@ -3,8 +3,10 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
+import { JsonLd } from "@/components/JsonLd";
 import { SEO_LANDINGS } from "@/lib/seo-landings";
 import { siteConfig } from "@/lib/site";
+import { buildItemListSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Решения под ключ — боты, лендинги, кабинеты, MVP",
@@ -21,8 +23,17 @@ export const metadata: Metadata = {
 };
 
 export default function ResheniyaIndexPage() {
+  const itemList = buildItemListSchema(
+    "Решения DevFuture",
+    SEO_LANDINGS.map((page) => ({
+      name: page.h1,
+      url: `${siteConfig.url}/resheniya/${page.slug}`,
+    }))
+  );
+
   return (
     <main className="relative min-h-screen bg-void">
+      <JsonLd data={itemList} />
       <Navbar />
       <div className="mx-auto max-w-6xl px-6 pb-20 pt-28 md:pt-32">
         <p className="font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">

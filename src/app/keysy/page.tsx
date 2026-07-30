@@ -3,8 +3,10 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
+import { JsonLd } from "@/components/JsonLd";
 import { CASE_PAGES } from "@/lib/cases";
 import { siteConfig } from "@/lib/site";
+import { buildItemListSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Кейсы DevFuture — боты, лендинги, кабинеты",
@@ -21,8 +23,17 @@ export const metadata: Metadata = {
 };
 
 export default function KeysyIndexPage() {
+  const itemList = buildItemListSchema(
+    "Кейсы DevFuture",
+    CASE_PAGES.map((page) => ({
+      name: page.h1,
+      url: `${siteConfig.url}/keysy/${page.slug}`,
+    }))
+  );
+
   return (
     <main className="relative min-h-screen bg-void">
+      <JsonLd data={itemList} />
       <Navbar />
       <div className="mx-auto max-w-6xl px-6 pb-20 pt-28 md:pt-32">
         <p className="font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">
