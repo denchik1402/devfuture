@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import NeonButton from "./NeonButton";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
@@ -34,7 +34,6 @@ function setStickyVis(on: boolean) {
 function QuizStickyBar() {
   const [visible, setVisible] = useState(false);
   const [detail, setDetail] = useState<QuizStickyDetail | null>(null);
-  const reduceMotion = useReducedMotion();
 
   const show = useCallback((next: QuizStickyDetail | null) => {
     if (!next) return;
@@ -89,14 +88,10 @@ function QuizStickyBar() {
           key="quiz-sticky"
           role="region"
           aria-label="Продолжить заявку"
-          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, y: 16 }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { type: "spring", stiffness: 320, damping: 28 }
-          }
+          exit={{ opacity: 0, y: 16 }}
+          transition={{ type: "spring", stiffness: 320, damping: 28 }}
           className="fixed inset-x-0 z-[55] border-t border-white/10 bg-void/90 backdrop-blur-md"
           style={{
             bottom: 0,

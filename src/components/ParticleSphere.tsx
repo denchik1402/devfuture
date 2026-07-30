@@ -50,7 +50,7 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
       let pageVisible = document.visibilityState === "visible";
       let raf = 0;
       let burst = 0;
-      const baseSize = isLight ? 0.034 : 0.024;
+      const baseSize = isLight ? 0.048 : 0.024;
       const baseOpacity = isLight ? 1 : 0.92;
 
       const scene = new THREE.Scene();
@@ -76,8 +76,8 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
       const positions = new Float32Array(particleCount * 3);
       const basePositions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
-      const colorCyan = new THREE.Color(isLight ? "#0891b2" : "#00F0FF");
-      const colorPurple = new THREE.Color(isLight ? "#7e22ce" : "#B026FF");
+      const colorCyan = new THREE.Color(isLight ? "#00a8c4" : "#00F0FF");
+      const colorPurple = new THREE.Color(isLight ? "#8b3ddb" : "#B026FF");
       const colorMix = new THREE.Color();
 
       for (let i = 0; i < particleCount; i++) {
@@ -119,9 +119,9 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
 
       const ringGeo = new THREE.RingGeometry(2.05, 2.08, 64);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: isLight ? 0x0891b2 : 0x00f0ff,
+        color: isLight ? 0x00a8c4 : 0x00f0ff,
         transparent: true,
-        opacity: isLight ? 0.4 : 0.14,
+        opacity: isLight ? 0.55 : 0.14,
         side: THREE.DoubleSide,
         depthWrite: false,
         depthTest: false,
@@ -217,9 +217,9 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
           material.opacity = baseOpacity;
         }
 
-        points.rotation.y = t * 0.08 + targetRot.y;
-        points.rotation.x = t * 0.03 + targetRot.x;
-        ring.rotation.z = t * 0.12;
+        points.rotation.y = t * (isLight ? 0.12 : 0.08) + targetRot.y;
+        points.rotation.x = t * (isLight ? 0.045 : 0.03) + targetRot.x;
+        ring.rotation.z = t * (isLight ? 0.18 : 0.12);
         ring.rotation.x = Math.PI / 2.4 + targetRot.x * 0.3;
 
         renderer.render(scene, camera);

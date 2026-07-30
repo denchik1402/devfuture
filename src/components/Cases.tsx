@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowUpRight, Clock3 } from "lucide-react";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
@@ -11,8 +11,7 @@ import { siteConfig } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 function Cases() {
-  const reduceMotion = useReducedMotion();
-  const hoverLift = reduceMotion ? undefined : { y: -2 };
+  const hoverLift = { y: -2 };
 
   return (
     <>

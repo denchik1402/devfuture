@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Check, ChevronRight } from "lucide-react";
 import { reachGoal } from "@/lib/analytics";
 import { siteConfig } from "@/lib/site";
@@ -36,7 +36,6 @@ const DEMO_STEPS = [
 function BotDemo() {
   const [step, setStep] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
-  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     setStep(0);
@@ -60,9 +59,10 @@ function BotDemo() {
     setPicked([]);
   };
 
-  const motionProps = reduceMotion
-    ? { initial: false as const, animate: { opacity: 1 } }
-    : { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
+  const motionProps = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+  };
 
   return (
     <section
@@ -148,7 +148,7 @@ function BotDemo() {
 
             {finished && (
               <motion.div
-                initial={reduceMotion ? false : { opacity: 0 }}
+                initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="mt-auto flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3"
               >

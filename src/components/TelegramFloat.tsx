@@ -2,14 +2,13 @@
 
 import { memo, useEffect, useState } from "react";
 import { Send } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 function TelegramFloat() {
   const [hidden, setHidden] = useState(false);
   const [stickyUp, setStickyUp] = useState(false);
-  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const contact = document.getElementById("contact");
@@ -48,16 +47,12 @@ function TelegramFloat() {
           rel="noopener noreferrer"
           aria-label="Написать в Telegram"
           title="Написать в Telegram"
-          initial={reduceMotion ? false : { opacity: 0, scale: 0.8, y: 16 }}
+          initial={{ opacity: 0, scale: 0.8, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, scale: 0.9, y: 12 }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { type: "spring", stiffness: 260, damping: 20 }
-          }
-          whileHover={reduceMotion ? undefined : { scale: 1.06 }}
-          whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+          exit={{ opacity: 0, scale: 0.9, y: 12 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.94 }}
           onClick={() => reachGoal("click_telegram", { place: "float" })}
           className="fixed z-[60] flex items-center gap-2 rounded-full bg-[#2AABEE] py-3 pl-4 pr-5 text-white shadow-[0_8px_32px_rgba(42,171,238,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
           style={{
