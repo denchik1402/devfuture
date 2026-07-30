@@ -1194,7 +1194,13 @@ async function handleCallback(cb: TgCallback) {
           inline_keyboard: [
             [
               {
-                text: "💬 Ответить клиенту",
+                text: "📤 Отправить клиенту",
+                callback_data: `tplsend:${m[1]}:${leadId}`,
+              },
+            ],
+            [
+              {
+                text: "💬 Ответить вручную",
                 callback_data: `reply:${lead.chatId}:${leadId}`,
               },
             ],
@@ -1202,6 +1208,44 @@ async function handleCallback(cb: TgCallback) {
         },
       }
     );
+    return;
+  }
+
+  if (data.startsWith("tplsend:")) {
+    if (!isAdmin(userId)) {
+      await sendMessage(chatId, "Недостаточно прав.");
+      return;
+    }
+    const m = data.match(/^tplsend:([a-z0-9_-]+):([A-Za-z0-9]+)$/i);
+    if (!m) return;
+    const tpl = getReplyTemplate(m[1]);
+    const leadId = m[2];
+    if (!tpl) {
+      await sendMessage(chatId, "Шаблон не найден.");
+      return;
+    }
+    const lead = getLead(leadId);
+    if (!lead) {
+      await sendMessage(chatId, "Заявка не найдена.");
+      return;
+    }
+    const sent = await sendMessage(lead.chatId, escapeHtml(tpl.text));
+    if (sent.ok) {
+      addLeadNote(leadId, `Отправлен шаблон: ${tpl.title}`, userId);
+      if (lead.status === "new") {
+        updateLeadStatus(leadId, "progress");
+      }
+      await sendMessage(
+        chatId,
+        `✅ Шаблон «${escapeHtml(tpl.title)}» отправлен клиенту.`,
+        { reply_markup: leadNotifyMarkup(getLead(leadId) || lead) }
+      );
+    } else {
+      await sendMessage(
+        chatId,
+        "Не удалось отправить клиенту (возможно, бот заблокирован)."
+      );
+    }
     return;
   }
 

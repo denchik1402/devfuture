@@ -7,7 +7,8 @@ import { getMetrikaId } from "@/lib/analytics";
  * Yandex Metrika counter. Set NEXT_PUBLIC_YANDEX_METRIKA_ID in .env.local
  * Goals to create in Metrika UI: click_telegram, click_phone, submit_brief,
  * open_packages, open_service, open_demo, click_package, scroll_75, quiz_complete,
- * open_contact, lead_handoff, open_estimator, view_resheniya, view_case, view_blog
+ * open_contact, lead_handoff, open_estimator, view_resheniya, view_case, view_blog,
+ * funnel_cta
  */
 export function YandexMetrika() {
   const id = getMetrikaId();

@@ -20,12 +20,16 @@
 | `view_resheniya` | Просмотр SEO-посадочной (`slug` в параметрах) |
 | `view_case` | Просмотр кейса (`slug`) |
 | `view_blog` | Просмотр поста блога (`slug`) |
+| `funnel_cta` | CTA на посадочной/кейсе (`kind`, `slug`, `cta`) |
 
 ## SEO-воронка (как смотреть)
 
 1. Сегмент: источник = поиск / переходы из поисковых систем.
-2. Цели цепочкой: `view_resheniya` / `view_case` → `click_telegram` / `open_contact` → `submit_brief`.
-3. В отчёте по параметрам визитов смотрите `slug` у `view_*`.
+2. Цепочка: `view_resheniya` / `view_case` → `funnel_cta` или `click_telegram` → `submit_brief`.
+3. В параметрах визитов смотрите `slug`, `path`, `cta`.
+4. Сравнение посадочных: отчёт по `view_resheniya` с группировкой по `slug`, затем конверсия в `funnel_cta`.
+
+У всех `reachGoal` автоматически уходит `path` (текущий URL).
 
 Проверка: после деплоя откройте сайт → выполните действие → «Онлайн» / отчёт по целям.
 Параметры (`place`, `channel`, `slug`) уходят вторым аргументом `reachGoal`.

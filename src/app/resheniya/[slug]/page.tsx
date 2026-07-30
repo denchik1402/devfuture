@@ -5,9 +5,9 @@ import { Check, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
-import NeonButton from "@/components/NeonButton";
 import LandingDemoCta from "@/components/LandingDemoCta";
 import SeoViewBeacon from "@/components/SeoViewBeacon";
+import FunnelCtaRow from "@/components/FunnelCtaRow";
 import { JsonLd } from "@/components/JsonLd";
 import {
   getAllSeoLandingSlugs,
@@ -109,14 +109,7 @@ export default function SeoLandingPage({ params }: Props) {
             </span>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <NeonButton href={siteConfig.telegramUrl} pulse>
-              Написать в Telegram
-            </NeonButton>
-            <NeonButton href="/#quiz" variant="ghost">
-              Собрать бриф за 30 сек
-            </NeonButton>
-          </div>
+          <FunnelCtaRow slug={page.slug} kind="resheniya" />
 
           <section className="glass mt-14 rounded-2xl p-7">
             <h2 className="font-display text-xl font-semibold text-white">

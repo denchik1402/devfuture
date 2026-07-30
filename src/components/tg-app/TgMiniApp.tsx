@@ -96,17 +96,60 @@ export default function TgMiniApp() {
   const [crmLoading, setCrmLoading] = useState(false);
   const [crmBusyId, setCrmBusyId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
+  const [crmQuery, setCrmQuery] = useState("");
+  const [crmStatus, setCrmStatus] = useState<LeadStatus | "all">("all");
+  const [crmTag, setCrmTag] = useState<"all" | "hot" | "warm" | "cold">("all");
+  const [crmStaleOnly, setCrmStaleOnly] = useState(false);
 
   const tabs = useMemo(() => {
     if (!isAdminUser) return BASE_TABS;
     return [...BASE_TABS, { id: "admin" as const, label: "CRM" }];
   }, [isAdminUser]);
 
+  const staleCutoff = 4 * 60 * 60 * 1000;
+
+  const filteredLeads = useMemo(() => {
+    const q = crmQuery.trim().toLowerCase();
+    const now = Date.now();
+    return leads.filter((l) => {
+      if (crmStatus !== "all" && l.status !== crmStatus) return false;
+      if (crmTag !== "all" && !l.tags?.includes(crmTag)) return false;
+      if (crmStaleOnly) {
+        if (l.status !== "new") return false;
+        const t = Date.parse(l.at);
+        if (!Number.isFinite(t) || now - t < staleCutoff) return false;
+      }
+      if (!q) return true;
+      const blob = [
+        l.name,
+        l.contact,
+        l.task,
+        l.id,
+        l.username,
+        l.source,
+        ...(l.tags || []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return blob.includes(q);
+    });
+  }, [leads, crmQuery, crmStatus, crmTag, crmStaleOnly, staleCutoff]);
+
+  const staleCount = useMemo(() => {
+    const now = Date.now();
+    return leads.filter((l) => {
+      if (l.status !== "new") return false;
+      const t = Date.parse(l.at);
+      return Number.isFinite(t) && now - t >= staleCutoff;
+    }).length;
+  }, [leads, staleCutoff]);
+
   const loadCrm = useCallback(async () => {
     if (!initData) return false;
     setCrmLoading(true);
     try {
-      const res = await fetch("/api/admin/leads?limit=20", {
+      const res = await fetch("/api/admin/leads?limit=50", {
         headers: { "x-telegram-init-data": initData },
       });
       if (!res.ok) {
@@ -655,15 +698,82 @@ export default function TgMiniApp() {
                     ["done", leadStatsView.done],
                   ] as const
                 ).map(([key, n]) => (
-                  <div key={key}>
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() =>
+                      setCrmStatus((prev) => (prev === key ? "all" : key))
+                    }
+                    className={`rounded-xl px-1 py-1 transition ${
+                      crmStatus === key ? "bg-white/10" : ""
+                    }`}
+                  >
                     <p className="font-display text-lg text-white">{n}</p>
                     <p className="text-[10px] uppercase tracking-wider text-zinc-500">
                       {key}
                     </p>
-                  </div>
+                  </button>
                 ))}
               </div>
             ) : null}
+
+            <div className="space-y-2">
+              <input
+                value={crmQuery}
+                onChange={(e) => setCrmQuery(e.target.value)}
+                placeholder="Поиск: имя, контакт, тег…"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none focus:border-cyan-neon/40"
+              />
+              <div className="flex flex-wrap gap-1.5">
+                {(["all", "hot", "warm", "cold"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setCrmTag(t)}
+                    className={`rounded-full border px-2.5 py-1 text-[11px] ${
+                      crmTag === t
+                        ? "border-amber-400/40 bg-amber-400/15 text-amber-300"
+                        : "border-white/10 text-zinc-500"
+                    }`}
+                  >
+                    {t === "all" ? "все теги" : `#${t}`}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setCrmStaleOnly((v) => !v)}
+                  className={`rounded-full border px-2.5 py-1 text-[11px] ${
+                    crmStaleOnly
+                      ? "border-rose-400/40 bg-rose-400/15 text-rose-300"
+                      : "border-white/10 text-zinc-500"
+                  }`}
+                >
+                  без ответа &gt;4ч
+                  {staleCount ? ` (${staleCount})` : ""}
+                </button>
+              </div>
+              {(crmStatus !== "all" ||
+                crmTag !== "all" ||
+                crmStaleOnly ||
+                crmQuery) && (
+                <p className="text-[11px] text-zinc-500">
+                  Показано {filteredLeads.length} из {leads.length}
+                  {" · "}
+                  <button
+                    type="button"
+                    className="text-cyan-neon hover:underline"
+                    onClick={() => {
+                      setCrmQuery("");
+                      setCrmStatus("all");
+                      setCrmTag("all");
+                      setCrmStaleOnly(false);
+                    }}
+                  >
+                    сбросить
+                  </button>
+                </p>
+              )}
+            </div>
 
             {crmLoading && !leads.length ? (
               <p className="text-sm text-zinc-500">Загрузка…</p>
@@ -675,7 +785,13 @@ export default function TgMiniApp() {
               </div>
             ) : null}
 
-            {leads.map((lead) => {
+            {!crmLoading && leads.length > 0 && !filteredLeads.length ? (
+              <div className="glass rounded-2xl p-5 text-sm text-zinc-400">
+                Ничего не найдено по фильтру.
+              </div>
+            ) : null}
+
+            {filteredLeads.map((lead) => {
               const busy = crmBusyId === lead.id;
               return (
                 <article key={lead.id} className="glass rounded-2xl p-4">

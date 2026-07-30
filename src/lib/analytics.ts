@@ -21,7 +21,8 @@ export type MetrikaGoal =
   | "open_estimator"
   | "view_resheniya"
   | "view_case"
-  | "view_blog";
+  | "view_blog"
+  | "funnel_cta";
 
 export function getMetrikaId(): number | null {
   const raw = process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID;
@@ -30,13 +31,23 @@ export function getMetrikaId(): number | null {
   return Number.isFinite(id) && id > 0 ? id : null;
 }
 
+/** Page path for funnel params (client only). */
+export function analyticsPath(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.pathname.slice(0, 120);
+}
+
 export function reachGoal(goal: MetrikaGoal, params?: Record<string, string>) {
   const id = getMetrikaId();
   if (!id || typeof window === "undefined" || typeof window.ym !== "function") {
     return;
   }
   try {
-    window.ym(id, "reachGoal", goal, params);
+    const merged = {
+      path: analyticsPath(),
+      ...params,
+    };
+    window.ym(id, "reachGoal", goal, merged);
   } catch {
     // ignore analytics errors
   }

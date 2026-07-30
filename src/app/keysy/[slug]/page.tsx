@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
 import NeonButton from "@/components/NeonButton";
 import SeoViewBeacon from "@/components/SeoViewBeacon";
+import CaseBotMock from "@/components/CaseBotMock";
 import { JsonLd } from "@/components/JsonLd";
 import { getAllCaseSlugs, getCasePage } from "@/lib/cases";
 import { getSeoLanding } from "@/lib/seo-landings";
@@ -127,31 +128,17 @@ export default function CasePage({ params }: Props) {
           </div>
 
           {page.flowSteps?.length ? (
-            <section className="mt-14">
-              <h2 className="font-display text-2xl font-bold text-white">
-                Сценарий как в боте
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm text-zinc-500">
-                Условные экраны — без стоковых фото, чтобы было видно поток.
-              </p>
-              <div className="mt-6 flex gap-3 overflow-x-auto pb-2">
-                {page.flowSteps.map((step, i) => (
-                  <div
-                    key={step}
-                    className="glass flex w-40 shrink-0 flex-col rounded-2xl p-4"
-                  >
-                    <span className="font-display text-[10px] tracking-[0.2em] text-cyan-neon/70">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <div className="mt-3 rounded-xl border border-white/10 bg-void/80 px-3 py-8 text-center">
-                      <p className="font-display text-sm font-medium text-white">
-                        {step}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+            <CaseBotMock
+              title={page.h1}
+              steps={page.flowSteps}
+              variant={
+                page.slug === "salon-booking" ||
+                page.slug === "delivery-bot" ||
+                page.slug === "status-cabinet"
+                  ? "phone"
+                  : "strip"
+              }
+            />
           ) : null}
 
           <section className="mt-14 grid gap-4 md:grid-cols-2">
