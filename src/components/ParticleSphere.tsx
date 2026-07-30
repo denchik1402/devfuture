@@ -29,35 +29,35 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
 
     let cancelled = false;
     let cleanup: (() => void) | undefined;
+    let retryId = 0;
+    let startId = 0;
 
     const start = () => {
       if (cancelled || !containerRef.current) return;
 
-      const conn = (
-        navigator as Navigator & {
-          connection?: { saveData?: boolean; effectiveType?: string };
-        }
-      ).connection;
-      if (conn?.saveData || conn?.effectiveType === "2g") return;
-
       const el = containerRef.current;
+      const width = el.clientWidth || window.innerWidth;
+      const height = el.clientHeight || window.innerHeight;
+      if (width < 2 || height < 2) {
+        retryId = window.setTimeout(start, 100);
+        return;
+      }
 
       const particleCount = getParticleCount();
       const mouse = { x: 0, y: 0 };
       const targetRot = { x: 0, y: 0 };
       let visible = true;
-      let pageVisible = true;
+      let pageVisible = document.visibilityState === "visible";
       let raf = 0;
       let burst = 0;
-
-      const width = el.clientWidth || window.innerWidth;
-      const height = el.clientHeight || window.innerHeight;
+      const baseSize = isLight ? 0.034 : 0.024;
+      const baseOpacity = isLight ? 1 : 0.92;
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
       camera.position.z = 4.2;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const renderer = new THREE.WebGLRenderer({
         antialias: false,
         alpha: true,
@@ -70,12 +70,12 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
       renderer.setClearColor(0x000000, 0);
       renderer.domElement.style.width = "100%";
       renderer.domElement.style.height = "100%";
+      renderer.domElement.style.display = "block";
       el.appendChild(renderer.domElement);
 
       const positions = new Float32Array(particleCount * 3);
       const basePositions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
-      // Darker / richer on light so particles don't wash out
       const colorCyan = new THREE.Color(isLight ? "#0891b2" : "#00F0FF");
       const colorPurple = new THREE.Color(isLight ? "#7e22ce" : "#B026FF");
       const colorMix = new THREE.Color();
@@ -104,10 +104,10 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
       geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const material = new THREE.PointsMaterial({
-        size: isLight ? 0.032 : 0.022,
+        size: baseSize,
         vertexColors: true,
         transparent: true,
-        opacity: isLight ? 1 : 0.9,
+        opacity: baseOpacity,
         depthWrite: false,
         depthTest: false,
         blending: isLight ? THREE.NormalBlending : THREE.AdditiveBlending,
@@ -121,7 +121,7 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
       const ringMat = new THREE.MeshBasicMaterial({
         color: isLight ? 0x0891b2 : 0x00f0ff,
         transparent: true,
-        opacity: isLight ? 0.35 : 0.12,
+        opacity: isLight ? 0.4 : 0.14,
         side: THREE.DoubleSide,
         depthWrite: false,
         depthTest: false,
@@ -156,7 +156,7 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
           visible = entry.isIntersecting;
           if (visible && pageVisible && !raf) animate();
         },
-        { threshold: 0.05 }
+        { threshold: 0 }
       );
       io.observe(el);
 
@@ -202,8 +202,8 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
             posAttr.array[i * 3 + 2] = basePositions[i * 3 + 2] * expand;
           }
           posAttr.needsUpdate = true;
-          material.size = 0.022 + burst * 0.02;
-          material.opacity = 0.9 + burst * 0.1;
+          material.size = baseSize + burst * 0.02;
+          material.opacity = Math.min(1, baseOpacity + burst * 0.1);
           burst *= 0.88;
         } else if (burst !== 0) {
           burst = 0;
@@ -213,8 +213,8 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
             posAttr.array[i * 3 + 2] = basePositions[i * 3 + 2];
           }
           posAttr.needsUpdate = true;
-          material.size = 0.022;
-          material.opacity = 0.9;
+          material.size = baseSize;
+          material.opacity = baseOpacity;
         }
 
         points.rotation.y = t * 0.08 + targetRot.y;
@@ -245,37 +245,13 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
       };
     };
 
-    // Defer WebGL well after first paint — protects LCP / INP on first visit
-    const mem = (navigator as Navigator & { deviceMemory?: number })
-      .deviceMemory;
-    const isLowEnd =
-      window.matchMedia("(max-width: 768px)").matches ||
-      (typeof mem === "number" && mem <= 4);
-    const deferMs = isLowEnd ? 2200 : 1400;
-
-    const ric = (
-      window as Window & {
-        requestIdleCallback?: (
-          cb: () => void,
-          opts?: { timeout: number }
-        ) => number;
-      }
-    ).requestIdleCallback;
-    let idleId = 0;
-    let timeoutId = 0;
-
-    if (typeof ric === "function") {
-      idleId = ric(() => start(), { timeout: deferMs + 800 });
-    } else {
-      timeoutId = window.setTimeout(start, deferMs);
-    }
+    // Short defer so first paint is free, but sphere appears quickly
+    startId = window.setTimeout(start, 200);
 
     return () => {
       cancelled = true;
-      if (idleId && typeof window.cancelIdleCallback === "function") {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId) window.clearTimeout(timeoutId);
+      window.clearTimeout(retryId);
+      window.clearTimeout(startId);
       cleanup?.();
     };
   }, [isLight]);
@@ -285,7 +261,7 @@ function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
       ref={containerRef}
       className={className}
       aria-hidden="true"
-      style={{ pointerEvents: "none", contain: "strict" }}
+      style={{ pointerEvents: "none" }}
     />
   );
 }

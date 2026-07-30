@@ -137,15 +137,7 @@ html[data-theme="light"] .glass {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-fade-up,
-  .hero-fade-up-delay-1,
-  .hero-fade-up-delay-2,
-  .hero-fade-up-delay-3 {
-    animation: none !important;
-    opacity: 1;
-    transform: none;
-  }
-
+  /* Product choice: keep hero entrance; ignore OS reduced-motion */
   html:focus-within {
     scroll-behavior: auto;
   }

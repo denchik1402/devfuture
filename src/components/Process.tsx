@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useRef } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Search, PenTool, Code2, Headphones } from "lucide-react";
@@ -39,15 +39,6 @@ const STEPS = [
 
 function Process() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduceMotion(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -80,16 +71,11 @@ function Process() {
         </Reveal>
 
         <div ref={containerRef} className="relative mt-12 md:mt-14">
-          {/* Vertical timeline line (desktop) — scaleY is GPU-composited */}
           <div className="absolute left-6 top-0 bottom-0 w-px bg-white/10 md:left-1/2 md:-translate-x-px hidden sm:block">
-            {reduceMotion ? (
-              <div className="h-full w-full origin-top bg-neon-gradient opacity-60" />
-            ) : (
-              <motion.div
-                style={{ scaleY: lineScale }}
-                className="h-full w-full origin-top bg-neon-gradient will-change-transform"
-              />
-            )}
+            <motion.div
+              style={{ scaleY: lineScale }}
+              className="h-full w-full origin-top bg-neon-gradient will-change-transform"
+            />
           </div>
 
           <div className="space-y-12 md:space-y-0">

@@ -24,21 +24,12 @@ function triggerBurst() {
 
 function Hero() {
   const { theme } = useTheme();
+  /** Desktop/tablet only — ignore prefers-reduced-motion / Save-Data by product choice */
   const [enableSphere, setEnableSphere] = useState(false);
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const mobile = window.matchMedia("(max-width: 768px)").matches;
-    const conn = (
-      navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }
-    ).connection;
-    const slow =
-      conn?.saveData ||
-      conn?.effectiveType === "2g" ||
-      conn?.effectiveType === "slow-2g";
-    setEnableSphere(!reduce && !mobile && !slow);
+    setEnableSphere(!mobile);
   }, []);
 
   const vignette =
@@ -56,7 +47,7 @@ function Hero() {
         <ParticleSphere
           key={theme}
           theme={theme}
-          className="absolute inset-0 z-[1] [contain:strict]"
+          className="absolute inset-0 z-[1]"
         />
       ) : (
         <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.1),transparent_55%)]" />
