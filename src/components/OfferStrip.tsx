@@ -11,7 +11,7 @@ function OfferStrip() {
     <section
       id="offer"
       aria-label="Быстрый старт"
-      className="relative border-y border-white/5 bg-gradient-to-r from-cyan-neon/10 via-void to-purple-neon/10"
+      className="relative border-y border-white/5 bg-void bg-gradient-to-r from-cyan-neon/10 via-transparent to-purple-neon/10"
     >
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-6 py-5 sm:flex-row sm:items-center">
         <div className="flex items-start gap-3 sm:items-center">

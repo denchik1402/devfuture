@@ -121,7 +121,7 @@ function Cases() {
                 {FEATURED_CASE.roles.map((role) => (
                   <li
                     key={role.name}
-                    className="rounded-xl border border-white/10 bg-void/40 px-4 py-3"
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3"
                   >
                     <p className="font-display text-sm font-semibold text-white">
                       {role.name}
