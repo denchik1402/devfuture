@@ -1,0 +1,2 @@
+/** Inline before paint — avoids flash of wrong theme */
+export const themeInitScript = `(function(){try{var k='df-theme';var t=localStorage.getItem(k);if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;

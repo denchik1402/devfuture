@@ -4,9 +4,9 @@ import { memo, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { siteConfig } from "@/lib/site";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
+import ThemeToggle from "./ThemeToggle";
 
 const NAV = [
   { label: "Услуги", href: "/uslugi" },
@@ -81,6 +81,7 @@ function Navbar() {
               {item.label}
             </Link>
           ))}
+          <ThemeToggle />
           <a
             href={telegramBotStartLink("order")}
             target="_blank"
@@ -92,17 +93,20 @@ function Navbar() {
           </a>
         </nav>
 
-        <button
-          type="button"
-          className="md:hidden text-zinc-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
-          aria-label={open ? "Закрыть меню" : "Открыть меню"}
-          aria-expanded={open}
-          aria-controls={menuId}
-          aria-haspopup="dialog"
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="text-zinc-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
+            aria-label={open ? "Закрыть меню" : "Открыть меню"}
+            aria-expanded={open}
+            aria-controls={menuId}
+            aria-haspopup="dialog"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>

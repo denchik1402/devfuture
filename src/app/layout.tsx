@@ -6,6 +6,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { YandexMetrika } from "@/components/YandexMetrika";
 import { AttributionCapture } from "@/components/AttributionCapture";
 import { MotionProvider } from "@/components/MotionProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { themeInitScript } from "@/lib/theme-script";
 import "./globals.css";
 
 const inter = Inter({
@@ -33,18 +35,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={`${inter.variable} ${manrope.variable}`}>
+    <html lang="ru" className={`${inter.variable} ${manrope.variable}`} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <JsonLd
           data={[buildOrganizationSchema(), buildWebsiteSchema()]}
         />
       </head>
       <body className="font-sans antialiased bg-void text-zinc-100">
-        <MotionProvider>
-          <AttributionCapture />
-          <YandexMetrika />
-          {children}
-        </MotionProvider>
+        <ThemeProvider>
+          <MotionProvider>
+            <AttributionCapture />
+            <YandexMetrika />
+            {children}
+          </MotionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
