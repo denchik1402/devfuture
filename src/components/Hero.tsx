@@ -69,8 +69,8 @@ function Hero() {
 
         <p className="hero-fade-up hero-fade-up-delay-2 mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg">
           Сайты, веб-приложения, Telegram-боты, автоматизация и AI — под ключ.
-          Простой бот или MVP можем показать уже в день обращения: ценим ваше
-          время.
+          Ценим ваше время: простой бот или MVP можем показать уже в день
+          обращения.
         </p>
 
         <div className="hero-fade-up hero-fade-up-delay-3 mt-10 flex flex-wrap items-center justify-center gap-4">
