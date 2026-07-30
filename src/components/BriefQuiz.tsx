@@ -27,14 +27,15 @@ function BriefQuiz() {
     useState<(typeof TIMELINES)[number]["id"]>("asap");
   const [budget, setBudget] = useState<(typeof BUDGETS)[number]["id"]>("15-40");
 
-  const href = useMemo(() => {
-    const typeLabel =
-      BRIEF_TYPES.find((t) => t.value === type)?.label ?? type;
-    const timeLabel =
-      TIMELINES.find((t) => t.id === timeline)?.label ?? timeline;
-    const budgetLabel =
-      BUDGETS.find((b) => b.id === budget)?.label ?? budget;
-    const text = [
+  const typeLabel =
+    BRIEF_TYPES.find((t) => t.value === type)?.label ?? type;
+  const timeLabel =
+    TIMELINES.find((t) => t.id === timeline)?.label ?? timeline;
+  const budgetLabel =
+    BUDGETS.find((b) => b.id === budget)?.label ?? budget;
+
+  const briefText = useMemo(() => {
+    return [
       "Бриф за 30 секунд (с сайта DevFuture)",
       `Тип: ${typeLabel}`,
       `Срок: ${timeLabel}`,
@@ -42,8 +43,38 @@ function BriefQuiz() {
       "",
       "Задача:",
     ].join("\n");
-    return telegramBriefLink(text);
-  }, [type, timeline, budget]);
+  }, [typeLabel, timeLabel, budgetLabel]);
+
+  const telegramHref = useMemo(
+    () => telegramBriefLink(briefText),
+    [briefText]
+  );
+
+  const goToForm = () => {
+    reachGoal("quiz_complete", { type, timeline, budget, channel: "form" });
+    try {
+      sessionStorage.setItem(
+        "df_quiz_prefill",
+        JSON.stringify({
+          type,
+          message: [
+            `Срок: ${timeLabel}`,
+            `Бюджет: ${budgetLabel}`,
+            "",
+            "Задача:",
+          ].join("\n"),
+          source: "homepage_quiz",
+        })
+      );
+    } catch {
+      // ignore
+    }
+    const el = document.getElementById("contact");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.dispatchEvent(new Event("df:quiz-prefill"));
+    }
+  };
 
   return (
     <section id="quiz" className="relative py-24 md:py-32">
@@ -56,8 +87,8 @@ function BriefQuiz() {
             Соберите задачу за 30 секунд
           </h2>
           <p className="mt-4 max-w-2xl text-zinc-400">
-            Три выбора — и готовое сообщение в Telegram. Можно дописать детали
-            уже в чате.
+            Три выбора — префилл формы на сайте или готовое сообщение в
+            Telegram.
           </p>
         </Reveal>
 
@@ -87,12 +118,20 @@ function BriefQuiz() {
               onChange={(v) => setBudget(v as typeof budget)}
             />
 
-            <div className="mt-10">
+            <div className="mt-10 flex flex-wrap gap-3">
+              <NeonButton href="#contact" pulse onClick={goToForm}>
+                Продолжить в форме
+              </NeonButton>
               <NeonButton
-                href={href}
-                pulse
+                href={telegramHref}
+                variant="ghost"
                 onClick={() =>
-                  reachGoal("quiz_complete", { type, timeline, budget })
+                  reachGoal("quiz_complete", {
+                    type,
+                    timeline,
+                    budget,
+                    channel: "telegram",
+                  })
                 }
               >
                 Открыть в Telegram

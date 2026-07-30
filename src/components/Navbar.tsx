@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -18,6 +18,8 @@ const NAV = [
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const menuId = useId();
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let ticking = false;
@@ -33,6 +35,24 @@ function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    closeBtnRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   return (
     <header
@@ -74,6 +94,8 @@ function Navbar() {
           className="md:hidden text-zinc-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
           aria-label={open ? "Закрыть меню" : "Открыть меню"}
           aria-expanded={open}
+          aria-controls={menuId}
+          aria-haspopup="dialog"
           onClick={() => setOpen((v) => !v)}
         >
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -82,14 +104,28 @@ function Navbar() {
 
       <AnimatePresence>
         {open && (
-          <motion.nav
+          <motion.div
+            id={menuId}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Мобильное меню"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="border-b border-white/5 bg-void/95 md:hidden"
-            aria-label="Мобильная"
           >
-            <div className="flex flex-col gap-1 px-6 py-4">
+            <div className="flex items-center justify-end px-4 pt-2">
+              <button
+                ref={closeBtnRef}
+                type="button"
+                className="rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
+                aria-label="Закрыть меню"
+                onClick={() => setOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-1 px-6 pb-4" aria-label="Мобильная">
               {NAV.map((item) => (
                 <Link
                   key={item.href}
@@ -104,7 +140,10 @@ function Navbar() {
                 href={siteConfig.telegramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  reachGoal("click_telegram", { place: "nav_mobile" });
+                }}
                 className="mt-2 rounded-full bg-neon-gradient px-4 py-3 text-center text-sm font-semibold text-void"
               >
                 Написать в Telegram
@@ -116,8 +155,8 @@ function Navbar() {
               >
                 Оставить бриф
               </Link>
-            </div>
-          </motion.nav>
+            </nav>
+          </motion.div>
         )}
       </AnimatePresence>
     </header>

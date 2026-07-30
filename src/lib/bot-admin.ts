@@ -117,6 +117,17 @@ export function leadsManageKeyboard(leads: BotLead[]) {
   return { inline_keyboard: rows };
 }
 
+export function leadDeleteConfirmKeyboard(id: string) {
+  return {
+    inline_keyboard: [
+      [
+        { text: "✅ Да, удалить", callback_data: `ldc:${id}` },
+        { text: "❌ Отмена", callback_data: "admin:leads" },
+      ],
+    ],
+  };
+}
+
 export function leadNotifyMarkup(lead: BotLead) {
   const rows: { text: string; callback_data?: string; url?: string }[][] = [
     [

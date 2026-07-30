@@ -2,7 +2,7 @@
 
 import { MotionConfig } from "framer-motion";
 
-/** Force Framer Motion animations on even when OS has reduced-motion enabled. */
+/** Respect OS/browser reduced-motion preference for Framer Motion. */
 export function MotionProvider({ children }: { children: React.ReactNode }) {
-  return <MotionConfig reducedMotion="never">{children}</MotionConfig>;
+  return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
 }

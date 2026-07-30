@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import { rootMetadata } from "@/lib/metadata";
 import { buildOrganizationSchema, buildWebsiteSchema } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
@@ -15,9 +15,10 @@ const inter = Inter({
   preload: true,
 });
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin", "latin-ext"],
-  weight: ["500", "600", "700"],
+/** Display font with Cyrillic — Space Grotesk had Latin-only glyphs */
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "600", "700", "800"],
   variable: "--font-space-grotesk",
   display: "swap",
   preload: true,
@@ -31,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="ru" className={`${inter.variable} ${manrope.variable}`}>
       <head>
         <JsonLd
           data={[buildOrganizationSchema(), buildWebsiteSchema()]}

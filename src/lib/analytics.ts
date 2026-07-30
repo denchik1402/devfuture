@@ -15,7 +15,8 @@ export type MetrikaGoal =
   | "open_demo"
   | "click_package"
   | "scroll_75"
-  | "quiz_complete";
+  | "quiz_complete"
+  | "open_contact";
 
 export function getMetrikaId(): number | null {
   const raw = process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID;

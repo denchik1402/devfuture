@@ -119,10 +119,20 @@ export const STATUS_LABEL: Record<LeadStatus, string> = {
 
 export function leadStats() {
   const leads = load();
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-  const todayIso = startOfDay.toISOString();
-  const today = leads.filter((l) => l.at >= todayIso).length;
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Moscow",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const todayMsk = formatter.format(new Date()); // YYYY-MM-DD
+  const today = leads.filter((l) => {
+    try {
+      return formatter.format(new Date(l.at)) === todayMsk;
+    } catch {
+      return false;
+    }
+  }).length;
   return {
     total: leads.length,
     today,

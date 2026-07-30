@@ -12,14 +12,11 @@ const sectionFallback = (minHeight: string) => (
 );
 
 /** Below-the-fold: code-split to shrink first JS parse/hydrate */
-const Stats = dynamic(() => import("@/components/Stats"), {
-  loading: () => sectionFallback("min-h-[18rem]"),
-});
 const ServicesIntro = dynamic(() => import("@/components/ServicesIntro"), {
   loading: () => sectionFallback("min-h-[22rem]"),
 });
-const Skills = dynamic(() => import("@/components/Skills"), {
-  loading: () => sectionFallback("min-h-[22rem]"),
+const SolutionsStrip = dynamic(() => import("@/components/SolutionsStrip"), {
+  loading: () => sectionFallback("min-h-[14rem]"),
 });
 const Packages = dynamic(() => import("@/components/Packages"), {
   loading: () => sectionFallback("min-h-[24rem]"),
@@ -60,9 +57,8 @@ export default function Home() {
       <Navbar />
       <Hero />
       <OfferStrip />
-      <Stats />
       <ServicesIntro />
-      <Skills />
+      <SolutionsStrip />
       <Packages />
       <Process />
       <BotDemo />

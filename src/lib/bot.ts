@@ -3,8 +3,8 @@ import {
   adminWelcomeText,
   formatAdminStats,
   formatRecentLeads,
-  getAdminIds,
   isAdmin,
+  leadDeleteConfirmKeyboard,
   leadNotifyMarkup,
   leadsManageKeyboard,
   parseLeadStatusCallback,
@@ -22,7 +22,7 @@ import {
   serviceBotKeyboard,
   serviceBotText,
 } from "@/lib/bot-content";
-import { pushLeadStatusToCrm, pushLeadToCrm } from "@/lib/bot-crm";
+import { pushLeadStatusToCrm } from "@/lib/bot-crm";
 import {
   clearAllDrafts,
   deleteDraft,
@@ -31,13 +31,13 @@ import {
   type LeadDraft,
 } from "@/lib/bot-drafts";
 import {
-  addLead,
   deleteLead,
   getLead,
   listLeads,
   STATUS_LABEL,
   updateLeadStatus,
 } from "@/lib/bot-leads";
+import { ingestLeadAndNotify, notifyAdmins } from "@/lib/bot-notify";
 import {
   clearSession,
   getSession,
@@ -50,7 +50,6 @@ import {
   answerCallbackQuery,
   editMessageText,
   escapeHtml,
-  getOwnerChatId,
   sendMessage,
 } from "@/lib/telegram";
 
@@ -389,21 +388,9 @@ async function deliverQuestion(chatId: number, question: string, from?: TgUser) 
     escapeHtml(question.slice(0, 3500)),
   ].join("\n");
 
-  const markup = questionNotifyMarkup(chatId);
-  const admins = Array.from(getAdminIds());
-  const owner = getOwnerChatId();
-  const targets = new Set<string>();
-  if (owner) targets.add(owner);
-  for (const id of admins) targets.add(String(id));
-
-  if (!targets.size) {
-    console.error("[bot] no admin to receive question");
-    return;
-  }
-
-  for (const target of Array.from(targets)) {
-    await sendMessage(target, notify, { reply_markup: markup });
-  }
+  await notifyAdmins(notify, {
+    reply_markup: questionNotifyMarkup(chatId),
+  });
 }
 
 async function handleStart(
@@ -516,7 +503,7 @@ async function handleDraftStep(
     const source = draft.source;
     deleteDraft(chatId);
 
-    const lead = addLead({
+    const lead = await ingestLeadAndNotify({
       chatId,
       name,
       contact,
@@ -524,8 +511,8 @@ async function handleDraftStep(
       fromId: from?.id,
       username: from?.username,
       source,
+      title: "🆕 <b>Заявка из Telegram-бота</b>",
     });
-    void pushLeadToCrm(lead);
 
     await sendMessage(
       chatId,
@@ -533,39 +520,11 @@ async function handleDraftStep(
         "✅ <b>Заявка принята!</b>",
         "",
         "Мы получили её и скоро ответим.",
-        "Можно также написать менеджеру напрямую.",
+        "Можно также задать вопрос через меню бота.",
       ].join("\n"),
       { reply_markup: mainKeyboard(isAdmin(from?.id)) }
     );
-
-    const owner = getOwnerChatId();
-    if (owner) {
-      const when = new Date().toLocaleString("ru-RU", {
-        timeZone: "Europe/Moscow",
-      });
-      const notify = [
-        "🆕 <b>Заявка из Telegram-бота</b>",
-        `🕐 ${escapeHtml(when)} (МСК)`,
-        source ? `🏷 Источник: <code>${escapeHtml(source)}</code>` : "",
-        "",
-        `👤 <b>Имя:</b> ${escapeHtml(name)}`,
-        `📱 <b>Контакт:</b> ${escapeHtml(contact)}`,
-        from?.username
-          ? `🔗 TG: @${escapeHtml(from.username)} (id: ${from.id})`
-          : `🔗 TG id: ${from?.id ?? chatId}`,
-        "",
-        "<b>Задача:</b>",
-        escapeHtml(task),
-        "",
-        `ID: <code>${escapeHtml(lead.id)}</code>`,
-      ]
-        .filter(Boolean)
-        .join("\n");
-
-      await sendMessage(owner, notify, {
-        reply_markup: leadNotifyMarkup(lead),
-      });
-    }
+    void lead;
   }
 }
 
@@ -573,9 +532,10 @@ async function runBroadcast(adminChatId: number, text: string) {
   const ids = listUserChatIds().filter((id) => id !== adminChatId);
   let ok = 0;
   let fail = 0;
+  const safe = escapeHtml(text);
   await sendMessage(adminChatId, `📣 Рассылка началась (${ids.length})…`);
   for (const id of ids) {
-    const res = await sendMessage(id, text);
+    const res = await sendMessage(id, safe);
     if (res.ok) ok += 1;
     else fail += 1;
     await new Promise((r) => setTimeout(r, 45));
@@ -701,7 +661,10 @@ async function handleAdminCallback(
     }
     const body = session.text;
     clearSession(userId);
-    await runBroadcast(chatId, body);
+    // Don't block webhook — Telegram may time out on long sends
+    void runBroadcast(chatId, body).catch((err) =>
+      console.error("[bot] broadcast failed", err)
+    );
   }
 }
 
@@ -738,12 +701,12 @@ async function handleCallback(cb: TgCallback) {
     return;
   }
 
-  if (data.startsWith("ld:")) {
+  if (data.startsWith("ldc:")) {
     if (!isAdmin(userId)) {
       await sendMessage(chatId, "Недостаточно прав.");
       return;
     }
-    const id = data.slice(3);
+    const id = data.slice(4);
     const removed = deleteLead(id);
     await sendMessage(
       chatId,
@@ -751,6 +714,30 @@ async function handleCallback(cb: TgCallback) {
         ? `🗑 Заявка удалена: <b>${escapeHtml(removed.name)}</b> (<code>${escapeHtml(id)}</code>)`
         : "Заявка не найдена или уже удалена.",
       { reply_markup: adminKeyboard() }
+    );
+    return;
+  }
+
+  if (data.startsWith("ld:")) {
+    if (!isAdmin(userId)) {
+      await sendMessage(chatId, "Недостаточно прав.");
+      return;
+    }
+    const id = data.slice(3);
+    const lead = getLead(id);
+    if (!lead) {
+      await sendMessage(chatId, "Заявка не найдена.", {
+        reply_markup: adminKeyboard(),
+      });
+      return;
+    }
+    await sendMessage(
+      chatId,
+      [
+        "<b>Удалить заявку?</b>",
+        `${escapeHtml(lead.name)} · <code>${escapeHtml(lead.id)}</code>`,
+      ].join("\n"),
+      { reply_markup: leadDeleteConfirmKeyboard(id) }
     );
     return;
   }
@@ -927,12 +914,10 @@ async function handleCallback(cb: TgCallback) {
     const source = data.startsWith("order:") ? data.slice(6) : "menu_order";
     let preface: string | undefined;
     if (source.startsWith("pkg_")) {
-      const pkgBody = packageText(source.slice(4));
-      if (pkgBody) preface = `Заявка по пакету:\n${pkgBody}`;
+      preface = `Заявка по пакету <b>${escapeHtml(source.slice(4))}</b>.`;
     }
     if (source.startsWith("svc_")) {
-      const svcBody = serviceBotText(source.slice(4));
-      if (svcBody) preface = `Заявка по услуге:\n${svcBody}`;
+      preface = `Заявка по услуге <b>${escapeHtml(source.slice(4))}</b>.`;
     }
     await startOrder(chatId, source, preface);
   }

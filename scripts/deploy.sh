@@ -11,6 +11,10 @@ echo "==> git pull"
 git fetch origin
 git reset --hard origin/main
 
+echo "==> ensure .data survives deploys (bot leads/users)"
+mkdir -p "$APP_DIR/.data"
+chmod 700 "$APP_DIR/.data" || true
+
 echo "==> npm ci"
 if ! npm ci; then
   echo "==> npm ci failed — clean install"

@@ -4,12 +4,9 @@ import {
   isValidContactBody,
   type ContactBody,
 } from "@/lib/contact-validation";
+import { ingestLeadAndNotify } from "@/lib/bot-notify";
 import { clientIp, pruneRateLimitBuckets, rateLimit } from "@/lib/rate-limit";
-import {
-  escapeHtml,
-  getOwnerChatId,
-  sendMessage,
-} from "@/lib/telegram";
+import { escapeHtml, getOwnerChatId, sendMessage } from "@/lib/telegram";
 
 export const runtime = "nodejs";
 
@@ -22,7 +19,6 @@ async function sendFormspree(payload: {
   type: string;
   message: string;
 }) {
-  // Prefer server-only FORMSPREE_ID; NEXT_PUBLIC_ is accepted for legacy .env only.
   const id = process.env.FORMSPREE_ID?.trim();
   if (!id) return false;
 
@@ -67,7 +63,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Некорректный запрос" }, { status: 400 });
   }
 
-  // Honeypot — pretend success so bots leave quietly
   if (body.company?.trim()) {
     return NextResponse.json({ ok: true, delivered: true, channel: "noop" });
   }
@@ -86,15 +81,37 @@ export async function POST(request: Request) {
   const contact = body.contact.trim();
   const type = body.type.trim();
   const message = body.message.trim();
-  const source = body.source?.trim() || "";
+  const source = body.source?.trim() || "contact_form";
+  const tgUser = extractTelegramUsername(contact);
+  const task = [`Тип: ${type}`, "", message].join("\n");
+
+  try {
+    await ingestLeadAndNotify({
+      chatId: 0,
+      name,
+      contact,
+      task,
+      username: tgUser || undefined,
+      source,
+      title: "🆕 <b>Новая заявка DevFuture</b>",
+    });
+    return NextResponse.json({
+      ok: true,
+      delivered: true,
+      channel: "telegram",
+    });
+  } catch (err) {
+    console.error("[contact] ingest failed", err);
+  }
+
+  // Fallback: plain notify without lead store
   const when = new Date().toLocaleString("ru-RU", {
     timeZone: "Europe/Moscow",
   });
-
   const text = [
     "🆕 <b>Новая заявка DevFuture</b>",
     `🕐 ${escapeHtml(when)} (МСК)`,
-    source ? `🏷 Источник: <code>${escapeHtml(source)}</code>` : "",
+    `🏷 Источник: <code>${escapeHtml(source)}</code>`,
     "",
     `👤 <b>Имя:</b> ${escapeHtml(name)}`,
     `📱 <b>Контакт:</b> ${escapeHtml(contact)}`,
@@ -102,11 +119,8 @@ export async function POST(request: Request) {
     "",
     "<b>Задача:</b>",
     escapeHtml(message),
-  ]
-    .filter(Boolean)
-    .join("\n");
+  ].join("\n");
 
-  const tgUser = extractTelegramUsername(contact);
   const replyMarkup = tgUser
     ? {
         inline_keyboard: [
@@ -153,7 +167,6 @@ export async function POST(request: Request) {
     });
   }
 
-  // Soft delivery failure → hard HTTP error so UI does not show fake success
   return NextResponse.json(
     {
       ok: false,

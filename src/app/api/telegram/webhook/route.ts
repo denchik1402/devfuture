@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { handleTelegramUpdate, type TelegramUpdate } from "@/lib/bot";
-import { clientIp, pruneRateLimitBuckets, rateLimit } from "@/lib/rate-limit";
+import { pruneRateLimitBuckets, rateLimit } from "@/lib/rate-limit";
 import { getBotToken } from "@/lib/telegram";
 
 export const runtime = "nodejs";
@@ -42,8 +42,8 @@ export async function POST(request: Request) {
   }
 
   pruneRateLimitBuckets();
-  const ip = clientIp(request);
-  const limited = rateLimit(`tg-webhook:${ip}`, 120, 60_000);
+  // Global bucket: with webhook relay all traffic shares one proxy IP
+  const limited = rateLimit(`tg-webhook:global`, 240, 60_000);
   if (!limited.ok) {
     return NextResponse.json(
       { ok: false },

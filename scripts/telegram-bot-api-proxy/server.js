@@ -27,6 +27,9 @@ const ALLOWED_IPS = (process.env.ALLOWED_IPS || "")
 const WEBHOOK_RELAY_URL = (process.env.WEBHOOK_RELAY_URL || "").trim();
 const UPSTREAM = "api.telegram.org";
 
+/** @type {Map<string, { count: number; resetAt: number }> | null} */
+let relayBuckets = null;
+
 if (!PROXY_SECRET || PROXY_SECRET.length < 16) {
   console.error(
     "Set PROXY_SECRET to a long random string (openssl rand -hex 32)"
@@ -109,6 +112,21 @@ async function relayWebhook(req, res) {
   }
 
   const ip = normalizeIp(clientIp(req));
+  // Simple in-process rate limit per IP (Telegram + abuse)
+  if (!relayBuckets) relayBuckets = new Map();
+  const now = Date.now();
+  let bucket = relayBuckets.get(ip);
+  if (!bucket || bucket.resetAt <= now) {
+    bucket = { count: 0, resetAt: now + 60_000 };
+    relayBuckets.set(ip, bucket);
+  }
+  bucket.count += 1;
+  if (bucket.count > 180) {
+    res.writeHead(429, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ ok: false, description: "Too many requests" }));
+    return;
+  }
+
   const body = await readBody(req);
   const secretHeader = req.headers["x-telegram-bot-api-secret-token"];
   console.log(

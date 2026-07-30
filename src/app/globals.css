@@ -92,6 +92,21 @@ body {
   animation-delay: 0.36s;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade-up,
+  .hero-fade-up-delay-1,
+  .hero-fade-up-delay-2,
+  .hero-fade-up-delay-3 {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}
+
 /* Horizontal skills scroll hide scrollbar */
 .skills-track {
   scrollbar-width: none;

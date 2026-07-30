@@ -1,10 +1,10 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import NeonButton from "./NeonButton";
 import TechMarquee from "./TechMarquee";
-import { siteConfig } from "@/lib/site";
+import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 import { SPHERE_BURST_EVENT } from "@/lib/sphere-events";
 
@@ -22,49 +22,76 @@ function triggerBurst() {
 }
 
 function Hero() {
+  const [enableSphere, setEnableSphere] = useState(false);
+
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobile = window.matchMedia("(max-width: 768px)").matches;
+    const conn = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
+    const slow =
+      conn?.saveData ||
+      conn?.effectiveType === "2g" ||
+      conn?.effectiveType === "slow-2g";
+    setEnableSphere(!reduce && !mobile && !slow);
+  }, []);
+
   return (
     <section className="relative flex min-h-screen flex-col overflow-hidden">
       <div className="absolute inset-0 bg-void" />
       <div className="absolute inset-0 dot-grid opacity-60" />
       <div className="absolute inset-0 bg-neon-radial" />
 
-      <ParticleSphere className="absolute inset-0 z-[1] [contain:strict]" />
+      {enableSphere ? (
+        <ParticleSphere className="absolute inset-0 z-[1] [contain:strict]" />
+      ) : (
+        <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.1),transparent_55%)]" />
+      )}
 
       <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,transparent_30%,#0A0A0A_85%)]" />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-16 pt-24 text-center">
-        <p className="hero-fade-up mb-6 font-display text-xs uppercase tracking-[0.35em] text-cyan-neon/80">
-          DevFuture · цифровые продукты
+        <p className="hero-fade-up mb-4 font-display text-xs uppercase tracking-[0.35em] text-cyan-neon/80">
+          Цифровые продукты под ключ
         </p>
 
-        <h1 className="hero-fade-up hero-fade-up-delay-1 max-w-5xl font-display text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-          МЫ РЕШАЕМ ЗАДАЧИ,
-          <br />
-          <span className="text-neon">КОТОРЫЕ НЕ МОГУТ ДРУГИЕ</span>
+        <p className="hero-fade-up font-display text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl">
+          Dev<span className="text-neon">Future</span>
+        </p>
+
+        <h1 className="hero-fade-up hero-fade-up-delay-1 mt-6 max-w-4xl font-display text-2xl font-semibold leading-snug text-zinc-100 sm:text-3xl md:text-4xl">
+          Сайты, боты и автоматизация —{" "}
+          <span className="text-neon">с демо часто в день обращения</span>
         </h1>
 
-        <p className="hero-fade-up hero-fade-up-delay-2 mt-6 max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-          Сайты, веб-приложения, десктопные программы, Telegram-боты,
-          автоматизация и AI — под ключ. Простой бот или MVP можем показать уже
-          в день обращения
+        <p className="hero-fade-up hero-fade-up-delay-2 mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg">
+          Разбираем задачу, фиксируем смету и собираем рабочий продукт без
+          лишней сложности.
         </p>
 
         <div className="hero-fade-up hero-fade-up-delay-3 mt-10 flex flex-wrap items-center justify-center gap-4">
           <span
-            onMouseEnter={triggerBurst}
-            onFocus={triggerBurst}
+            onMouseEnter={enableSphere ? triggerBurst : undefined}
+            onFocus={enableSphere ? triggerBurst : undefined}
             className="inline-flex"
           >
             <NeonButton
-              href={siteConfig.telegramUrl}
+              href="#contact"
               pulse
-              onClick={() => reachGoal("click_telegram", { place: "hero" })}
+              onClick={() => reachGoal("open_contact", { place: "hero" })}
             >
-              Обсудить проект
+              Оставить бриф
             </NeonButton>
           </span>
-          <NeonButton href="#packages" variant="ghost">
-            Пакеты и сроки
+          <NeonButton
+            href={telegramBotStartLink("order")}
+            variant="ghost"
+            onClick={() => reachGoal("click_telegram", { place: "hero_bot" })}
+          >
+            Открыть бота
           </NeonButton>
         </div>
       </div>

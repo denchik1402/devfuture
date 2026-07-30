@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, type FormEvent } from "react";
+import { memo, useCallback, useEffect, useState, type FormEvent } from "react";
 import { Send, Loader2, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import Reveal from "./Reveal";
@@ -11,20 +11,96 @@ import { reachGoal } from "@/lib/analytics";
 
 type BriefType = (typeof BRIEF_TYPES)[number]["value"];
 
+function isBriefType(v: string): v is BriefType {
+  return BRIEF_TYPES.some((t) => t.value === v);
+}
+
 function ContactForm() {
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [type, setType] = useState<BriefType>(BRIEF_TYPES[0].value);
   const [message, setMessage] = useState("");
   const [company, setCompany] = useState(""); // honeypot
+  const [source, setSource] = useState("contact_form");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
     "idle"
   );
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    contact?: string;
+    message?: string;
+  }>({});
   const [deliveredToBot, setDeliveredToBot] = useState(false);
+
+  const applyPrefill = useCallback(() => {
+    type Prefill = {
+      type?: string;
+      message?: string;
+      source?: string;
+      name?: string;
+      contact?: string;
+    };
+    let fromStorage: Prefill | null = null;
+
+    try {
+      const raw = sessionStorage.getItem("df_quiz_prefill");
+      if (raw) {
+        fromStorage = JSON.parse(raw) as Prefill;
+        sessionStorage.removeItem("df_quiz_prefill");
+      }
+    } catch {
+      // ignore
+    }
+
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    const qIndex = hash.indexOf("?");
+    const params =
+      qIndex >= 0
+        ? new URLSearchParams(hash.slice(qIndex + 1))
+        : new URLSearchParams(
+            typeof window !== "undefined" ? window.location.search : ""
+          );
+
+    const nextType = params.get("type") || fromStorage?.type;
+    const nextMessage = params.get("message") || fromStorage?.message;
+    const nextSource = params.get("source") || fromStorage?.source;
+    const nextName = params.get("name") || fromStorage?.name;
+    const nextContact = params.get("contact") || fromStorage?.contact;
+
+    if (nextType && isBriefType(nextType)) setType(nextType);
+    if (nextMessage) setMessage(nextMessage);
+    if (nextSource) setSource(nextSource);
+    if (nextName) setName(nextName);
+    if (nextContact) setContact(nextContact);
+  }, []);
+
+  useEffect(() => {
+    applyPrefill();
+    const onQuiz = () => applyPrefill();
+    window.addEventListener("df:quiz-prefill", onQuiz);
+    return () => window.removeEventListener("df:quiz-prefill", onQuiz);
+  }, [applyPrefill]);
+
+  const validate = () => {
+    const next: typeof fieldErrors = {};
+    if (!name.trim()) next.name = "Укажите имя";
+    if (!contact.trim()) next.contact = "Укажите Telegram или телефон";
+    if (message.trim().length < 10) {
+      next.message = "Опишите задачу чуть подробнее (от 10 символов)";
+    }
+    setFieldErrors(next);
+    return Object.keys(next).length === 0;
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!validate()) {
+      setStatus("error");
+      setError("Проверьте поля формы");
+      return;
+    }
+
     setStatus("loading");
     setError("");
     setDeliveredToBot(false);
@@ -32,10 +108,10 @@ function ContactForm() {
     const payload = {
       name: name.trim(),
       contact: contact.trim(),
-      type:
-        BRIEF_TYPES.find((t) => t.value === type)?.label ?? type,
+      type: BRIEF_TYPES.find((t) => t.value === type)?.label ?? type,
       message: message.trim(),
       company,
+      source,
     };
 
     const openTelegramFallback = () => {
@@ -92,6 +168,8 @@ function ContactForm() {
       setContact("");
       setMessage("");
       setCompany("");
+      setSource("contact_form");
+      setFieldErrors({});
       setType(BRIEF_TYPES[0].value);
     } catch {
       setStatus("error");
@@ -178,17 +256,41 @@ function ContactForm() {
                 className="glass relative space-y-4 rounded-2xl p-6 md:p-8"
                 noValidate
               >
+                {source === "homepage_quiz" && (
+                  <p className="rounded-xl border border-cyan-neon/20 bg-cyan-neon/5 px-3 py-2 text-xs text-cyan-neon/90">
+                    Prefill из быстрого брифа — дополните детали и отправьте.
+                  </p>
+                )}
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block text-sm">
                     <span className="mb-1.5 block text-zinc-400">Имя</span>
                     <input
                       required
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (fieldErrors.name) {
+                          setFieldErrors((f) => ({ ...f, name: undefined }));
+                        }
+                      }}
+                      aria-invalid={Boolean(fieldErrors.name)}
+                      aria-describedby={
+                        fieldErrors.name ? "contact-name-error" : undefined
+                      }
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-cyan-neon/50 focus-visible:ring-2 focus-visible:ring-cyan-neon/30"
                       placeholder="Как к вам обращаться"
                       autoComplete="name"
                     />
+                    {fieldErrors.name && (
+                      <p
+                        id="contact-name-error"
+                        className="mt-1 text-xs text-red-400"
+                        role="alert"
+                      >
+                        {fieldErrors.name}
+                      </p>
+                    )}
                   </label>
                   <label className="block text-sm">
                     <span className="mb-1.5 block text-zinc-400">
@@ -197,11 +299,34 @@ function ContactForm() {
                     <input
                       required
                       value={contact}
-                      onChange={(e) => setContact(e.target.value)}
+                      onChange={(e) => {
+                        setContact(e.target.value);
+                        if (fieldErrors.contact) {
+                          setFieldErrors((f) => ({
+                            ...f,
+                            contact: undefined,
+                          }));
+                        }
+                      }}
+                      aria-invalid={Boolean(fieldErrors.contact)}
+                      aria-describedby={
+                        fieldErrors.contact
+                          ? "contact-contact-error"
+                          : undefined
+                      }
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-cyan-neon/50 focus-visible:ring-2 focus-visible:ring-cyan-neon/30"
                       placeholder="@username или +7…"
                       autoComplete="tel"
                     />
+                    {fieldErrors.contact && (
+                      <p
+                        id="contact-contact-error"
+                        className="mt-1 text-xs text-red-400"
+                        role="alert"
+                      >
+                        {fieldErrors.contact}
+                      </p>
+                    )}
                   </label>
                 </div>
 
@@ -236,10 +361,28 @@ function ContactForm() {
                     minLength={10}
                     rows={4}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) => {
+                      setMessage(e.target.value);
+                      if (fieldErrors.message) {
+                        setFieldErrors((f) => ({ ...f, message: undefined }));
+                      }
+                    }}
+                    aria-invalid={Boolean(fieldErrors.message)}
+                    aria-describedby={
+                      fieldErrors.message ? "contact-message-error" : undefined
+                    }
                     className="w-full resize-y rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-cyan-neon/50 focus-visible:ring-2 focus-visible:ring-cyan-neon/30"
                     placeholder="2–3 предложения: цель, кто пользуется, что должно произойти в итоге"
                   />
+                  {fieldErrors.message && (
+                    <p
+                      id="contact-message-error"
+                      className="mt-1 text-xs text-red-400"
+                      role="alert"
+                    >
+                      {fieldErrors.message}
+                    </p>
+                  )}
                 </label>
 
                 {/* Honeypot for bots — hidden from users */}

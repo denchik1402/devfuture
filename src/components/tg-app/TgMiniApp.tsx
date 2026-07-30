@@ -9,7 +9,7 @@ type Tab = "home" | "offer" | "faq" | "lead";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "home", label: "Главная" },
-  { id: "offer", label: "Офер" },
+  { id: "offer", label: "Пакеты" },
   { id: "faq", label: "FAQ" },
   { id: "lead", label: "Заявка" },
 ];
