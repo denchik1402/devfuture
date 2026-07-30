@@ -10,6 +10,7 @@ export type Attribution = {
   utm_term?: string;
   yclid?: string;
   gclid?: string;
+  partner?: string;
   capturedAt?: string;
 };
 
@@ -21,6 +22,7 @@ const KEYS = [
   "utm_term",
   "yclid",
   "gclid",
+  "partner",
 ] as const;
 
 export function readAttributionFromSearch(
@@ -36,6 +38,11 @@ export function readAttributionFromSearch(
       out[key] = v.slice(0, 120);
       hit = true;
     }
+  }
+  const ref = params.get("ref")?.trim();
+  if (ref && !out.partner) {
+    out.partner = ref.slice(0, 120);
+    hit = true;
   }
   if (!hit) return null;
   out.capturedAt = new Date().toISOString();
@@ -72,6 +79,7 @@ export function formatSourceTag(
   if (attr.utm_source) parts.push(`utm:${attr.utm_source}`);
   if (attr.utm_medium) parts.push(attr.utm_medium);
   if (attr.utm_campaign) parts.push(attr.utm_campaign.slice(0, 40));
+  if (attr.partner) parts.push(`partner:${attr.partner.slice(0, 40)}`);
   if (attr.yclid) parts.push("yclid");
   if (attr.gclid) parts.push("gclid");
   return parts.join("|").slice(0, 180);

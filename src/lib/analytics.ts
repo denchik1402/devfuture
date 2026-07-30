@@ -18,7 +18,10 @@ export type MetrikaGoal =
   | "quiz_complete"
   | "open_contact"
   | "lead_handoff"
-  | "open_estimator";
+  | "open_estimator"
+  | "view_resheniya"
+  | "view_case"
+  | "view_blog";
 
 export function getMetrikaId(): number | null {
   const raw = process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID;

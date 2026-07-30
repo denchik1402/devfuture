@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
 import NeonButton from "@/components/NeonButton";
 import LandingDemoCta from "@/components/LandingDemoCta";
+import SeoViewBeacon from "@/components/SeoViewBeacon";
 import { JsonLd } from "@/components/JsonLd";
 import {
   getAllSeoLandingSlugs,
@@ -77,6 +78,7 @@ export default function SeoLandingPage({ params }: Props) {
 
   return (
     <main className="relative min-h-screen bg-void">
+      <SeoViewBeacon goal="view_resheniya" slug={page.slug} />
       <JsonLd data={[serviceSchema, buildFaqSchema(page.faq), crumbs]} />
       <Navbar />
 
@@ -133,7 +135,31 @@ export default function SeoLandingPage({ params }: Props) {
             </ul>
           </section>
 
-          {showDemoCta ? <LandingDemoCta /> : null}
+          {page.notIncluded?.length ? (
+            <section className="glass mt-6 rounded-2xl p-7">
+              <h2 className="font-display text-xl font-semibold text-white">
+                Что обычно не входит в первую версию
+              </h2>
+              <ul className="mt-5 space-y-3">
+                {page.notIncluded.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-2 text-sm text-zinc-400"
+                  >
+                    <span className="mt-1 text-zinc-600">—</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {showDemoCta ? (
+            <LandingDemoCta
+              slug={page.slug}
+              relatedCases={page.relatedCases}
+            />
+          ) : null}
 
           {page.sections.map((section) => (
             <section key={section.heading} className="mt-14 max-w-3xl">

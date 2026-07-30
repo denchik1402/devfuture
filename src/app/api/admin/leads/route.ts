@@ -6,6 +6,7 @@ import {
   leadStats,
   listLeads,
   setLeadAssignee,
+  setLeadRemindAt,
   updateLeadStatus,
   type LeadStatus,
 } from "@/lib/bot-leads";
@@ -62,6 +63,8 @@ export async function PATCH(request: Request) {
     note?: string;
     tag?: string;
     assigneeSelf?: boolean;
+    /** Snooze N days from now */
+    snoozeDays?: number;
   };
   try {
     body = await request.json();
@@ -102,6 +105,20 @@ export async function PATCH(request: Request) {
 
   if (body.assigneeSelf === true) {
     lead = setLeadAssignee(id, auth.userId);
+    if (!lead) {
+      return NextResponse.json({ error: "not found" }, { status: 404 });
+    }
+  }
+
+  if (
+    typeof body.snoozeDays === "number" &&
+    Number.isFinite(body.snoozeDays) &&
+    (body.snoozeDays === 1 || body.snoozeDays === 3)
+  ) {
+    const when = new Date(
+      Date.now() + body.snoozeDays * 24 * 60 * 60 * 1000
+    ).toISOString();
+    lead = setLeadRemindAt(id, when);
     if (!lead) {
       return NextResponse.json({ error: "not found" }, { status: 404 });
     }

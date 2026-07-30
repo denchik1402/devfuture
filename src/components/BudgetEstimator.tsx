@@ -83,7 +83,15 @@ function BudgetEstimator() {
 
   const pkg = PACKAGES.find((p) => p.id === recommendation.id)!;
   const support = PACKAGES.find((p) => p.id === "support");
-  const botHref = telegramBotStartLink(`pkg_${pkg.id}`);
+  const estimatePayload = [
+    "estimate",
+    pkg.id,
+    type,
+    roles,
+    integrations,
+    timeline,
+  ].join("_");
+  const botHref = telegramBotStartLink(estimatePayload);
 
   const timelineNote =
     timeline === "asap"
@@ -165,11 +173,14 @@ function BudgetEstimator() {
                   href={botHref}
                   pulse
                   onClick={() => {
-                    reachGoal("open_estimator", { package: pkg.id });
+                    reachGoal("open_estimator", {
+                      package: pkg.id,
+                      estimate: "1",
+                    });
                     reachGoal("click_package", { package: pkg.id });
                   }}
                 >
-                  Открыть в боте
+                  Открыть в боте с этой оценкой
                 </NeonButton>
                 <NeonButton
                   href="#contact"

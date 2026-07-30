@@ -13,7 +13,8 @@ export type StartPayload =
   | { kind: "demo"; demo: "booking" | "shop" | "qualify" }
   | { kind: "demos" }
   | { kind: "lead"; id: string }
-  | { kind: "support" };
+  | { kind: "support" }
+  | { kind: "estimate"; packageId: string; summary: string };
 
 /** Parse /start payload (BotFather deep-link ?start=...) */
 export function parseStartPayload(text: string): StartPayload {
@@ -39,6 +40,22 @@ export function parseStartPayload(text: string): StartPayload {
     return { kind: "demo", demo: "qualify" };
   }
   if (key === "support" || key === "retainer") return { kind: "support" };
+
+  if (key.startsWith("estimate_")) {
+    const parts = key.slice(9).split("_");
+    const packageId = parts[0] || "bot";
+    const type = parts[1] || "bot";
+    const roles = parts[2] === "yes" ? "роли" : "без ролей";
+    const integrations = parts[3] === "yes" ? "с интеграциями" : "без интеграций";
+    const timeline =
+      parts[4] === "week"
+        ? "1–2 недели"
+        : parts[4] === "month"
+          ? "месяц"
+          : "как можно скорее";
+    const summary = `Оценка с сайта: пакет ${packageId}, тип ${type}, ${roles}, ${integrations}, срок ${timeline}`;
+    return { kind: "estimate", packageId, summary };
+  }
 
   if (key.startsWith("lead_")) {
     const id = raw.slice(5).trim();

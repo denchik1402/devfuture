@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { formatWeeklyDigest, listDueReminders, setLeadRemindAt } from "@/lib/bot-leads";
 import { flushCrmQueue } from "@/lib/bot-crm";
-import { formatSlaReport, maybePingSla } from "@/lib/bot-sla";
+import { formatSlaReport, maybePingSla, maybePingSla24 } from "@/lib/bot-sla";
 import { notifyAdmins } from "@/lib/bot-notify";
 import { escapeHtml, sendMessage } from "@/lib/telegram";
 
@@ -31,6 +31,7 @@ export async function GET(request: Request) {
   const digest = url.searchParams.get("digest") === "1";
 
   await maybePingSla(4);
+  await maybePingSla24();
   await flushCrmQueue();
 
   const due = listDueReminders();
@@ -55,7 +56,9 @@ export async function GET(request: Request) {
 
   if (digest) {
     await notifyAdmins(
-      [formatWeeklyDigest(), "", formatSlaReport(4)].join("\n\n")
+      [formatWeeklyDigest(), "", formatSlaReport(4), "", formatSlaReport(24)].join(
+        "\n\n"
+      )
     );
   }
 

@@ -62,6 +62,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${siteConfig.url}/kak-rabotaem`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${siteConfig.url}/sobrat-scenarij`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
+    {
+      url: `${siteConfig.url}/brief`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.55,
+    },
+    {
       url: `${siteConfig.url}/blog`,
       lastModified,
       changeFrequency: "weekly",

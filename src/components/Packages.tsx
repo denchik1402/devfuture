@@ -29,19 +29,31 @@ function Packages() {
 
         <div className="mt-12 md:mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {PACKAGES.map((pkg, i) => {
-            const botHref = telegramBotStartLink(`pkg_${pkg.id}`);
+            const botHref =
+              pkg.id === "support"
+                ? telegramBotStartLink("support")
+                : telegramBotStartLink(`pkg_${pkg.id}`);
+            const isRetainer = pkg.id === "support";
             return (
               <Reveal key={pkg.id} delay={i * 0.06}>
                 <article
                   className={`glass group relative flex h-full flex-col rounded-2xl p-6 transition duration-300 hover:-translate-y-1 ${
                     pkg.highlight
                       ? "border-cyan-neon/30 shadow-[0_0_0_1px_rgba(0,240,255,0.12)] hover:shadow-[0_0_32px_rgba(0,240,255,0.18)]"
-                      : "hover:border-cyan-neon/25 hover:shadow-[0_0_28px_rgba(0,240,255,0.1)]"
+                      : isRetainer
+                        ? "border-purple-neon/25 hover:border-purple-neon/40"
+                        : "hover:border-cyan-neon/25 hover:shadow-[0_0_28px_rgba(0,240,255,0.1)]"
                   }`}
                 >
-                  {pkg.highlight && (
-                    <span className="absolute -top-3 left-6 rounded-full bg-neon-gradient px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-void">
-                      Хит
+                  {(pkg.highlight || isRetainer) && (
+                    <span
+                      className={`absolute -top-3 left-6 rounded-full px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                        isRetainer
+                          ? "bg-purple-neon/90 text-void"
+                          : "bg-neon-gradient text-void"
+                      }`}
+                    >
+                      {isRetainer ? "Retainer" : "Хит"}
                     </span>
                   )}
                   <p className="text-[11px] uppercase tracking-wider text-zinc-500">

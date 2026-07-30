@@ -158,3 +158,14 @@ INDEXNOW_KEY=ваш_ключ_без_пробелов
 Сгенерировать ключ: `openssl rand -hex 16`. Положите его и в `public/indexnow-key.txt`, и в `INDEXNOW_KEY`. После `git pull` + деплоя файл должен открываться как `https://devfuture.ru/indexnow-key.txt`.
 
 Ручной прогон: `cd /var/www/devfuture && npm run seo:indexnow`. Без `INDEXNOW_KEY` скрипт тихо пропускается.
+
+---
+
+## 6. SEO-чеклист после релиза (ручные шаги)
+
+1. **Яндекс Вебмастер** — добавить/проверить `devfuture.ru`, sitemap `https://devfuture.ru/sitemap.xml`, индексацию `/resheniya/*`, `/keysy/*`, `/blog/*`, `/kak-rabotaem`, `/sobrat-scenarij`.
+2. **Google Search Console** — то же sitemap; склеить www/non-www если нужно.
+3. **Метрика** — создать цели из [METRIKA.md](METRIKA.md), особенно `view_resheniya`, `view_case`, `view_blog`, `open_estimator`.
+4. **Partner UTM** — тест: `https://devfuture.ru/?partner=test` → заявка → в `source` должно быть `partner:test` (алиас `?ref=` тоже работает).
+5. **Демо статуса** — `https://devfuture.ru/status/demo-alpha`.
+6. **Сценарий** — `https://devfuture.ru/sobrat-scenarij`.

@@ -2,9 +2,13 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 
 export type LeadDraft = {
-  step: "name" | "contact" | "task";
+  step: "name" | "contact" | "task" | "niche" | "urgency" | "budget";
   name?: string;
   contact?: string;
+  task?: string;
+  niche?: string;
+  urgency?: string;
+  budget?: string;
   /** Deep-link / package / service source tag */
   source?: string;
 };

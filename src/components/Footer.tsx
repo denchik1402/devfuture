@@ -12,10 +12,12 @@ const LINKS = [
   { label: "Услуги", href: "/uslugi" },
   { label: "Решения", href: "/resheniya" },
   { label: "Кейсы", href: "/keysy" },
+  { label: "Как работаем", href: "/kak-rabotaem" },
+  { label: "Собрать сценарий", href: "/sobrat-scenarij" },
   { label: "Пакеты", href: "/#packages" },
   { label: "Демо", href: "/#demo" },
   { label: "Блог", href: "/blog" },
-  { label: "Бриф", href: "/#quiz" },
+  { label: "Бриф", href: "/brief" },
   { label: "Конфиденциальность", href: "/privacy" },
 ];
 

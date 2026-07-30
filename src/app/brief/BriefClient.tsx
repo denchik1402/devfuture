@@ -9,12 +9,29 @@ import NeonButton from "@/components/NeonButton";
 import { BRIEF_TYPES } from "@/lib/content";
 import { siteConfig, telegramBotStartLink } from "@/lib/site";
 
+function resolveMessage(
+  scenario: string,
+  messageParam: string,
+  from: string
+): string {
+  if (scenario) return scenario;
+  if (messageParam) return messageParam;
+  if (from.startsWith("case_")) {
+    const slug = from.slice("case_".length) || "unknown";
+    return `Черновик из кейса ${slug}: похожий сценарий для клиента`;
+  }
+  return "";
+}
+
 export default function BriefClient() {
   const params = useSearchParams();
   const type = params.get("type") || "bot";
   const timeline = params.get("timeline") || "";
   const budget = params.get("budget") || "";
-  const message = params.get("message") || "";
+  const from = params.get("from") || "";
+  const scenario = params.get("scenario") || "";
+  const messageParam = params.get("message") || "";
+  const message = resolveMessage(scenario, messageParam, from);
   const name = params.get("name") || "";
   const contact = params.get("contact") || "";
 

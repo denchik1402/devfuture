@@ -174,6 +174,11 @@ export function leadNotifyMarkup(lead: BotLead) {
       { text: "🏷 hot", callback_data: `tag:hot:${lead.id}` },
     ],
     [
+      { text: "📄 Привет", callback_data: `tpl:hello:${lead.id}` },
+      { text: "📄 Бриф", callback_data: `tpl:brief:${lead.id}` },
+      { text: "📄 Демо", callback_data: `tpl:demo:${lead.id}` },
+    ],
+    [
       {
         text: "💬 Ответить",
         callback_data: `reply:${lead.chatId}:${lead.id}`,

@@ -6,6 +6,7 @@ import { FAQ_ITEMS, PACKAGES } from "@/lib/content";
 import { SERVICE_PAGES } from "@/lib/services";
 import { formatSourceTag, loadAttribution } from "@/lib/attribution";
 import type { BotLead, LeadStatus } from "@/lib/bot-leads";
+import { REPLY_TEMPLATES } from "@/lib/reply-templates";
 import { useTelegramWebApp } from "./useTelegramWebApp";
 
 type Tab = "home" | "offer" | "demo" | "faq" | "lead" | "admin";
@@ -169,6 +170,7 @@ export default function TgMiniApp() {
       note?: string;
       tag?: string;
       assigneeSelf?: boolean;
+      snoozeDays?: number;
     }
   ) {
     if (!initData) return;
@@ -722,6 +724,20 @@ export default function TgMiniApp() {
                     </p>
                   ) : null}
 
+                  {lead.score != null ? (
+                    <p className="mt-1 text-[11px] text-cyan-neon/70">
+                      score {lead.score}
+                    </p>
+                  ) : null}
+                  {lead.remindAt ? (
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      snooze до{" "}
+                      {new Date(lead.remindAt).toLocaleString("ru-RU", {
+                        timeZone: "Europe/Moscow",
+                      })}
+                    </p>
+                  ) : null}
+
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {STATUS_PILLS.map((s) => (
                       <button
@@ -755,6 +771,47 @@ export default function TgMiniApp() {
                     >
                       hot
                     </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        void patchLead(lead.id, { snoozeDays: 1 })
+                      }
+                      className="rounded-full border border-violet-400/30 px-3 py-1.5 text-xs text-violet-300 disabled:opacity-40"
+                    >
+                      +1д
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        void patchLead(lead.id, { snoozeDays: 3 })
+                      }
+                      className="rounded-full border border-violet-400/30 px-3 py-1.5 text-xs text-violet-300 disabled:opacity-40"
+                    >
+                      +3д
+                    </button>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {REPLY_TEMPLATES.map((tpl) => (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        disabled={busy}
+                        onClick={() => {
+                          void navigator.clipboard?.writeText(tpl.text);
+                          setNoteDraft((prev) => ({
+                            ...prev,
+                            [lead.id]: tpl.text,
+                          }));
+                          webApp?.HapticFeedback?.impactOccurred("light");
+                        }}
+                        className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-zinc-400 disabled:opacity-40"
+                      >
+                        {tpl.title}
+                      </button>
+                    ))}
                   </div>
 
                   <div className="mt-3 flex gap-2">

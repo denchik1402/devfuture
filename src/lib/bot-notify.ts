@@ -28,6 +28,8 @@ export async function ingestLeadAndNotify(input: {
   username?: string;
   source?: string;
   title?: string;
+  tags?: string[];
+  score?: number;
 }): Promise<BotLead> {
   const lead = addLead({
     chatId: input.chatId,
@@ -37,6 +39,8 @@ export async function ingestLeadAndNotify(input: {
     fromId: input.fromId,
     username: input.username,
     source: input.source,
+    tags: input.tags,
+    score: input.score,
   });
   void pushLeadToCrm(lead);
 
@@ -44,12 +48,24 @@ export async function ingestLeadAndNotify(input: {
     timeZone: "Europe/Moscow",
   });
   const title = input.title || "🆕 <b>Заявка DevFuture</b>";
+  const tagLine =
+    lead.tags?.length || typeof lead.score === "number"
+      ? [
+          lead.tags?.length
+            ? `🏷 Теги: ${lead.tags.map((t) => escapeHtml(t)).join(", ")}`
+            : "",
+          typeof lead.score === "number" ? `📊 Score: ${lead.score}` : "",
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : "";
   const notify = [
     title,
     `🕐 ${escapeHtml(when)} (МСК)`,
     input.source
       ? `🏷 Источник: <code>${escapeHtml(input.source)}</code>`
       : "",
+    tagLine,
     "",
     `👤 <b>Имя:</b> ${escapeHtml(input.name)}`,
     `📱 <b>Контакт:</b> ${escapeHtml(input.contact)}`,

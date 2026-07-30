@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
 import NeonButton from "@/components/NeonButton";
+import SeoViewBeacon from "@/components/SeoViewBeacon";
 import { JsonLd } from "@/components/JsonLd";
 import { getAllBlogSlugs, getBlogPost } from "@/lib/blog";
 import { getSeoLanding } from "@/lib/seo-landings";
@@ -62,6 +63,7 @@ export default function BlogPostPage({ params }: Props) {
 
   return (
     <main className="relative min-h-screen bg-void">
+      <SeoViewBeacon goal="view_blog" slug={post.slug} />
       <JsonLd data={[articleSchema, crumbs]} />
       <Navbar />
       <article className="mx-auto max-w-3xl px-6 pb-20 pt-28 md:pt-32">

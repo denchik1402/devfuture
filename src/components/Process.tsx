@@ -1,6 +1,7 @@
 "use client";
 
-import { memo, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Search, PenTool, Code2, Headphones } from "lucide-react";
 import Reveal from "./Reveal";
@@ -38,6 +39,16 @@ const STEPS = [
 
 function Process() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start 0.7", "end 0.4"],
@@ -58,17 +69,27 @@ function Process() {
           </h2>
           <p className="mt-4 max-w-xl text-zinc-400">
             От формулировки задачи до сопровождения — один процесс, без потери
-            контекста между этапами.
+            контекста между этапами.{" "}
+            <Link
+              href="/kak-rabotaem"
+              className="text-cyan-neon hover:underline"
+            >
+              Подробнее о этапах, доступах и сопровождении →
+            </Link>
           </p>
         </Reveal>
 
         <div ref={containerRef} className="relative mt-12 md:mt-14">
           {/* Vertical timeline line (desktop) — scaleY is GPU-composited */}
           <div className="absolute left-6 top-0 bottom-0 w-px bg-white/10 md:left-1/2 md:-translate-x-px hidden sm:block">
-            <motion.div
-              style={{ scaleY: lineScale }}
-              className="h-full w-full origin-top bg-neon-gradient will-change-transform"
-            />
+            {reduceMotion ? (
+              <div className="h-full w-full origin-top bg-neon-gradient opacity-60" />
+            ) : (
+              <motion.div
+                style={{ scaleY: lineScale }}
+                className="h-full w-full origin-top bg-neon-gradient will-change-transform"
+              />
+            )}
           </div>
 
           <div className="space-y-12 md:space-y-0">

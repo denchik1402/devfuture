@@ -13,13 +13,14 @@ export type CasePage = {
   relatedLandings?: string[];
   relatedServices?: string[];
   relatedPosts?: string[];
+  flowSteps?: string[];
   faq: { q: string; a: string }[];
 };
 
 export const CASE_PAGES: CasePage[] = [
   {
     slug: "salon-booking",
-    title: "Кейс: бот записи для салона — демо в день старта",
+    title: "Кейс: бот записи для салона — −70% переписок, демо в день",
     h1: "Салон → бот записи",
     description:
       "Как салон ушёл от WhatsApp и блокнота к Telegram-боту: услуги, слот, напоминание и заявки в один чат администратору.",
@@ -38,6 +39,14 @@ export const CASE_PAGES: CasePage[] = [
       "telegram-bot-pod-klyuch",
     ],
     relatedServices: ["telegram-boty"],
+    flowSteps: [
+      "Меню услуг",
+      "Выбор мастера",
+      "Выбор слота",
+      "Контакт",
+      "Подтверждение",
+      "Пуш админу",
+    ],
     faq: [
       {
         q: "Это реальный салон с названием?",
@@ -55,7 +64,7 @@ export const CASE_PAGES: CasePage[] = [
   },
   {
     slug: "shop-telegram-hub",
-    title: "Кейс: интернет-магазин — витрины + Telegram-хаб",
+    title: "Кейс: интернет-магазин — витрины + Telegram-хаб заказов",
     h1: "Интернет-магазин: витрины + Telegram-хаб",
     description:
       "Несколько сайтов-витрин с разным UI и один Telegram-бот: заказы, роли клиента, курьера, руководителя и админа в одной операционке.",
@@ -74,6 +83,14 @@ export const CASE_PAGES: CasePage[] = [
       "telegram-bot-pod-klyuch",
     ],
     relatedServices: ["telegram-boty", "sajty"],
+    flowSteps: [
+      "Заказ с витрины",
+      "Роль клиента",
+      "Задания курьера",
+      "Смена статуса",
+      "Метрики боссу",
+      "Админ-меню",
+    ],
     faq: [
       {
         q: "Обязательно несколько сайтов?",
@@ -91,7 +108,7 @@ export const CASE_PAGES: CasePage[] = [
   },
   {
     slug: "landing-leads",
-    title: "Кейс: лендинг с заявкой в Telegram",
+    title: "Кейс: лендинг с заявкой в Telegram — лиды без тяжёлой CMS",
     h1: "Лендинг с заявкой",
     description:
       "Короткий продающий лендинг: один экран ценности, услуги, форма. Заявка уходит в Telegram менеджеру — без тяжёлой CMS.",
@@ -110,6 +127,13 @@ export const CASE_PAGES: CasePage[] = [
       "integraciya-crm-telegram",
     ],
     relatedServices: ["sajty", "telegram-boty"],
+    flowSteps: [
+      "Экран оффера",
+      "Блок услуг",
+      "Форма заявки",
+      "Пуш в Telegram",
+      "Вход в бота",
+    ],
     faq: [
       {
         q: "Нужна ли CMS?",
@@ -127,7 +151,7 @@ export const CASE_PAGES: CasePage[] = [
   },
   {
     slug: "status-cabinet",
-    title: "Кейс: кабинет статусов для команды",
+    title: "Кейс: кабинет статусов — прозрачный поток от ~80 000 ₽",
     h1: "Кабинет статусов",
     description:
       "Внутренний веб-кабинет: список заявок, статусы, роли сотрудников и уведомления вместо хаоса в групповых чатах.",
@@ -146,6 +170,13 @@ export const CASE_PAGES: CasePage[] = [
       "telegram-bot-pod-klyuch",
     ],
     relatedServices: ["veb-prilozheniya", "telegram-boty"],
+    flowSteps: [
+      "Вход по роли",
+      "Список заявок",
+      "Смена статуса",
+      "Фильтры",
+      "Пуш в Telegram",
+    ],
     faq: [
       {
         q: "Можно ли связать с Telegram?",
@@ -163,7 +194,7 @@ export const CASE_PAGES: CasePage[] = [
   },
   {
     slug: "clinic-booking",
-    title: "Кейс: бот записи для клиники — заявки вместо телефонной очереди",
+    title: "Кейс: бот записи для клиники — меньше очереди на телефоне",
     h1: "Клиника → бот записи",
     description:
       "Как частная клиника снизила нагрузку на ресепшен: направление, окно времени, контакт и напоминание в Telegram без подмены МИС.",
@@ -179,6 +210,14 @@ export const CASE_PAGES: CasePage[] = [
     relatedLandings: ["bot-dlya-kliniki", "bot-zapisi-klientov"],
     relatedServices: ["telegram-boty"],
     relatedPosts: ["bot-zapisi-dlya-kliniki"],
+    flowSteps: [
+      "Направление / услуга",
+      "Окно времени",
+      "Контакт",
+      "Подтверждение",
+      "Пуш ресепшену",
+      "Напоминание",
+    ],
     faq: [
       {
         q: "Это реальная клиника с названием?",
@@ -196,7 +235,7 @@ export const CASE_PAGES: CasePage[] = [
   },
   {
     slug: "delivery-bot",
-    title: "Кейс: бот доставки — заказ, курьер и статусы в одном контуре",
+    title: "Кейс: бот доставки — заказ и статусы без хаоса в чатах",
     h1: "Доставка → бот с ролями",
     description:
       "Как локальная доставка ушла от хаоса в чатах к Telegram-боту: заказ, адрес, статусы и роль курьера без тяжёлой WMS на старте.",
@@ -212,6 +251,14 @@ export const CASE_PAGES: CasePage[] = [
     relatedLandings: ["bot-dostavki", "bot-dlya-internet-magazina"],
     relatedServices: ["telegram-boty"],
     relatedPosts: ["bot-dostavki-kak-ustroit"],
+    flowSteps: [
+      "Состав заказа",
+      "Адрес и контакт",
+      "Подтверждение",
+      "Задание курьеру",
+      "Статусы доставки",
+      "Пуш клиенту",
+    ],
     faq: [
       {
         q: "Это сеть с названием бренда?",
@@ -229,7 +276,7 @@ export const CASE_PAGES: CasePage[] = [
   },
   {
     slug: "online-school-bot",
-    title: "Кейс: бот онлайн-школы — заявки, материалы и напоминания",
+    title: "Кейс: бот онлайн-школы — заявки и выше явка на вебинары",
     h1: "Онлайн-школа → бот заявок",
     description:
       "Как школа курсов собрала лиды и выдачу ссылок в Telegram: меню программ, заявка куратору и напоминания о вебинарах без замены LMS.",
@@ -245,6 +292,14 @@ export const CASE_PAGES: CasePage[] = [
     relatedLandings: ["bot-dlya-online-shkoly", "telegram-bot-pod-klyuch"],
     relatedServices: ["telegram-boty"],
     relatedPosts: ["bot-dlya-kursov-online"],
+    flowSteps: [
+      "Меню курсов",
+      "Заявка / консультация",
+      "Контакт",
+      "Выдача ссылок",
+      "Пуш куратору",
+      "Напоминание о вебинаре",
+    ],
     faq: [
       {
         q: "Школа с публичным названием?",

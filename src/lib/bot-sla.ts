@@ -4,6 +4,7 @@ import { escapeHtml } from "@/lib/telegram";
 
 const DEFAULT_HOURS = 4;
 let lastSlaPingAt = 0;
+let lastSla24PingAt = 0;
 
 export function listStaleNewLeads(hours = DEFAULT_HOURS): BotLead[] {
   const cutoff = Date.now() - hours * 60 * 60 * 1000;
@@ -43,4 +44,20 @@ export async function maybePingSla(hours = DEFAULT_HOURS) {
   const stale = listStaleNewLeads(hours);
   if (!stale.length) return;
   await notifyAdmins(formatSlaReport(hours));
+}
+
+/** At most once per ~20h — escalate leads without answer > 24h */
+export async function maybePingSla24() {
+  const now = Date.now();
+  if (now - lastSla24PingAt < 20 * 60 * 60 * 1000) return;
+  lastSla24PingAt = now;
+  const stale = listStaleNewLeads(24);
+  if (!stale.length) return;
+  await notifyAdmins(
+    [
+      formatSlaReport(24),
+      "",
+      "Эскалация: заявки без ответа больше суток.",
+    ].join("\n")
+  );
 }

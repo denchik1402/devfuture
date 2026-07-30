@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
 import NeonButton from "@/components/NeonButton";
+import SeoViewBeacon from "@/components/SeoViewBeacon";
 import { JsonLd } from "@/components/JsonLd";
 import { getAllCaseSlugs, getCasePage } from "@/lib/cases";
 import { getSeoLanding } from "@/lib/seo-landings";
@@ -67,6 +68,7 @@ export default function CasePage({ params }: Props) {
 
   return (
     <main className="relative min-h-screen bg-void">
+      <SeoViewBeacon goal="view_case" slug={page.slug} />
       <JsonLd data={[caseSchema, buildFaqSchema(page.faq), crumbs]} />
       <Navbar />
 
@@ -111,7 +113,46 @@ export default function CasePage({ params }: Props) {
             <NeonButton href="/#contact" variant="ghost">
               Написать через форму
             </NeonButton>
+            <NeonButton
+              href={`/brief?from=case_${page.slug}`}
+              variant="ghost"
+            >
+              Черновик поста / брифа
+            </NeonButton>
+            {page.slug === "status-cabinet" ? (
+              <NeonButton href="/status/demo-alpha" variant="ghost">
+                Демо статуса по токену
+              </NeonButton>
+            ) : null}
           </div>
+
+          {page.flowSteps?.length ? (
+            <section className="mt-14">
+              <h2 className="font-display text-2xl font-bold text-white">
+                Сценарий как в боте
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm text-zinc-500">
+                Условные экраны — без стоковых фото, чтобы было видно поток.
+              </p>
+              <div className="mt-6 flex gap-3 overflow-x-auto pb-2">
+                {page.flowSteps.map((step, i) => (
+                  <div
+                    key={step}
+                    className="glass flex w-40 shrink-0 flex-col rounded-2xl p-4"
+                  >
+                    <span className="font-display text-[10px] tracking-[0.2em] text-cyan-neon/70">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div className="mt-3 rounded-xl border border-white/10 bg-void/80 px-3 py-8 text-center">
+                      <p className="font-display text-sm font-medium text-white">
+                        {step}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="mt-14 grid gap-4 md:grid-cols-2">
             <div className="glass rounded-2xl p-7">

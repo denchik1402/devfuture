@@ -25,6 +25,8 @@ export type BotLead = {
   tags?: string[];
   remindAt?: string;
   assigneeId?: number;
+  /** 0–10 qualify score from bot questions */
+  score?: number;
 };
 
 const dataDir = path.join(process.cwd(), ".data");
@@ -124,6 +126,7 @@ export function addLead(
     tags: lead.tags || [],
     remindAt: lead.remindAt,
     assigneeId: lead.assigneeId,
+    score: lead.score,
   };
   leads.unshift(entry);
   if (leads.length > MAX_LEADS) leads.length = MAX_LEADS;

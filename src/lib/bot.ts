@@ -60,8 +60,9 @@ import {
   getSession,
   setSession,
 } from "@/lib/bot-sessions";
-import { formatSlaReport, maybePingSla } from "@/lib/bot-sla";
+import { formatSlaReport, maybePingSla, maybePingSla24 } from "@/lib/bot-sla";
 import { listUserChatIds, touchUser, usersCount } from "@/lib/bot-users";
+import { getReplyTemplate } from "@/lib/reply-templates";
 import { PACKAGES } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
 import { SERVICE_PAGES } from "@/lib/services";
@@ -241,6 +242,9 @@ async function startOrder(
 export async function handleTelegramUpdate(update: TelegramUpdate) {
   void maybePingSla(4).catch((err) =>
     console.error("[bot-sla]", err)
+  );
+  void maybePingSla24().catch((err) =>
+    console.error("[bot-sla-24]", err)
   );
   void flushCrmQueue().catch((err) =>
     console.error("[bot-crm] flush", err)
@@ -501,6 +505,14 @@ async function handleStart(
       return;
     }
   }
+  if (payload.kind === "estimate") {
+    await startOrder(
+      chatId,
+      `estimate_${payload.packageId}`,
+      payload.summary + "\n\nОформим заявку с этой оценкой."
+    );
+    return;
+  }
   if (payload.kind === "service") {
     const body = serviceBotText(payload.slug);
     if (body) {
@@ -594,6 +606,42 @@ async function sendSpeed(chatId: number, messageId?: number) {
   }
 }
 
+function clampScore(n: number) {
+  return Math.max(0, Math.min(10, n));
+}
+
+function scoreUrgency(urgency: string): number {
+  const u = urgency.toLowerCase();
+  if (/asap|скорее|сегодня/.test(u)) return 3;
+  if (/week|недел/.test(u)) return 2;
+  return 1;
+}
+
+function scoreBudget(budget: string): number {
+  const b = budget.toLowerCase().replace(/\s+/g, "");
+  if (/100/.test(b)) return 3;
+  if (/50.?100|80/.test(b)) return 2;
+  if (/20.?50|35/.test(b)) return 2;
+  if (/до20|15/.test(b)) return 1;
+  return 1;
+}
+
+function qualifyScore(niche: string, urgency: string, budget: string) {
+  let score = 0;
+  if (niche.trim()) score += 2;
+  score += scoreUrgency(urgency);
+  score += scoreBudget(budget);
+  score = clampScore(score);
+  const tag = score >= 7 ? "hot" : score >= 4 ? "warm" : "cold";
+  return { score, tag } as const;
+}
+
+function thankByTag(tag: "hot" | "warm" | "cold") {
+  if (tag === "hot") return "Поставили в приоритет — ответим быстрее.";
+  if (tag === "warm") return "Уже смотрим детали.";
+  return "Мы получили её и скоро ответим.";
+}
+
 async function handleDraftStep(
   chatId: number,
   draft: LeadDraft,
@@ -625,14 +673,67 @@ async function handleDraftStep(
   }
 
   if (draft.step === "task") {
-    const task = text.slice(0, 2000);
+    draft.task = text.slice(0, 2000);
+    draft.step = "niche";
+    setDraft(chatId, draft);
+    await sendMessage(
+      chatId,
+      "Ниша / тип бизнеса? (салон, клиника, доставка, школа, другое — одним словом)",
+      { reply_markup: cancelKeyboard() }
+    );
+    return;
+  }
+
+  if (draft.step === "niche") {
+    draft.niche = text.slice(0, 120);
+    draft.step = "urgency";
+    setDraft(chatId, draft);
+    await sendMessage(
+      chatId,
+      "Срочность? (asap / week / month или своими словами)",
+      { reply_markup: cancelKeyboard() }
+    );
+    return;
+  }
+
+  if (draft.step === "urgency") {
+    draft.urgency = text.slice(0, 120);
+    draft.step = "budget";
+    setDraft(chatId, draft);
+    await sendMessage(
+      chatId,
+      "Ориентир бюджета? (до 20к / 20–50к / 50–100к / 100к+ / не знаю)",
+      { reply_markup: cancelKeyboard() }
+    );
+    return;
+  }
+
+  if (draft.step === "budget") {
+    draft.budget = text.slice(0, 120);
+    const niche = (draft.niche || "").trim();
+    const urgency = (draft.urgency || "").trim();
+    const budget = draft.budget.trim();
+    const { score, tag } = qualifyScore(niche, urgency, budget);
+
+    const baseTask = (draft.task || "").trim();
+    const task = [
+      baseTask,
+      "",
+      "— Квалификация —",
+      `Ниша: ${niche || "—"}`,
+      `Срочность: ${urgency || "—"}`,
+      `Бюджет: ${budget || "—"}`,
+    ]
+      .join("\n")
+      .slice(0, 3500);
+
     const name = draft.name || from?.first_name || "Клиент";
     const contact =
       draft.contact || (from?.username ? `@${from.username}` : "—");
     const source = draft.source;
     deleteDraft(chatId);
 
-    const lead = await ingestLeadAndNotify({
+    await ingestLeadAndNotify({
       chatId,
       name,
       contact,
@@ -641,6 +742,8 @@ async function handleDraftStep(
       username: from?.username,
       source,
       title: "🆕 <b>Заявка из Telegram-бота</b>",
+      tags: [tag],
+      score,
     });
 
     await sendMessage(
@@ -648,12 +751,11 @@ async function handleDraftStep(
       [
         "✅ <b>Заявка принята!</b>",
         "",
-        "Мы получили её и скоро ответим.",
+        thankByTag(tag),
         "Можно также задать вопрос через меню бота.",
       ].join("\n"),
       { reply_markup: mainKeyboard(isAdmin(from?.id)) }
     );
-    void lead;
   }
 }
 
@@ -1056,6 +1158,49 @@ async function handleCallback(cb: TgCallback) {
         ? `🏷 Тег «${escapeHtml(m[1])}» · <code>${escapeHtml(m[2])}</code>`
         : "Заявка не найдена.",
       { reply_markup: lead ? leadNotifyMarkup(lead) : adminKeyboard() }
+    );
+    return;
+  }
+
+  if (data.startsWith("tpl:")) {
+    if (!isAdmin(userId)) {
+      await sendMessage(chatId, "Недостаточно прав.");
+      return;
+    }
+    const m = data.match(/^tpl:([a-z0-9_-]+):([A-Za-z0-9]+)$/i);
+    if (!m) return;
+    const tpl = getReplyTemplate(m[1]);
+    const leadId = m[2];
+    if (!tpl) {
+      await sendMessage(chatId, "Шаблон не найден.");
+      return;
+    }
+    const lead = getLead(leadId);
+    if (!lead) {
+      await sendMessage(chatId, "Заявка не найдена.");
+      return;
+    }
+    addLeadNote(leadId, `Шаблон: ${tpl.title}`, userId);
+    await sendMessage(
+      chatId,
+      [
+        `<b>${escapeHtml(tpl.title)}</b>`,
+        `Заявка: <code>${escapeHtml(leadId)}</code>`,
+        "",
+        escapeHtml(tpl.text),
+      ].join("\n"),
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "💬 Ответить клиенту",
+                callback_data: `reply:${lead.chatId}:${leadId}`,
+              },
+            ],
+          ],
+        },
+      }
     );
     return;
   }
