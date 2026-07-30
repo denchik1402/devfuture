@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
 import NeonButton from "@/components/NeonButton";
+import FunnelCtaRow from "@/components/FunnelCtaRow";
 import SeoViewBeacon from "@/components/SeoViewBeacon";
 import CaseBotMock from "@/components/CaseBotMock";
 import { JsonLd } from "@/components/JsonLd";
@@ -13,7 +14,7 @@ import { getAllCaseSlugs, getCasePage } from "@/lib/cases";
 import { getSeoLanding } from "@/lib/seo-landings";
 import { getBlogPost } from "@/lib/blog";
 import { getServiceBySlug } from "@/lib/services";
-import { siteConfig, telegramBotStartLink } from "@/lib/site";
+import { siteConfig } from "@/lib/site";
 import {
   buildBreadcrumbSchema,
   buildCaseStudySchema,
@@ -65,8 +66,6 @@ export default function CasePage({ params }: Props) {
     url: caseUrl,
   });
 
-  const botHref = telegramBotStartLink(page.demoStart || "order");
-
   return (
     <main className="relative min-h-screen bg-void">
       <SeoViewBeacon goal="view_case" slug={page.slug} />
@@ -107,25 +106,19 @@ export default function CasePage({ params }: Props) {
             </div>
           )}
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <NeonButton href={botHref} pulse>
-              Обсудить похожий сценарий
-            </NeonButton>
-            <NeonButton href="/#contact" variant="ghost">
-              Написать через форму
-            </NeonButton>
-            <NeonButton
-              href={`/brief?from=case_${page.slug}`}
-              variant="ghost"
-            >
-              Черновик поста / брифа
-            </NeonButton>
-            {page.slug === "status-cabinet" ? (
+          <FunnelCtaRow
+            slug={page.slug}
+            kind="keysy"
+            botStart={page.demoStart || "order"}
+            quizHref="/#quiz"
+          />
+          {page.slug === "status-cabinet" ? (
+            <div className="mt-3 flex flex-wrap gap-3">
               <NeonButton href="/status/demo-alpha" variant="ghost">
                 Демо статуса по токену
               </NeonButton>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
 
           {page.flowSteps?.length ? (
             <CaseBotMock

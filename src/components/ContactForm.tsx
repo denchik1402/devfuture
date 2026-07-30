@@ -7,7 +7,11 @@ import { motion } from "framer-motion";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
 import { BRIEF_TYPES } from "@/lib/content";
-import { siteConfig, telegramBriefLink, telegramContactLink } from "@/lib/site";
+import {
+  siteConfig,
+  telegramBriefLink,
+  telegramBotStartLink,
+} from "@/lib/site";
 import { formatSourceTag, loadAttribution } from "@/lib/attribution";
 import { reachGoal } from "@/lib/analytics";
 
@@ -126,7 +130,7 @@ function ContactForm() {
 
     const openTelegramFallback = () => {
       const brief = [
-        `Бриф DevFuture`,
+        `Заявка DevFuture`,
         `Имя: ${payload.name}`,
         `Контакт: ${payload.contact}`,
         `Тип: ${payload.type}`,
@@ -159,7 +163,7 @@ function ContactForm() {
           setStatus("error");
           setError(
             data.error ||
-              "Автодоставка не сработала. Откройте Telegram и отправьте бриф вручную."
+              "Автодоставка не сработала. Откройте Telegram и отправьте заявку вручную."
           );
           return;
         }
@@ -208,7 +212,7 @@ function ContactForm() {
               Контакт
             </p>
             <h2 className="font-display text-3xl font-bold text-white md:text-4xl">
-              Короткий бриф — и мы ответим
+              Опишите задачу — и мы ответим
             </h2>
             <p className="mt-4 max-w-md text-zinc-400">
               Опишите задачу в нескольких предложениях. Оценим срок, формат и
@@ -217,13 +221,13 @@ function ContactForm() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <NeonButton
-                href={telegramContactLink()}
+                href={telegramBotStartLink("order")}
                 pulse
                 onClick={() =>
                   reachGoal("click_telegram", { place: "contact_1click" })
                 }
               >
-                Связаться в 1 клик
+                Написать в Telegram
               </NeonButton>
               {siteConfig.phoneTel && siteConfig.phone && (
                 <NeonButton
@@ -236,8 +240,7 @@ function ContactForm() {
               )}
             </div>
             <p className="mt-3 text-xs text-zinc-500">
-              1 клик откроет Telegram с готовым сообщением. Или заполните бриф
-              справа.
+              Telegram откроет бота. Или опишите задачу в форме справа.
             </p>
           </Reveal>
 
@@ -250,7 +253,7 @@ function ContactForm() {
               >
                 <CheckCircle2 className="h-10 w-10 text-cyan-neon" />
                 <h3 className="mt-4 font-display text-xl font-semibold text-white">
-                  {deliveredToBot ? "Заявка ушла в Telegram" : "Бриф принят"}
+                  {deliveredToBot ? "Заявка ушла в Telegram" : "Заявка принята"}
                 </h3>
                 <p className="mt-2 text-sm text-zinc-400">
                   {deliveredToBot
@@ -304,7 +307,7 @@ function ContactForm() {
                 {source === "homepage_quiz" ||
                 source.startsWith("homepage_quiz|") ? (
                   <p className="rounded-xl border border-cyan-neon/20 bg-cyan-neon/5 px-3 py-2 text-xs text-cyan-neon/90">
-                    Prefill из быстрого брифа — дополните детали и отправьте.
+                    Prefill из быстрой заявки — дополните детали и отправьте.
                   </p>
                 ) : null}
 
@@ -385,6 +388,7 @@ function ContactForm() {
                       <button
                         key={t.value}
                         type="button"
+                        aria-pressed={type === t.value}
                         onClick={() => setType(t.value)}
                         className={`rounded-full border px-3 py-1.5 text-xs transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon ${
                           type === t.value
@@ -495,7 +499,7 @@ function ContactForm() {
                   ) : (
                     <>
                       <Send className="h-4 w-4" />
-                      Отправить бриф
+                      Отправить заявку
                     </>
                   )}
                 </button>

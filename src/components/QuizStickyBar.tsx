@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import NeonButton from "./NeonButton";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
@@ -24,14 +24,23 @@ function readPrefill(): QuizStickyDetail | null {
   }
 }
 
+function setStickyVis(on: boolean) {
+  if (typeof document === "undefined") return;
+  if (on) document.body.dataset.quizSticky = "1";
+  else delete document.body.dataset.quizSticky;
+  window.dispatchEvent(new Event("df:quiz-sticky-vis"));
+}
+
 function QuizStickyBar() {
   const [visible, setVisible] = useState(false);
   const [detail, setDetail] = useState<QuizStickyDetail | null>(null);
+  const reduceMotion = useReducedMotion();
 
   const show = useCallback((next: QuizStickyDetail | null) => {
     if (!next) return;
     setDetail(next);
     setVisible(true);
+    setStickyVis(true);
   }, []);
 
   useEffect(() => {
@@ -43,10 +52,13 @@ function QuizStickyBar() {
     };
 
     window.addEventListener("df:quiz-sticky", onSticky);
-    return () => window.removeEventListener("df:quiz-sticky", onSticky);
+    return () => {
+      window.removeEventListener("df:quiz-sticky", onSticky);
+      setStickyVis(false);
+    };
   }, [show]);
 
-  const briefHref = useMemo(() => {
+  const printHref = useMemo(() => {
     const params = new URLSearchParams();
     if (detail?.type) params.set("type", detail.type);
     if (detail?.timeline) params.set("timeline", detail.timeline);
@@ -65,17 +77,26 @@ function QuizStickyBar() {
     }
   };
 
+  const dismiss = () => {
+    setVisible(false);
+    setStickyVis(false);
+  };
+
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
           key="quiz-sticky"
           role="region"
-          aria-label="Продолжить бриф"
-          initial={{ opacity: 0, y: 24 }}
+          aria-label="Продолжить заявку"
+          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 16 }}
-          transition={{ type: "spring", stiffness: 320, damping: 28 }}
+          exit={reduceMotion ? undefined : { opacity: 0, y: 16 }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : { type: "spring", stiffness: 320, damping: 28 }
+          }
           className="fixed inset-x-0 z-[55] border-t border-white/10 bg-void/90 backdrop-blur-md"
           style={{
             bottom: 0,
@@ -86,39 +107,39 @@ function QuizStickyBar() {
         >
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
             <p className="hidden min-w-0 flex-1 font-display text-sm text-zinc-300 sm:block">
-              Бриф собран — продолжите в форме, боте или PDF.
+              Задача собрана — отправьте форму или напишите в Telegram.
             </p>
             <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 sm:flex-none">
               <NeonButton
-                href="#contact"
-                pulse
-                className="!px-4 !py-2.5 text-xs sm:text-sm"
-                onClick={goToContact}
-              >
-                Продолжить в форме
-              </NeonButton>
-              <NeonButton
                 href={telegramBotStartLink("order")}
-                variant="ghost"
+                pulse
                 className="!px-4 !py-2.5 text-xs sm:text-sm"
                 onClick={() =>
                   reachGoal("click_telegram", { place: "quiz_sticky" })
                 }
               >
-                В бота
+                Написать в Telegram
+              </NeonButton>
+              <NeonButton
+                href="#contact"
+                variant="ghost"
+                className="!px-4 !py-2.5 text-xs sm:text-sm"
+                onClick={goToContact}
+              >
+                Форма на сайте
               </NeonButton>
               <a
-                href={briefHref}
-                className="text-xs text-zinc-500 underline-offset-4 hover:text-cyan-neon hover:underline sm:text-sm"
+                href={printHref}
+                className="text-xs text-zinc-400 underline-offset-4 hover:text-cyan-neon hover:underline sm:text-sm"
               >
-                /brief
+                Печать
               </a>
             </div>
             <button
               type="button"
               aria-label="Закрыть"
-              onClick={() => setVisible(false)}
-              className="shrink-0 rounded-full border border-white/10 p-2 text-zinc-500 transition hover:border-white/20 hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
+              onClick={dismiss}
+              className="shrink-0 rounded-full border border-white/10 p-2 text-zinc-400 transition hover:border-white/20 hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
             >
               <X className="h-4 w-4" />
             </button>

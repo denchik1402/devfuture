@@ -95,7 +95,7 @@ function BudgetEstimator() {
 
   const timelineNote =
     timeline === "asap"
-      ? "Срочность учтём в брифе — стартуем с MVP."
+      ? "Срочность учтём в заявке — стартуем с MVP."
       : timeline === "week"
         ? "Горизонт 1–2 недель хорошо ложится на пакет выше."
         : "Месяц даёт запас на итерации и поддержку.";
@@ -114,7 +114,7 @@ function BudgetEstimator() {
           </h2>
           <p className="mt-4 max-w-2xl text-zinc-400">
             Четыре ответа — рекомендация из пакетов DevFuture. Точная смета
-            после короткого брифа.
+            после короткого описания задачи.
           </p>
         </Reveal>
 
@@ -180,7 +180,7 @@ function BudgetEstimator() {
                     reachGoal("click_package", { package: pkg.id });
                   }}
                 >
-                  Открыть в боте с этой оценкой
+                  Написать в Telegram
                 </NeonButton>
                 <NeonButton
                   href="#contact"
@@ -189,10 +189,10 @@ function BudgetEstimator() {
                     reachGoal("open_packages", { package: pkg.id })
                   }
                 >
-                  Обсудить в форме
+                  Форма на сайте
                 </NeonButton>
                 <NeonButton href="/brief" variant="ghost">
-                  Полный бриф
+                  Печать заявки
                 </NeonButton>
               </div>
             </div>

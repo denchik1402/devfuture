@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Bot, Check, ChevronRight } from "lucide-react";
 import { reachGoal } from "@/lib/analytics";
 import { siteConfig } from "@/lib/site";
@@ -36,6 +36,7 @@ const DEMO_STEPS = [
 function BotDemo() {
   const [step, setStep] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     setStep(0);
@@ -53,6 +54,15 @@ function BotDemo() {
     // advance past the mirrored user line if next is user with same intent
     setStep((s) => Math.min(s + 2, DEMO_STEPS.length - 1));
   };
+
+  const restart = () => {
+    setStep(0);
+    setPicked([]);
+  };
+
+  const motionProps = reduceMotion
+    ? { initial: false as const, animate: { opacity: 1 } }
+    : { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
 
   return (
     <section
@@ -101,8 +111,7 @@ function BotDemo() {
                   return (
                     <motion.div
                       key={`u-${i}-${text}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      {...motionProps}
                       className="ml-auto max-w-[80%] rounded-2xl rounded-br-md bg-neon-gradient px-3.5 py-2 text-sm text-void"
                     >
                       {text}
@@ -112,8 +121,7 @@ function BotDemo() {
                 return (
                   <motion.div
                     key={`b-${i}`}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    {...motionProps}
                     className="mr-auto max-w-[85%] rounded-2xl rounded-bl-md border border-white/10 bg-white/5 px-3.5 py-2 text-sm text-zinc-200"
                   >
                     {msg.text}
@@ -140,12 +148,21 @@ function BotDemo() {
 
             {finished && (
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="mt-auto flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-zinc-400"
+                className="mt-auto flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3"
               >
-                <Check className="h-4 w-4 text-cyan-neon" />
-                Демо завершено. Можем собрать похожий сценарий под ваш бизнес.
+                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                  <Check className="h-4 w-4 text-cyan-neon" />
+                  Демо завершено. Можем собрать похожий сценарий под ваш бизнес.
+                </div>
+                <button
+                  type="button"
+                  onClick={restart}
+                  className="self-start rounded-full border border-cyan-neon/30 bg-cyan-neon/10 px-4 py-2 text-sm text-cyan-neon transition hover:bg-cyan-neon/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
+                >
+                  Пройти снова
+                </button>
               </motion.div>
             )}
           </div>

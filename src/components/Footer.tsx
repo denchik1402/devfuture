@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { memo } from "react";
 import Link from "next/link";
 import { Send, Phone } from "lucide-react";
 import NeonButton from "./NeonButton";
 import Reveal from "./Reveal";
-import { siteConfig, telegramContactLink } from "@/lib/site";
+import { siteConfig, telegramBotStartLink, telegramContactLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 const LINKS = [
@@ -17,7 +17,7 @@ const LINKS = [
   { label: "Пакеты", href: "/#packages" },
   { label: "Демо", href: "/#demo" },
   { label: "Блог", href: "/blog" },
-  { label: "Бриф", href: "/brief" },
+  { label: "Заявка", href: "/brief" },
   { label: "Конфиденциальность", href: "/privacy" },
 ];
 
@@ -41,13 +41,13 @@ function Footer() {
             </div>
             <div className="flex flex-wrap gap-3">
               <NeonButton
-                href={telegramContactLink()}
+                href={telegramBotStartLink("order")}
                 pulse
                 onClick={() =>
-                  reachGoal("click_telegram", { place: "footer_1click" })
+                  reachGoal("click_telegram", { place: "footer" })
                 }
               >
-                Связаться в 1 клик
+                Написать в Telegram
               </NeonButton>
               {siteConfig.phoneTel && siteConfig.phone && (
                 <NeonButton href={siteConfig.phoneTel} variant="ghost">

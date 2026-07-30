@@ -35,7 +35,7 @@ async function sendFormspree(payload: {
       contact: payload.contact,
       type: payload.type,
       message: payload.message,
-      _subject: `DevFuture бриф: ${payload.type}`,
+      _subject: `DevFuture заявка: ${payload.type}`,
     }),
   });
   return res.ok;

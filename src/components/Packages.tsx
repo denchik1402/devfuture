@@ -22,8 +22,8 @@ function Packages() {
             Ориентиры по стоимости
           </h2>
           <p className="mt-4 max-w-2xl text-zinc-400">
-            Цены «от» — стартовая вилка после короткого брифа. Фиксируем смету
-            до старта работ, без скрытых доплат за «сюрпризы».
+            Цены «от» — стартовая вилка после короткого описания задачи.
+            Фиксируем смету до старта работ, без скрытых доплат за «сюрпризы».
           </p>
         </Reveal>
 
@@ -53,7 +53,7 @@ function Packages() {
                           : "bg-neon-gradient text-void"
                       }`}
                     >
-                      {isRetainer ? "Retainer" : "Хит"}
+                      {isRetainer ? "Абонемент" : "Хит"}
                     </span>
                   )}
                   <p className="text-[11px] uppercase tracking-wider text-zinc-500">
@@ -87,7 +87,7 @@ function Packages() {
                       reachGoal("click_package", { package: pkg.id })
                     }
                   >
-                    Открыть в боте
+                    Написать в Telegram
                   </NeonButton>
                 </article>
               </Reveal>

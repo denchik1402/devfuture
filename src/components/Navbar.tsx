@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { siteConfig } from "@/lib/site";
+import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 const NAV = [
@@ -81,7 +82,7 @@ function Navbar() {
             </Link>
           ))}
           <a
-            href={siteConfig.telegramUrl}
+            href={telegramBotStartLink("order")}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => reachGoal("click_telegram", { place: "nav" })}
@@ -139,7 +140,7 @@ function Navbar() {
                 </Link>
               ))}
               <a
-                href={siteConfig.telegramUrl}
+                href={telegramBotStartLink("order")}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
@@ -151,11 +152,11 @@ function Navbar() {
                 Написать в Telegram
               </a>
               <Link
-                href="/#contact"
+                href="/#quiz"
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-3 text-center text-sm text-zinc-400"
+                className="rounded-lg px-3 py-3 text-center text-sm text-zinc-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
               >
-                Оставить бриф
+                Описать задачу
               </Link>
             </nav>
           </motion.div>

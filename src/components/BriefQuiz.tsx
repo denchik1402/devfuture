@@ -37,7 +37,7 @@ function BriefQuiz() {
 
   const briefText = useMemo(() => {
     return [
-      "Бриф за 30 секунд (с сайта DevFuture)",
+      "Заявка с сайта DevFuture",
       `Тип: ${typeLabel}`,
       `Срок: ${timeLabel}`,
       `Бюджет: ${budgetLabel}`,
@@ -109,7 +109,7 @@ function BriefQuiz() {
       <div className="relative mx-auto max-w-6xl px-6">
         <Reveal>
           <p className="mb-3 font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">
-            Быстрый бриф
+            Быстрая заявка
           </p>
           <h2 className="font-display text-3xl font-bold text-white md:text-4xl">
             Соберите задачу за 30 секунд
@@ -146,24 +146,24 @@ function BriefQuiz() {
               onChange={(v) => setBudget(v as typeof budget)}
             />
 
-            <div className="mt-10 flex flex-wrap gap-3">
-              <NeonButton href="#contact" pulse onClick={goToForm}>
-                Продолжить в форме
-              </NeonButton>
+            <div className="mt-10 flex flex-wrap items-center gap-3">
               <NeonButton
                 href={telegramHref}
-                variant="ghost"
+                pulse
                 onClick={() => persistAndSticky("telegram")}
               >
-                Открыть в Telegram
+                Написать в Telegram
               </NeonButton>
-              <NeonButton
+              <NeonButton href="#contact" variant="ghost" onClick={goToForm}>
+                Форма на сайте
+              </NeonButton>
+              <a
                 href={briefPdfHref}
-                variant="ghost"
                 onClick={() => persistAndSticky("brief")}
+                className="text-xs text-zinc-500 underline-offset-4 transition hover:text-cyan-neon hover:underline"
               >
-                Скачать бриф (PDF)
-              </NeonButton>
+                Печать / PDF
+              </a>
             </div>
           </div>
         </Reveal>
@@ -188,13 +188,18 @@ function Step({
   return (
     <div className={className}>
       <p className="font-display text-sm font-semibold text-white">{title}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div
+        className="mt-3 flex flex-wrap gap-2"
+        role="group"
+        aria-label={title}
+      >
         {options.map((opt) => {
           const active = opt.id === value;
           return (
             <button
               key={opt.id}
               type="button"
+              aria-pressed={active}
               onClick={() => onChange(opt.id)}
               className={`rounded-full border px-3.5 py-2 text-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon ${
                 active

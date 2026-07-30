@@ -65,14 +65,14 @@ export default function Home() {
       <OfferStrip />
       <ServicesIntro />
       <SolutionsStrip />
+      <Cases />
+      <Testimonials />
       <Packages />
       <BudgetEstimator />
       <Process />
       <BotDemo />
-      <Cases />
       <BriefQuiz />
       <Faq />
-      <Testimonials />
       <ContactForm />
       <Footer />
       <QuizStickyBar />

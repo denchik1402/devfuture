@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Clock3 } from "lucide-react";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
@@ -11,6 +11,9 @@ import { siteConfig } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
 function Cases() {
+  const reduceMotion = useReducedMotion();
+  const hoverLift = reduceMotion ? undefined : { y: -2 };
+
   return (
     <>
       <section id="day-demo" className="relative py-24 md:py-32">
@@ -25,7 +28,7 @@ function Cases() {
               Как выглядит демо в день обращения
             </h2>
             <p className="mt-4 max-w-2xl text-zinc-400">
-              Для простого бота или прототипа путь короткий: бриф → сценарий →
+              Для простого бота или прототипа путь короткий: задача → сценарий →
               рабочее демо. Дальше итерации под ваш процесс.
             </p>
           </Reveal>
@@ -84,7 +87,7 @@ function Cases() {
 
           <Reveal className="mt-12 md:mt-14">
             <motion.article
-              whileHover={{ y: -2 }}
+              whileHover={hoverLift}
               transition={{ type: "spring", stiffness: 300, damping: 24 }}
               className="glass group relative overflow-hidden rounded-2xl p-7 md:p-8"
             >
@@ -104,7 +107,12 @@ function Cases() {
               </div>
 
               <h3 className="relative mt-6 font-display text-2xl font-semibold text-white md:text-3xl">
-                {FEATURED_CASE.title}
+                <Link
+                  href={FEATURED_CASE.href}
+                  className="transition hover:text-cyan-neon"
+                >
+                  {FEATURED_CASE.title}
+                </Link>
               </h3>
               <p className="relative mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400 md:text-base">
                 {FEATURED_CASE.description}
@@ -144,7 +152,7 @@ function Cases() {
             {SCENARIO_CASES.map((item, i) => (
               <Reveal key={item.title} delay={i * 0.08}>
                 <motion.article
-                  whileHover={{ y: -2 }}
+                  whileHover={hoverLift}
                   transition={{ type: "spring", stiffness: 300, damping: 24 }}
                   className="glass group relative flex h-full flex-col overflow-hidden rounded-2xl p-7"
                 >
@@ -166,7 +174,12 @@ function Cases() {
                   </div>
 
                   <h3 className="relative mt-8 font-display text-2xl font-semibold text-white">
-                    {item.title}
+                    <Link
+                      href={item.href}
+                      className="transition hover:text-cyan-neon"
+                    >
+                      {item.title}
+                    </Link>
                   </h3>
                   <p className="relative mt-3 flex-1 text-sm leading-relaxed text-zinc-400">
                     {item.description}

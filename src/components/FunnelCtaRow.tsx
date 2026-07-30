@@ -1,25 +1,29 @@
 "use client";
 
+import { memo } from "react";
 import NeonButton from "@/components/NeonButton";
 import { reachGoal } from "@/lib/analytics";
-import { siteConfig } from "@/lib/site";
+import { telegramBotStartLink } from "@/lib/site";
 
 type Props = {
   slug: string;
   kind: "resheniya" | "keysy" | "blog";
   quizHref?: string;
+  /** Optional bot start payload (e.g. demo_booking) */
+  botStart?: string;
 };
 
-/** Primary CTAs that also fire funnel_cta for Metrika chain analysis. */
+/** Primary Telegram + secondary «описать задачу» — единый словарь CTA. */
 export default function FunnelCtaRow({
   slug,
   kind,
   quizHref = "/#quiz",
+  botStart = "order",
 }: Props) {
   return (
     <div className="mt-8 flex flex-wrap gap-3">
       <NeonButton
-        href={siteConfig.telegramUrl}
+        href={telegramBotStartLink(botStart)}
         pulse
         onClick={() =>
           reachGoal("funnel_cta", { kind, slug, cta: "telegram" })
@@ -30,9 +34,9 @@ export default function FunnelCtaRow({
       <NeonButton
         href={quizHref}
         variant="ghost"
-        onClick={() => reachGoal("funnel_cta", { kind, slug, cta: "brief" })}
+        onClick={() => reachGoal("funnel_cta", { kind, slug, cta: "task" })}
       >
-        Собрать бриф за 30 сек
+        Описать задачу
       </NeonButton>
     </div>
   );

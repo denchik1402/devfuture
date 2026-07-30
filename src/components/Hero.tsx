@@ -79,19 +79,19 @@ function Hero() {
             className="inline-flex"
           >
             <NeonButton
-              href="#contact"
+              href={telegramBotStartLink("order")}
               pulse
-              onClick={() => reachGoal("open_contact", { place: "hero" })}
+              onClick={() => reachGoal("click_telegram", { place: "hero" })}
             >
-              Оставить бриф
+              Написать в Telegram
             </NeonButton>
           </span>
           <NeonButton
-            href={telegramBotStartLink("order")}
+            href="#quiz"
             variant="ghost"
-            onClick={() => reachGoal("click_telegram", { place: "hero_bot" })}
+            onClick={() => reachGoal("open_contact", { place: "hero_quiz" })}
           >
-            Открыть бота
+            Описать задачу
           </NeonButton>
         </div>
       </div>

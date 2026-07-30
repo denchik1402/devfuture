@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import NeonButton from "@/components/NeonButton";
-import { telegramBotStartLink } from "@/lib/site";
+import { telegramBriefLink } from "@/lib/site";
 
 const BOT_TYPES = [
   { id: "booking", label: "запись" },
@@ -19,7 +18,6 @@ const MENU_ITEMS = [
   { id: "catalog", label: "каталог" },
   { id: "statuses", label: "статусы" },
   { id: "faq", label: "FAQ" },
-  { id: "reminders", label: "напоминания" },
   { id: "roles", label: "роли" },
 ] as const;
 
@@ -58,7 +56,7 @@ function chipClass(active: boolean) {
 export default function ScenarioWizard() {
   const [step, setStep] = useState(0);
   const [botType, setBotType] = useState<BotTypeId>("booking");
-  const [menu, setMenu] = useState<MenuId[]>(["services", "slots", "reminders"]);
+  const [menu, setMenu] = useState<MenuId[]>(["services", "slots"]);
   const [roles, setRoles] = useState<RoleId>("admin_client");
   const [reminders, setReminders] = useState<ReminderId>("yes");
 
@@ -230,11 +228,11 @@ export default function ScenarioWizard() {
             {summary}
           </pre>
           <div className="mt-6 flex flex-wrap gap-3">
-            <NeonButton href={telegramBotStartLink("order")} pulse>
-              Открыть в боте
+            <NeonButton href={telegramBriefLink(summary)} pulse>
+              Написать в Telegram
             </NeonButton>
             <NeonButton href={briefHref} variant="ghost">
-              Открыть бриф
+              Печать заявки
             </NeonButton>
             <button
               type="button"
@@ -244,12 +242,6 @@ export default function ScenarioWizard() {
               Скачать .txt
             </button>
           </div>
-          <p className="mt-4 text-sm text-zinc-500">
-            Или{" "}
-            <Link href={briefHref} className="text-cyan-neon hover:underline">
-              /brief?message=…&amp;type=bot
-            </Link>
-          </p>
         </div>
       )}
 

@@ -40,7 +40,7 @@ export default function BriefClient() {
 
   const lines = useMemo(() => {
     return [
-      `Бриф DevFuture`,
+      `Заявка DevFuture`,
       `Дата: ${new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" })} (МСК)`,
       "",
       name ? `Имя: ${name}` : null,
@@ -75,10 +75,10 @@ export default function BriefClient() {
       </div>
       <article className="relative mx-auto max-w-2xl px-6 pb-24 pt-28 md:pt-32 print:pt-8">
         <p className="font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/80 print:text-black">
-          Бриф
+          Заявка
         </p>
         <h1 className="mt-3 font-display text-3xl font-bold text-white print:text-black">
-          One-pager для печати / PDF
+          Заявка DevFuture
         </h1>
         <p className="mt-3 text-sm text-zinc-400 print:text-zinc-700">
           Сохраните как PDF через «Печать» браузера или скачайте текст.
@@ -104,13 +104,13 @@ export default function BriefClient() {
             Скачать .txt
           </button>
           <NeonButton href={telegramBotStartLink("order")} variant="ghost">
-            Отправить в бота
+            Написать в Telegram
           </NeonButton>
         </div>
 
         <p className="mt-10 text-sm text-zinc-500 print:hidden">
           <Link href="/#quiz" className="text-cyan-neon hover:underline">
-            ← Вернуться к квизу
+            ← к форме на главной
           </Link>
         </p>
       </article>

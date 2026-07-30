@@ -7,14 +7,14 @@
 |--------------------|-------------------|
 | `click_telegram` | Клик в Telegram (nav, hero, float, footer…) |
 | `click_phone` | Клик по телефону |
-| `submit_brief` | Успешная отправка формы брифа |
+| `submit_brief` | Успешная отправка формы заявки |
 | `open_packages` | Переход/интерес к пакетам |
 | `open_service` | Открытие услуги |
 | `open_demo` | Открытие демо-блока / демо на лендинге |
 | `click_package` | Клик по пакету |
 | `scroll_75` | Прокрутка 75% главной |
 | `quiz_complete` | Завершение квиза (форма или Telegram) |
-| `open_contact` | CTA «Оставить бриф» в Hero |
+| `open_contact` | CTA «Описать задачу» / форма |
 | `lead_handoff` | Handoff заявки в Telegram |
 | `open_estimator` | Калькулятор пакетов → бот |
 | `view_resheniya` | Просмотр SEO-посадочной (`slug` в параметрах) |

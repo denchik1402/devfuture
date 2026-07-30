@@ -6,20 +6,20 @@ import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
 import NeonButton from "@/components/NeonButton";
 import { JsonLd } from "@/components/JsonLd";
-import { siteConfig, telegramBotStartLink } from "@/lib/site";
+import { telegramBotStartLink, telegramContactLink } from "@/lib/site";
 import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/seo";
 import { PACKAGES } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Как мы работаем — этапы, доступы и сопровождение",
   description:
-    "Процесс DevFuture: бриф → демо → сметa → итерации. Код и доступы у вас. Что входит в MVP и что остаётся на второй этап. Retainer от 15 000 ₽/мес.",
+    "Процесс DevFuture: задача → демо → смета → итерации. Код и доступы у вас. Что входит в MVP и что остаётся на второй этап. Абонемент поддержки от 15 000 ₽/мес.",
   alternates: { canonical: "/kak-rabotaem" },
 };
 
 const STEPS = [
   {
-    title: "Бриф и демо",
+    title: "Задача и демо",
     text: "Коротко фиксируем задачу. Для простого бота часто показываем рабочее демо в день обращения — вы кликаете сценарий до оплаты полной сметы.",
   },
   {
@@ -36,7 +36,7 @@ const STEPS = [
   },
   {
     title: "Сопровождение",
-    text: "Мелкие правки, обновления API, новые ветки сценария. Пакет поддержки (retainer) — если нужна постоянная команда рядом.",
+    text: "Мелкие правки, обновления API, новые ветки сценария. Абонемент поддержки — если нужна постоянная команда рядом.",
   },
 ];
 
@@ -65,7 +65,7 @@ const FAQ = [
   },
   {
     q: "Есть ли абонентское сопровождение?",
-    a: "Да — пакет поддержки от 15 000 ₽/мес: правки, мелкие фичи, мониторинг. Можно подключить после релиза.",
+    a: "Да — абонемент поддержки от 15 000 ₽/мес: правки, мелкие фичи, мониторинг. Можно подключить после релиза.",
   },
 ];
 
@@ -91,16 +91,16 @@ export default function KakRabotaemPage() {
             Как мы работаем
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 md:text-lg">
-            Один контур от брифа до сопровождения: демо раньше оплаты полной
-            сметы, код у вас, без раздувания MVP.
+            Один контур от первой задачи до сопровождения: демо раньше оплаты
+            полной сметы, код у вас, без раздувания MVP.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <NeonButton href="/#quiz" pulse>
-              Собрать бриф
+            <NeonButton href={telegramContactLink()} pulse>
+              Написать в Telegram
             </NeonButton>
-            <NeonButton href="/sobrat-scenarij" variant="ghost">
-              Собрать сценарий бота
+            <NeonButton href="/#quiz" variant="ghost">
+              Описать задачу
             </NeonButton>
           </div>
 
@@ -158,7 +158,7 @@ export default function KakRabotaemPage() {
           {support && (
             <section className="glass mt-14 rounded-2xl p-7 md:p-8">
               <p className="font-display text-xs uppercase tracking-[0.3em] text-purple-neon">
-                Retainer
+                Абонемент поддержки
               </p>
               <h2 className="mt-2 font-display text-2xl font-bold text-white">
                 {support.name} — от {support.priceFrom}
@@ -205,8 +205,8 @@ export default function KakRabotaemPage() {
               кейсы
             </Link>
             ,{" "}
-            <Link href="/brief" className="text-cyan-neon hover:underline">
-              бриф
+            <Link href="/sobrat-scenarij" className="text-cyan-neon hover:underline">
+              собрать сценарий
             </Link>
             .
           </p>

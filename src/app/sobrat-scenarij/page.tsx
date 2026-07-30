@@ -11,12 +11,12 @@ import ScenarioWizard from "./ScenarioWizard";
 export const metadata: Metadata = {
   title: "Собрать сценарий Telegram-бота",
   description:
-    "За 4 шага соберите черновик сценария бота: тип, меню, роли и напоминания. Скачайте .txt или откройте бриф / Telegram.",
+    "За 4 шага соберите черновик сценария бота: тип, меню, роли и напоминания. Скачайте .txt или напишите в Telegram.",
   alternates: { canonical: "/sobrat-scenarij" },
   openGraph: {
     title: "Собрать сценарий Telegram-бота | DevFuture",
     description:
-      "Тип бота → меню → роли → напоминания. Готовый черновик для брифа и демо.",
+      "Тип бота → меню → роли → напоминания. Готовый черновик сценария и демо.",
     url: `${siteConfig.url}/sobrat-scenarij`,
   },
 };
@@ -28,7 +28,7 @@ const HOWTO_STEPS = [
   },
   {
     name: "Отметьте пункты меню",
-    text: "Услуги, слоты, каталог, статусы, FAQ, напоминания, роли — что нужно в первой версии.",
+    text: "Услуги, слоты, каталог, статусы, FAQ, роли — что нужно в первой версии.",
   },
   {
     name: "Укажите роли",
@@ -48,7 +48,7 @@ export default function SobratScenarijPage() {
   const howTo = buildHowToSchema({
     name: "Как собрать сценарий Telegram-бота",
     description:
-      "Четыре шага: тип бота, пункты меню, роли и напоминания — затем сводка для брифа.",
+      "Четыре шага: тип бота, пункты меню, роли и напоминания — затем сводка сценария.",
     url: `${siteConfig.url}/sobrat-scenarij`,
     steps: HOWTO_STEPS,
   });
@@ -68,8 +68,8 @@ export default function SobratScenarijPage() {
             Собрать сценарий бота
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 md:text-lg">
-            Четыре ответа — черновик сценария. Откройте в боте, сохраните бриф
-            или скачайте текст.
+            Четыре ответа — черновик сценария. Напишите в Telegram, распечатайте
+            заявку или скачайте текст.
           </p>
 
           <div className="mt-10">

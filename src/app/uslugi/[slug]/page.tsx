@@ -14,7 +14,7 @@ import {
 } from "@/lib/services";
 import { getSeoLanding } from "@/lib/seo-landings";
 import { getBlogPost } from "@/lib/blog";
-import { siteConfig } from "@/lib/site";
+import { siteConfig, telegramBotStartLink } from "@/lib/site";
 import { buildFaqSchema, buildBreadcrumbSchema } from "@/lib/seo";
 
 type Props = { params: { slug: string } };
@@ -111,11 +111,11 @@ export default function ServicePage({ params }: Props) {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <NeonButton href="/#contact" pulse>
-              Оставить бриф
-            </NeonButton>
-            <NeonButton href={siteConfig.telegramUrl} variant="ghost">
+            <NeonButton href={telegramBotStartLink("order")} pulse>
               Написать в Telegram
+            </NeonButton>
+            <NeonButton href="/#quiz" variant="ghost">
+              Описать задачу
             </NeonButton>
           </div>
 

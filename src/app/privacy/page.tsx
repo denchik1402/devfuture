@@ -56,7 +56,7 @@ export default function PrivacyPage() {
             <ul className="list-disc space-y-1 pl-5 text-zinc-400">
               <li>имя или обращение;</li>
               <li>контакт (Telegram, телефон, email);</li>
-              <li>текст задачи / брифа;</li>
+              <li>текст задачи / заявки;</li>
               <li>
                 технические метки источника (страница, UTM, идентификаторы
                 рекламных кликов);

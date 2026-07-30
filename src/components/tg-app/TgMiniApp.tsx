@@ -20,10 +20,10 @@ const BASE_TABS: { id: Tab; label: string }[] = [
 ];
 
 const STATUS_PILLS: { id: LeadStatus; label: string }[] = [
-  { id: "new", label: "new" },
-  { id: "progress", label: "progress" },
-  { id: "wait", label: "wait" },
-  { id: "done", label: "done" },
+  { id: "new", label: "новая" },
+  { id: "progress", label: "в работе" },
+  { id: "wait", label: "ждём" },
+  { id: "done", label: "готово" },
 ];
 
 type LeadStats = {
@@ -813,9 +813,10 @@ export default function TgMiniApp() {
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider ${statusPillClass(lead.status, true)}`}
+                      className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] tracking-wider ${statusPillClass(lead.status, true)}`}
                     >
-                      {lead.status}
+                      {STATUS_PILLS.find((s) => s.id === lead.status)?.label ??
+                        lead.status}
                     </span>
                   </div>
 
@@ -868,68 +869,6 @@ export default function TgMiniApp() {
                     ))}
                   </div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() =>
-                        void patchLead(lead.id, { assigneeSelf: true })
-                      }
-                      className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-300 disabled:opacity-40"
-                    >
-                      Моя
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy || lead.tags?.includes("hot")}
-                      onClick={() => void patchLead(lead.id, { tag: "hot" })}
-                      className="rounded-full border border-amber-400/30 px-3 py-1.5 text-xs text-amber-300 disabled:opacity-40"
-                    >
-                      hot
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() =>
-                        void patchLead(lead.id, { snoozeDays: 1 })
-                      }
-                      className="rounded-full border border-violet-400/30 px-3 py-1.5 text-xs text-violet-300 disabled:opacity-40"
-                    >
-                      +1д
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() =>
-                        void patchLead(lead.id, { snoozeDays: 3 })
-                      }
-                      className="rounded-full border border-violet-400/30 px-3 py-1.5 text-xs text-violet-300 disabled:opacity-40"
-                    >
-                      +3д
-                    </button>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {REPLY_TEMPLATES.map((tpl) => (
-                      <button
-                        key={tpl.id}
-                        type="button"
-                        disabled={busy}
-                        onClick={() => {
-                          void navigator.clipboard?.writeText(tpl.text);
-                          setNoteDraft((prev) => ({
-                            ...prev,
-                            [lead.id]: tpl.text,
-                          }));
-                          webApp?.HapticFeedback?.impactOccurred("light");
-                        }}
-                        className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-zinc-400 disabled:opacity-40"
-                      >
-                        {tpl.title}
-                      </button>
-                    ))}
-                  </div>
-
                   <div className="mt-3 flex gap-2">
                     <input
                       value={noteDraft[lead.id] ?? ""}
@@ -956,6 +895,72 @@ export default function TgMiniApp() {
                       +
                     </button>
                   </div>
+
+                  <details className="mt-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2">
+                    <summary className="cursor-pointer select-none text-xs text-zinc-400 outline-none marker:text-zinc-600">
+                      Ещё действия
+                    </summary>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void patchLead(lead.id, { assigneeSelf: true })
+                        }
+                        className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-300 disabled:opacity-40"
+                      >
+                        Моя
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy || lead.tags?.includes("hot")}
+                        onClick={() => void patchLead(lead.id, { tag: "hot" })}
+                        className="rounded-full border border-amber-400/30 px-3 py-1.5 text-xs text-amber-300 disabled:opacity-40"
+                      >
+                        hot
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void patchLead(lead.id, { snoozeDays: 1 })
+                        }
+                        className="rounded-full border border-violet-400/30 px-3 py-1.5 text-xs text-violet-300 disabled:opacity-40"
+                      >
+                        +1д
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void patchLead(lead.id, { snoozeDays: 3 })
+                        }
+                        className="rounded-full border border-violet-400/30 px-3 py-1.5 text-xs text-violet-300 disabled:opacity-40"
+                      >
+                        +3д
+                      </button>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {REPLY_TEMPLATES.map((tpl) => (
+                        <button
+                          key={tpl.id}
+                          type="button"
+                          disabled={busy}
+                          onClick={() => {
+                            void navigator.clipboard?.writeText(tpl.text);
+                            setNoteDraft((prev) => ({
+                              ...prev,
+                              [lead.id]: tpl.text,
+                            }));
+                            webApp?.HapticFeedback?.impactOccurred("light");
+                          }}
+                          className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-zinc-400 disabled:opacity-40"
+                        >
+                          {tpl.title}
+                        </button>
+                      ))}
+                    </div>
+                  </details>
                 </article>
               );
             })}
