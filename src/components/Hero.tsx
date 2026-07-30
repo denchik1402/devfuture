@@ -7,6 +7,7 @@ import TechMarquee from "./TechMarquee";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 import { SPHERE_BURST_EVENT } from "@/lib/sphere-events";
+import { useTheme } from "./ThemeProvider";
 
 const ParticleSphere = dynamic(() => import("./ParticleSphere"), {
   ssr: false,
@@ -22,6 +23,7 @@ function triggerBurst() {
 }
 
 function Hero() {
+  const { theme } = useTheme();
   const [enableSphere, setEnableSphere] = useState(false);
 
   useEffect(() => {
@@ -39,6 +41,11 @@ function Hero() {
     setEnableSphere(!reduce && !mobile && !slow);
   }, []);
 
+  const vignette =
+    theme === "light"
+      ? "bg-[radial-gradient(ellipse_at_center,transparent_20%,#e8eef5_90%)]"
+      : "bg-[radial-gradient(ellipse_at_center,transparent_30%,#0A0A0A_85%)]";
+
   return (
     <section className="relative flex min-h-screen flex-col overflow-hidden">
       <div className="absolute inset-0 bg-void" />
@@ -46,12 +53,18 @@ function Hero() {
       <div className="absolute inset-0 bg-neon-radial" />
 
       {enableSphere ? (
-        <ParticleSphere className="absolute inset-0 z-[1] [contain:strict]" />
+        <ParticleSphere
+          key={theme}
+          theme={theme}
+          className="absolute inset-0 z-[1] [contain:strict]"
+        />
       ) : (
         <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.1),transparent_55%)]" />
       )}
 
-      <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,transparent_30%,#0A0A0A_85%)]" />
+      <div
+        className={`pointer-events-none absolute inset-0 z-[2] ${vignette}`}
+      />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-16 pt-24 text-center">
         <p className="hero-fade-up mb-4 font-display text-xs uppercase tracking-[0.35em] text-cyan-neon/80">

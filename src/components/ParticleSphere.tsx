@@ -6,6 +6,8 @@ import { SPHERE_BURST_EVENT } from "@/lib/sphere-events";
 
 type ParticleSphereProps = {
   className?: string;
+  /** light uses normal blending — additive vanishes on pale backgrounds */
+  theme?: "dark" | "light";
 };
 
 function getParticleCount() {
@@ -17,8 +19,9 @@ function getParticleCount() {
   return 1100;
 }
 
-function ParticleSphere({ className }: ParticleSphereProps) {
+function ParticleSphere({ className, theme = "dark" }: ParticleSphereProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isLight = theme === "light";
 
   useEffect(() => {
     const container = containerRef.current;
@@ -72,8 +75,9 @@ function ParticleSphere({ className }: ParticleSphereProps) {
       const positions = new Float32Array(particleCount * 3);
       const basePositions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
-      const colorCyan = new THREE.Color("#00F0FF");
-      const colorPurple = new THREE.Color("#B026FF");
+      // Darker / richer on light so particles don't wash out
+      const colorCyan = new THREE.Color(isLight ? "#0891b2" : "#00F0FF");
+      const colorPurple = new THREE.Color(isLight ? "#7e22ce" : "#B026FF");
       const colorMix = new THREE.Color();
 
       for (let i = 0; i < particleCount; i++) {
@@ -100,13 +104,13 @@ function ParticleSphere({ className }: ParticleSphereProps) {
       geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const material = new THREE.PointsMaterial({
-        size: 0.022,
+        size: isLight ? 0.032 : 0.022,
         vertexColors: true,
         transparent: true,
-        opacity: 0.9,
+        opacity: isLight ? 1 : 0.9,
         depthWrite: false,
         depthTest: false,
-        blending: THREE.AdditiveBlending,
+        blending: isLight ? THREE.NormalBlending : THREE.AdditiveBlending,
         sizeAttenuation: true,
       });
 
@@ -115,9 +119,9 @@ function ParticleSphere({ className }: ParticleSphereProps) {
 
       const ringGeo = new THREE.RingGeometry(2.05, 2.08, 64);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x00f0ff,
+        color: isLight ? 0x0891b2 : 0x00f0ff,
         transparent: true,
-        opacity: 0.12,
+        opacity: isLight ? 0.35 : 0.12,
         side: THREE.DoubleSide,
         depthWrite: false,
         depthTest: false,
@@ -274,7 +278,7 @@ function ParticleSphere({ className }: ParticleSphereProps) {
       if (timeoutId) window.clearTimeout(timeoutId);
       cleanup?.();
     };
-  }, []);
+  }, [isLight]);
 
   return (
     <div
