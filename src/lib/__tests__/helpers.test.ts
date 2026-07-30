@@ -16,13 +16,14 @@ describe("escapeHtml", () => {
 });
 
 describe("isValidContactBody", () => {
-  it("requires name, contact, type and message >= 10 chars", () => {
+  it("requires name, contact, type, message >= 10 and consent", () => {
     assert.equal(
       isValidContactBody({
         name: "Иван",
         contact: "@ivanov",
         type: "Бот",
         message: "Нужен простой бот",
+        consent: true,
       }),
       true
     );
@@ -31,7 +32,17 @@ describe("isValidContactBody", () => {
         name: "Иван",
         contact: "@ivanov",
         type: "Бот",
+        message: "Нужен простой бот",
+      }),
+      false
+    );
+    assert.equal(
+      isValidContactBody({
+        name: "Иван",
+        contact: "@ivanov",
+        type: "Бот",
         message: "коротко",
+        consent: true,
       }),
       false
     );
@@ -95,6 +106,14 @@ describe("parseStartPayload", () => {
     assert.deepEqual(parseStartPayload("/start svc_telegram-boty"), {
       kind: "service",
       slug: "telegram-boty",
+    });
+    assert.deepEqual(parseStartPayload("/start demo_booking"), {
+      kind: "demo",
+      demo: "booking",
+    });
+    assert.deepEqual(parseStartPayload("/start lead_abc123"), {
+      kind: "lead",
+      id: "abc123",
     });
   });
 });

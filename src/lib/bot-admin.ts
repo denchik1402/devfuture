@@ -43,8 +43,9 @@ export function adminKeyboard() {
       ],
       [
         { text: "🔔 Тест-пинг", callback_data: "admin:ping" },
-        { text: "⬅️ Клиентское меню", callback_data: "menu" },
+        { text: "⏰ SLA", callback_data: "admin:sla" },
       ],
+      [{ text: "⬅️ Клиентское меню", callback_data: "menu" }],
     ],
   };
 }

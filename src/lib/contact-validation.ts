@@ -4,8 +4,12 @@ export type ContactBody = {
   type?: string;
   message?: string;
   company?: string;
-  /** e.g. telegram_mini_app */
+  /** e.g. telegram_mini_app|utm:yandex */
   source?: string;
+  /** User accepted privacy policy */
+  consent?: boolean;
+  /** Telegram WebApp initData for Mini App posts */
+  initData?: string;
 };
 
 export function isValidContactBody(
@@ -19,7 +23,8 @@ export function isValidContactBody(
       body.contact?.trim() &&
       body.type?.trim() &&
       body.message?.trim() &&
-      body.message.trim().length >= 10
+      body.message.trim().length >= 10 &&
+      body.consent === true
   );
 }
 

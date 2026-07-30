@@ -26,3 +26,26 @@ cd /var/www/devfuture && npm run tg:set-webhook
 ```bash
 cd /var/www/devfuture && bash scripts/deploy.sh
 ```
+
+## Бэкап данных бота (`.data`)
+
+Заявки и пользователи бота лежат в `/var/www/devfuture/.data`. Деплой каталог не затирает, но нужен cron-бэкап:
+
+```bash
+chmod +x /var/www/devfuture/scripts/backup-bot-data.sh
+# ежедневно в 03:15
+crontab -e
+# 15 3 * * * /var/www/devfuture/scripts/backup-bot-data.sh >> /var/log/devfuture-backup.log 2>&1
+```
+
+Архивы: `/var/backups/devfuture/bot-data-*.tar.gz` (хранятся 14 дней по умолчанию).
+
+Проверка живости после деплоя:
+
+```bash
+curl -sS https://devfuture.ru/api/health
+```
+
+Ожидаем `"ok":true`, `telegramToken`, `dataWritable`.
+
+CRM (опционально): задайте `LEADS_WEBHOOK_URL` в `.env.local` (Make/Zapier/Sheets) — см. `.env.example` и `METRIKA.md` для целей аналитики.

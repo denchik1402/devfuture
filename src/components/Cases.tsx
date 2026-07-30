@@ -64,10 +64,10 @@ function Cases() {
         <div className="relative mx-auto max-w-6xl px-6">
           <Reveal>
             <p className="mb-3 font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/70">
-              Сценарии
+              Кейсы и сценарии
             </p>
             <h2 className="font-display text-3xl font-bold text-white md:text-4xl">
-              Примеры сценариев
+              Примеры с результатом
             </h2>
             <p className="mt-4 max-w-2xl text-zinc-400">
               Откройте карточку услуги или попробуйте{" "}

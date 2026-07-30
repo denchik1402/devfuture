@@ -18,7 +18,7 @@ export type BotLead = {
 
 const dataDir = path.join(process.cwd(), ".data");
 const leadsFile = path.join(dataDir, "bot-leads.json");
-const MAX_LEADS = 200;
+const MAX_LEADS = 500;
 
 let cache: BotLead[] | null = null;
 
@@ -100,6 +100,12 @@ export function updateLeadStatus(
 
 export function listLeads(limit = 10): BotLead[] {
   return load().slice(0, Math.max(1, limit));
+}
+
+export function findLeadByIdPrefix(prefix: string): BotLead | undefined {
+  const id = prefix.trim();
+  if (!id) return undefined;
+  return load().find((l) => l.id === id || l.id.startsWith(id));
 }
 
 export function deleteLead(id: string): BotLead | undefined {

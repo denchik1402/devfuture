@@ -4,6 +4,7 @@ import { rootMetadata } from "@/lib/metadata";
 import { buildOrganizationSchema, buildWebsiteSchema } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 import { YandexMetrika } from "@/components/YandexMetrika";
+import { AttributionCapture } from "@/components/AttributionCapture";
 import { MotionProvider } from "@/components/MotionProvider";
 import "./globals.css";
 
@@ -40,6 +41,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased bg-void text-zinc-100">
         <MotionProvider>
+          <AttributionCapture />
           <YandexMetrika />
           {children}
         </MotionProvider>

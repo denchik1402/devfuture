@@ -1,12 +1,14 @@
 "use client";
 
 import { memo, useCallback, useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { Send, Loader2, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
 import { BRIEF_TYPES } from "@/lib/content";
 import { siteConfig, telegramBriefLink, telegramContactLink } from "@/lib/site";
+import { formatSourceTag, loadAttribution } from "@/lib/attribution";
 import { reachGoal } from "@/lib/analytics";
 
 type BriefType = (typeof BRIEF_TYPES)[number]["value"];
@@ -22,6 +24,8 @@ function ContactForm() {
   const [message, setMessage] = useState("");
   const [company, setCompany] = useState(""); // honeypot
   const [source, setSource] = useState("contact_form");
+  const [consent, setConsent] = useState(false);
+  const [continueInBot, setContinueInBot] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
     "idle"
   );
@@ -30,6 +34,7 @@ function ContactForm() {
     name?: string;
     contact?: string;
     message?: string;
+    consent?: string;
   }>({});
   const [deliveredToBot, setDeliveredToBot] = useState(false);
 
@@ -89,6 +94,7 @@ function ContactForm() {
     if (message.trim().length < 10) {
       next.message = "Опишите задачу чуть подробнее (от 10 символов)";
     }
+    if (!consent) next.consent = "Нужно согласие на обработку данных";
     setFieldErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -104,6 +110,7 @@ function ContactForm() {
     setStatus("loading");
     setError("");
     setDeliveredToBot(false);
+    setContinueInBot("");
 
     const payload = {
       name: name.trim(),
@@ -111,7 +118,8 @@ function ContactForm() {
       type: BRIEF_TYPES.find((t) => t.value === type)?.label ?? type,
       message: message.trim(),
       company,
-      source,
+      source: formatSourceTag(source, loadAttribution()),
+      consent: true as const,
     };
 
     const openTelegramFallback = () => {
@@ -138,6 +146,8 @@ function ContactForm() {
         channel?: string;
         fallback?: string;
         error?: string;
+        leadId?: string;
+        continueInBot?: string;
       };
 
       if (!res.ok) {
@@ -156,6 +166,10 @@ function ContactForm() {
         return;
       }
 
+      if (data.continueInBot) {
+        setContinueInBot(data.continueInBot);
+      }
+
       if (data.delivered && data.channel === "telegram") {
         setDeliveredToBot(true);
         reachGoal("submit_brief", { channel: "telegram" });
@@ -169,6 +183,7 @@ function ContactForm() {
       setMessage("");
       setCompany("");
       setSource("contact_form");
+      setConsent(false);
       setFieldErrors({});
       setType(BRIEF_TYPES[0].value);
     } catch {
@@ -238,12 +253,21 @@ function ContactForm() {
                     : "Свяжемся в ближайшее время. Можно продублировать в Telegram — так быстрее."}
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <NeonButton href={siteConfig.telegramUrl}>
-                    Открыть Telegram
-                  </NeonButton>
+                  {continueInBot ? (
+                    <NeonButton href={continueInBot} pulse>
+                      Продолжить в боте
+                    </NeonButton>
+                  ) : (
+                    <NeonButton href={siteConfig.telegramUrl}>
+                      Открыть Telegram
+                    </NeonButton>
+                  )}
                   <button
                     type="button"
-                    onClick={() => setStatus("idle")}
+                    onClick={() => {
+                      setStatus("idle");
+                      setContinueInBot("");
+                    }}
                     className="text-sm text-zinc-500 underline-offset-4 hover:text-cyan-neon hover:underline"
                   >
                     Отправить ещё
@@ -256,11 +280,12 @@ function ContactForm() {
                 className="glass relative space-y-4 rounded-2xl p-6 md:p-8"
                 noValidate
               >
-                {source === "homepage_quiz" && (
+                {source === "homepage_quiz" ||
+                source.startsWith("homepage_quiz|") ? (
                   <p className="rounded-xl border border-cyan-neon/20 bg-cyan-neon/5 px-3 py-2 text-xs text-cyan-neon/90">
                     Prefill из быстрого брифа — дополните детали и отправьте.
                   </p>
-                )}
+                ) : null}
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block text-sm">
@@ -404,6 +429,35 @@ function ContactForm() {
                 {error && (
                   <p className="text-sm text-red-400" role="alert">
                     {error}
+                  </p>
+                )}
+
+                <label className="flex items-start gap-3 text-sm text-zinc-400">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => {
+                      setConsent(e.target.checked);
+                      if (fieldErrors.consent) {
+                        setFieldErrors((f) => ({ ...f, consent: undefined }));
+                      }
+                    }}
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/5 text-cyan-neon focus:ring-cyan-neon/30"
+                    required
+                  />
+                  <span>
+                    Согласен на обработку персональных данных.{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-cyan-neon underline-offset-2 hover:underline"
+                    >
+                      Политика конфиденциальности
+                    </Link>
+                  </span>
+                </label>
+                {fieldErrors.consent && (
+                  <p className="text-xs text-red-400" role="alert">
+                    {fieldErrors.consent}
                   </p>
                 )}
 

@@ -71,7 +71,7 @@ export const SEO_LANDINGS: SeoLanding[] = [
       },
     ],
     relatedService: "telegram-boty",
-    relatedLandings: ["bot-zapisi-klientov", "bot-dlya-internet-magazina", "mvp-za-1-den"],
+    relatedLandings: ["bot-zapisi-klientov", "bot-dlya-internet-magazina", "mvp-za-1-den", "avtomatizaciya-biznes-processov"],
     relatedPosts: ["kak-ustroen-bot-zayavok", "bot-s-rolyami-kak-ustroit"],
   },
   {
@@ -346,6 +346,103 @@ export const SEO_LANDINGS: SeoLanding[] = [
     relatedService: "telegram-boty",
     relatedLandings: ["lichnyy-kabinet-na-zakaz", "telegram-bot-pod-klyuch"],
     relatedPosts: ["bot-s-rolyami-kak-ustroit"],
+  },
+  {
+    slug: "avtomatizaciya-biznes-processov",
+    title: "Автоматизация бизнес-процессов — боты, уведомления, интеграции",
+    h1: "Автоматизация бизнес-процессов",
+    description:
+      "Уберём рутину: заявки, напоминания, статусы, синхронизация с таблицами и CRM. Фиксируем смету до старта, демо простого сценария часто в день обращения.",
+    priceFrom: "25 000 ₽",
+    term: "от нескольких дней",
+    keywords: [
+      "автоматизация бизнеса",
+      "автоматизация процессов",
+      "telegram автоматизация",
+      "интеграции без кода",
+    ],
+    bullets: [
+      "Сбор заявок и статусы в одном контуре",
+      "Напоминания клиентам и команде",
+      "Связка с Google Sheets / CRM / webhook",
+      "Без тяжёлого enterprise на годы",
+    ],
+    sections: [
+      {
+        heading: "Что автоматизируем",
+        paragraphs: [
+          "Типовые циклы: лид → квалификация → задача → напоминание → закрытие. Убираем копипаст между чатами и таблицами.",
+          "Стартуем с одного узкого сценария, который экономит часы в неделю — затем наращиваем.",
+        ],
+      },
+      {
+        heading: "Как идём",
+        paragraphs: [
+          "Короткий бриф, карта процесса, рабочий прототип. Дальше — итерации под ваш стек и доступы.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Нужна ли своя CRM?",
+        a: "Не обязательно. Часто хватает Telegram + таблица. CRM подключаем, если она уже есть.",
+      },
+      {
+        q: "Это RPA / low-code?",
+        a: "Делаем точечные интеграции и ботов. Не внедряем тяжёлые платформы «на всякий случай».",
+      },
+    ],
+    relatedService: "telegram-boty",
+    relatedLandings: [
+      "integraciya-crm-telegram",
+      "telegram-bot-pod-klyuch",
+      "bot-zapisi-klientov",
+    ],
+  },
+  {
+    slug: "integraciya-crm-telegram",
+    title: "Интеграция CRM и Telegram — заявки и статусы в одном потоке",
+    h1: "Интеграция CRM и Telegram",
+    description:
+      "Лиды из сайта и бота попадают в CRM, менеджеры получают уведомления в Telegram, статусы синхронизируются. Прозрачный поток без потери обращений.",
+    priceFrom: "30 000 ₽",
+    term: "от 1–2 недель",
+    keywords: [
+      "интеграция crm telegram",
+      "telegram crm",
+      "заявки в crm",
+      "уведомления менеджерам",
+    ],
+    bullets: [
+      "Создание сделки / лида из формы и бота",
+      "Уведомления менеджеру в Telegram",
+      "Обратный статус (по возможности API CRM)",
+      "Логи и обработка ошибок доставки",
+    ],
+    sections: [
+      {
+        heading: "Зачем связка",
+        paragraphs: [
+          "Сайт и бот дают быстрый вход, CRM — учёт. Без моста заявки теряются в чатах.",
+          "Подключаем webhook / API вашей CRM или промежуточный Make/Zapier, если так быстрее.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Какие CRM?",
+        a: "Bitrix24, amoCRM, кастом через webhook. Уточним по вашему тарифу и API.",
+      },
+      {
+        q: "Сколько длится?",
+        a: "Простой поток лида — часто за 1–2 недели после доступов. Сложные двусторонние статусы — дольше.",
+      },
+    ],
+    relatedService: "telegram-boty",
+    relatedLandings: [
+      "avtomatizaciya-biznes-processov",
+      "telegram-bot-pod-klyuch",
+    ],
   },
 ];
 

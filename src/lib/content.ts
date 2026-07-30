@@ -142,12 +142,12 @@ export const FEATURED_CASE = {
 
 export const SCENARIO_CASES = [
   {
-    title: "Бот записи клиентов",
-    category: "Telegram · быстрый старт",
+    title: "Салон → бот записи",
+    category: "Кейс · 1 день демо",
     description:
-      "Меню услуг → выбор слота → контакт → напоминание. Базовый сценарий собираем и показываем в день старта.",
-    stack: ["Aiogram", "Bot API"],
-    result: "Заявки в чат, без таблиц вручную",
+      "До: запись в WhatsApp и блокнот, путаница со слотами. После: меню услуг → слот → контакт → напоминание клиенту и пуш админу.",
+    stack: ["Telegram Bot API", "Напоминания"],
+    result: "−70% ручных переписок · демо в день старта · заявки в один чат",
     href: "/uslugi/telegram-boty",
     demoHref: "/#demo",
     gradient: "from-purple-neon/20 via-transparent to-cyan-neon/25",

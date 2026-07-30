@@ -15,6 +15,7 @@ const LINKS = [
   { label: "Демо", href: "/#demo" },
   { label: "Блог", href: "/blog" },
   { label: "Бриф", href: "/#quiz" },
+  { label: "Конфиденциальность", href: "/privacy" },
 ];
 
 function Footer() {
@@ -93,7 +94,13 @@ function Footer() {
         </div>
 
         <p className="mt-10 text-xs text-zinc-600">
-          © {new Date().getFullYear()} DevFuture. Все права защищены.
+          © {new Date().getFullYear()} DevFuture. Все права защищены.{" "}
+          <Link
+            href="/privacy"
+            className="underline-offset-2 hover:text-zinc-400 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
+          >
+            Политика конфиденциальности
+          </Link>
         </p>
       </div>
     </footer>

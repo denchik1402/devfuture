@@ -5,6 +5,7 @@ import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
 import { BRIEF_TYPES } from "@/lib/content";
 import { telegramBriefLink } from "@/lib/site";
+import { formatSourceTag, loadAttribution } from "@/lib/attribution";
 import { reachGoal } from "@/lib/analytics";
 
 const TIMELINES = [
@@ -50,6 +51,24 @@ function BriefQuiz() {
     [briefText]
   );
 
+  const messagePrefill = useMemo(
+    () =>
+      [`Срок: ${timeLabel}`, `Бюджет: ${budgetLabel}`, "", "Задача:"].join(
+        "\n"
+      ),
+    [timeLabel, budgetLabel]
+  );
+
+  const briefPdfHref = useMemo(() => {
+    const params = new URLSearchParams({
+      type,
+      timeline,
+      budget,
+      message: messagePrefill,
+    });
+    return `/brief?${params.toString()}`;
+  }, [type, timeline, budget, messagePrefill]);
+
   const goToForm = () => {
     reachGoal("quiz_complete", { type, timeline, budget, channel: "form" });
     try {
@@ -57,13 +76,8 @@ function BriefQuiz() {
         "df_quiz_prefill",
         JSON.stringify({
           type,
-          message: [
-            `Срок: ${timeLabel}`,
-            `Бюджет: ${budgetLabel}`,
-            "",
-            "Задача:",
-          ].join("\n"),
-          source: "homepage_quiz",
+          message: messagePrefill,
+          source: formatSourceTag("homepage_quiz", loadAttribution()),
         })
       );
     } catch {
@@ -135,6 +149,9 @@ function BriefQuiz() {
                 }
               >
                 Открыть в Telegram
+              </NeonButton>
+              <NeonButton href={briefPdfHref} variant="ghost">
+                Скачать бриф (PDF)
               </NeonButton>
             </div>
           </div>

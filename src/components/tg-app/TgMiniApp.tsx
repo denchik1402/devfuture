@@ -1,27 +1,59 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { FAQ_ITEMS, PACKAGES } from "@/lib/content";
 import { SERVICE_PAGES } from "@/lib/services";
+import { formatSourceTag, loadAttribution } from "@/lib/attribution";
 import { useTelegramWebApp } from "./useTelegramWebApp";
 
-type Tab = "home" | "offer" | "faq" | "lead";
+type Tab = "home" | "offer" | "demo" | "faq" | "lead";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "home", label: "Главная" },
   { id: "offer", label: "Пакеты" },
+  { id: "demo", label: "Демо" },
   { id: "faq", label: "FAQ" },
   { id: "lead", label: "Заявка" },
 ];
 
+const DEMO_CARDS = [
+  {
+    id: "booking",
+    title: "Запись",
+    hint: "Бот записи на услуги",
+    steps: ["Выберите услугу", "Выберите время", "Подтвердите запись"],
+    ctaMessage:
+      "Нужен бот записи: услуги, слоты, подтверждение и напоминания.",
+  },
+  {
+    id: "shop",
+    title: "Магазин",
+    hint: "Каталог и заказ в Telegram",
+    steps: ["Откройте каталог", "Добавьте в корзину", "Оформите заказ"],
+    ctaMessage:
+      "Нужен магазин в Telegram: каталог, корзина и оформление заказа.",
+  },
+  {
+    id: "lead",
+    title: "Заявка",
+    hint: "Сбор лидов и квалификация",
+    steps: ["Короткий вопрос", "Контакт", "Заявка у менеджера"],
+    ctaMessage:
+      "Нужен бот заявок: квалификация лида и передача менеджеру.",
+  },
+] as const;
+
 export default function TgMiniApp() {
-  const { webApp, user } = useTelegramWebApp();
+  const { webApp, user, initData } = useTelegramWebApp();
   const [tab, setTab] = useState<Tab>("home");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [type, setType] = useState<string>(PACKAGES[0]?.name || "Бот-MVP");
   const [message, setMessage] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [demoStep, setDemoStep] = useState<Record<string, number>>({});
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
     "idle"
   );
@@ -51,8 +83,19 @@ export default function TgMiniApp() {
     webApp?.HapticFeedback?.impactOccurred("light");
   };
 
+  const openLeadFromDemo = (demoMessage: string) => {
+    setMessage(demoMessage);
+    setType("Бот-MVP");
+    go("lead");
+  };
+
   async function submitLead(e: React.FormEvent) {
     e.preventDefault();
+    if (!consent) {
+      setStatus("error");
+      setError("Нужно согласие на обработку данных");
+      return;
+    }
     setStatus("loading");
     setError("");
     try {
@@ -64,8 +107,10 @@ export default function TgMiniApp() {
           contact,
           type,
           message,
-          source: "telegram_mini_app",
+          source: formatSourceTag("telegram_mini_app", loadAttribution()),
           company: "",
+          consent: true,
+          initData,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
@@ -79,6 +124,7 @@ export default function TgMiniApp() {
       }
       setStatus("ok");
       setMessage("");
+      setConsent(false);
       webApp?.HapticFeedback?.impactOccurred("medium");
     } catch {
       setStatus("error");
@@ -137,6 +183,13 @@ export default function TgMiniApp() {
                   className="glass rounded-full px-5 py-2.5 text-sm text-zinc-200"
                 >
                   Пакеты и услуги
+                </button>
+                <button
+                  type="button"
+                  onClick={() => go("demo")}
+                  className="glass rounded-full px-5 py-2.5 text-sm text-zinc-200"
+                >
+                  Смотреть демо
                 </button>
               </div>
             </div>
@@ -227,6 +280,99 @@ export default function TgMiniApp() {
                 </button>
               </article>
             ))}
+          </section>
+        )}
+
+        {tab === "demo" && (
+          <section className="space-y-4">
+            <h2 className="font-display text-lg font-semibold text-white">
+              Демо сценарии
+            </h2>
+            <p className="text-sm text-zinc-500">
+              Нажмите шаги — так выглядит мини-флоу бота. В конце можно сразу
+              оставить заявку.
+            </p>
+            {DEMO_CARDS.map((card) => {
+              const step = demoStep[card.id] ?? 0;
+              const done = step >= card.steps.length;
+              return (
+                <article key={card.id} className="glass rounded-2xl p-4">
+                  <p className="font-display text-base font-semibold text-white">
+                    {card.title}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">{card.hint}</p>
+                  <ol className="mt-4 space-y-2">
+                    {card.steps.map((label, i) => {
+                      const active = i === step;
+                      const completed = i < step;
+                      return (
+                        <li key={label}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDemoStep((prev) => ({
+                                ...prev,
+                                [card.id]: i,
+                              }));
+                              webApp?.HapticFeedback?.impactOccurred("light");
+                            }}
+                            className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition ${
+                              active
+                                ? "border-cyan-neon/40 bg-cyan-neon/10 text-cyan-neon"
+                                : completed
+                                  ? "border-white/10 text-zinc-300"
+                                  : "border-white/5 text-zinc-500"
+                            }`}
+                          >
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-current text-[11px]">
+                              {completed ? "✓" : i + 1}
+                            </span>
+                            {label}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {!done ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDemoStep((prev) => ({
+                            ...prev,
+                            [card.id]: Math.min(
+                              (prev[card.id] ?? 0) + 1,
+                              card.steps.length
+                            ),
+                          }));
+                          webApp?.HapticFeedback?.impactOccurred("light");
+                        }}
+                        className="rounded-full bg-neon-gradient px-4 py-2 text-sm font-semibold text-void"
+                      >
+                        Дальше
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => openLeadFromDemo(card.ctaMessage)}
+                        className="rounded-full bg-neon-gradient px-4 py-2 text-sm font-semibold text-void"
+                      >
+                        Хочу такой бот
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDemoStep((prev) => ({ ...prev, [card.id]: 0 }))
+                      }
+                      className="rounded-full border border-white/10 px-4 py-2 text-sm text-zinc-400"
+                    >
+                      Сбросить
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </section>
         )}
 
@@ -335,6 +481,24 @@ export default function TgMiniApp() {
                     placeholder="2–3 предложения о задаче"
                   />
                 </label>
+                <label className="flex items-start gap-3 text-sm text-zinc-400">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/5"
+                    required
+                  />
+                  <span>
+                    Согласен на обработку данных.{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-cyan-neon underline-offset-2 hover:underline"
+                    >
+                      Политика
+                    </Link>
+                  </span>
+                </label>
                 {error ? (
                   <p className="text-sm text-red-400">{error}</p>
                 ) : null}
@@ -352,13 +516,13 @@ export default function TgMiniApp() {
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-[#0a0a0a]/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-sm">
-        <div className="mx-auto grid max-w-lg grid-cols-4 gap-1 px-2">
+        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1 px-2">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => go(t.id)}
-              className={`rounded-xl px-2 py-2.5 text-center text-[11px] font-medium ${
+              className={`rounded-xl px-1 py-2.5 text-center text-[11px] font-medium ${
                 tab === t.id
                   ? "bg-cyan-neon/15 text-cyan-neon"
                   : "text-zinc-500"

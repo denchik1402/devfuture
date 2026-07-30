@@ -15,6 +15,7 @@ type TgWebApp = {
   close: () => void;
   themeParams?: Record<string, string>;
   colorScheme?: "light" | "dark";
+  initData?: string;
   initDataUnsafe?: { user?: TgWebAppUser };
   HapticFeedback?: {
     impactOccurred: (style: "light" | "medium" | "heavy") => void;
@@ -39,6 +40,7 @@ declare global {
 export function useTelegramWebApp() {
   const [webApp, setWebApp] = useState<TgWebApp | null>(null);
   const [user, setUser] = useState<TgWebAppUser | null>(null);
+  const [initData, setInitData] = useState("");
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
@@ -53,7 +55,8 @@ export function useTelegramWebApp() {
     }
     setWebApp(tg);
     setUser(tg.initDataUnsafe?.user ?? null);
+    setInitData(tg.initData || "");
   }, []);
 
-  return { webApp, user };
+  return { webApp, user, initData };
 }

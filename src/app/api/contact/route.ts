@@ -7,6 +7,8 @@ import {
 import { ingestLeadAndNotify } from "@/lib/bot-notify";
 import { clientIp, pruneRateLimitBuckets, rateLimit } from "@/lib/rate-limit";
 import { escapeHtml, getOwnerChatId, sendMessage } from "@/lib/telegram";
+import { verifyTelegramWebAppInitData } from "@/lib/telegram-webapp";
+import { telegramBotStartLink } from "@/lib/site";
 
 export const runtime = "nodejs";
 
@@ -71,40 +73,63 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Заполните имя, контакт, тип задачи и описание (от 10 символов)",
+          "Заполните имя, контакт, описание (от 10 символов) и согласие с политикой",
       },
       { status: 400 }
     );
+  }
+
+  let source = body.source?.trim() || "contact_form";
+  let fromId: number | undefined;
+  let username = extractTelegramUsername(body.contact.trim()) || undefined;
+  let chatId = 0;
+
+  const isMiniApp = source.includes("telegram_mini_app");
+  if (isMiniApp) {
+    const verified = verifyTelegramWebAppInitData(body.initData || "");
+    if (!verified.ok) {
+      return NextResponse.json(
+        { error: "Сессия Mini App не подтверждена. Откройте снова из Telegram." },
+        { status: 401 }
+      );
+    }
+    if (verified.user) {
+      fromId = verified.user.id;
+      chatId = verified.user.id;
+      if (verified.user.username) username = verified.user.username;
+    }
   }
 
   const name = body.name.trim();
   const contact = body.contact.trim();
   const type = body.type.trim();
   const message = body.message.trim();
-  const source = body.source?.trim() || "contact_form";
-  const tgUser = extractTelegramUsername(contact);
   const task = [`Тип: ${type}`, "", message].join("\n");
 
   try {
-    await ingestLeadAndNotify({
-      chatId: 0,
+    const lead = await ingestLeadAndNotify({
+      chatId,
       name,
       contact,
       task,
-      username: tgUser || undefined,
+      fromId,
+      username,
       source,
-      title: "🆕 <b>Новая заявка DevFuture</b>",
+      title: isMiniApp
+        ? "🆕 <b>Заявка из Mini App</b>"
+        : "🆕 <b>Новая заявка DevFuture</b>",
     });
     return NextResponse.json({
       ok: true,
       delivered: true,
       channel: "telegram",
+      leadId: lead.id,
+      continueInBot: telegramBotStartLink(`lead_${lead.id}`),
     });
   } catch (err) {
     console.error("[contact] ingest failed", err);
   }
 
-  // Fallback: plain notify without lead store
   const when = new Date().toLocaleString("ru-RU", {
     timeZone: "Europe/Moscow",
   });
@@ -121,13 +146,13 @@ export async function POST(request: Request) {
     escapeHtml(message),
   ].join("\n");
 
-  const replyMarkup = tgUser
+  const replyMarkup = username
     ? {
         inline_keyboard: [
           [
             {
               text: "Написать клиенту в Telegram",
-              url: `https://t.me/${tgUser}`,
+              url: `https://t.me/${username}`,
             },
           ],
         ],

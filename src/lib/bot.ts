@@ -24,6 +24,14 @@ import {
 } from "@/lib/bot-content";
 import { pushLeadStatusToCrm } from "@/lib/bot-crm";
 import {
+  demoIntro,
+  demoKeyboard,
+  demosMenuKeyboard,
+  demosMenuText,
+  demoStep,
+  isDemoKind,
+} from "@/lib/bot-demos";
+import {
   clearAllDrafts,
   deleteDraft,
   getDraft,
@@ -32,6 +40,7 @@ import {
 } from "@/lib/bot-drafts";
 import {
   deleteLead,
+  findLeadByIdPrefix,
   getLead,
   listLeads,
   STATUS_LABEL,
@@ -43,7 +52,9 @@ import {
   getSession,
   setSession,
 } from "@/lib/bot-sessions";
+import { formatSlaReport, maybePingSla } from "@/lib/bot-sla";
 import { listUserChatIds, touchUser, usersCount } from "@/lib/bot-users";
+import { PACKAGES } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
 import { SERVICE_PAGES } from "@/lib/services";
 import {
@@ -114,12 +125,13 @@ function mainKeyboard(admin = false) {
     ],
     [
       { text: "⚡ Демо за 1 день", callback_data: "speed" },
-      { text: "❓ FAQ", callback_data: "faq" },
+      { text: "🎮 Попробовать демо", callback_data: "demos" },
     ],
     [
+      { text: "❓ FAQ", callback_data: "faq" },
       { text: "💬 Задать вопрос", callback_data: "ask" },
-      { text: "🌐 Сайт", url: siteUrl("/") },
     ],
+    [{ text: "🌐 Сайт", url: siteUrl("/") }],
   ];
   if (admin) {
     rows.push([{ text: "🔐 Админ", callback_data: "admin" }]);
@@ -204,14 +216,24 @@ async function startOrder(
 ) {
   setDraft(chatId, { step: "name", source });
   const head = preface ? `${preface}\n\n` : "Давайте оформим заявку.\n\n";
+  const privacy = siteUrl("/privacy");
   await sendMessage(
     chatId,
-    `${head}Как к вам обращаться? <b>Напишите имя:</b>`,
+    [
+      head.trimEnd(),
+      "",
+      `Отправляя данные, вы соглашаетесь с <a href="${privacy}">политикой конфиденциальности</a>.`,
+      "",
+      "Как к вам обращаться? <b>Напишите имя:</b>",
+    ].join("\n"),
     { reply_markup: cancelKeyboard() }
   );
 }
 
 export async function handleTelegramUpdate(update: TelegramUpdate) {
+  void maybePingSla(4).catch((err) =>
+    console.error("[bot-sla]", err)
+  );
   if (update.callback_query) {
     await handleCallback(update.callback_query);
     return;
@@ -437,6 +459,62 @@ async function handleStart(
       return;
     }
   }
+  if (payload.kind === "demos") {
+    await sendMessage(chatId, demosMenuText(), {
+      reply_markup: demosMenuKeyboard(),
+    });
+    return;
+  }
+  if (payload.kind === "demo") {
+    await sendMessage(chatId, demoIntro(payload.demo), {
+      reply_markup: demoKeyboard(payload.demo),
+    });
+    return;
+  }
+  if (payload.kind === "support") {
+    const body = packageText("support");
+    if (body) {
+      await sendMessage(chatId, body, {
+        reply_markup: packageKeyboard("support"),
+      });
+      return;
+    }
+  }
+  if (payload.kind === "lead") {
+    const lead = findLeadByIdPrefix(payload.id) || getLead(payload.id);
+    if (!lead) {
+      await sendMessage(
+        chatId,
+        "Заявка не найдена. Можете оформить новую:",
+        { reply_markup: mainKeyboard(isAdmin(userId)) }
+      );
+      return;
+    }
+    await sendMessage(
+      chatId,
+      [
+        "<b>Заявка с сайта</b>",
+        `ID: <code>${escapeHtml(lead.id)}</code>`,
+        `Статус: ${STATUS_LABEL[lead.status]}`,
+        "",
+        `👤 ${escapeHtml(lead.name)}`,
+        `📱 ${escapeHtml(lead.contact)}`,
+        "",
+        escapeHtml(lead.task.slice(0, 800)),
+        "",
+        "Мы уже получили её. Можете дополнить вопрос или ждать ответа.",
+      ].join("\n"),
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "💬 Задать вопрос", callback_data: "ask" }],
+            [{ text: "⬅️ Меню", callback_data: "menu" }],
+          ],
+        },
+      }
+    );
+    return;
+  }
 
   await showClientMenu(chatId, userId, firstName);
 }
@@ -621,6 +699,18 @@ async function handleAdminCallback(
     return;
   }
 
+  if (data === "admin:sla") {
+    const text = formatSlaReport(4);
+    if (messageId) {
+      await editMessageText(chatId, messageId, text, {
+        reply_markup: adminKeyboard(),
+      });
+    } else {
+      await sendMessage(chatId, text, { reply_markup: adminKeyboard() });
+    }
+    return;
+  }
+
   if (data === "admin:broadcast") {
     setSession(userId, { type: "broadcast" });
     await sendMessage(
@@ -698,6 +788,38 @@ async function handleCallback(cb: TgCallback) {
     await sendMessage(chatId, `Статус обновлён:\n${note}`, {
       reply_markup: leadNotifyMarkup(lead),
     });
+    if (
+      parsed.status === "done" &&
+      lead.chatId &&
+      lead.chatId !== 0 &&
+      prev?.status !== "done"
+    ) {
+      const support = PACKAGES.find((p) => p.id === "support");
+      await sendMessage(
+        lead.chatId,
+        [
+          "✅ <b>Заявка закрыта</b>",
+          "",
+          "Если понадобится сопровождение после релиза — пакет поддержки:",
+          support
+            ? `<b>${escapeHtml(support.name)}</b> · от ${escapeHtml(support.priceFrom)}`
+            : "Сопровождение по retainer.",
+        ].join("\n"),
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "🛡 Поддержка",
+                  callback_data: "order:pkg_support",
+                },
+              ],
+              [{ text: "⬅️ Меню", callback_data: "menu" }],
+            ],
+          },
+        }
+      );
+    }
     return;
   }
 
@@ -806,6 +928,46 @@ async function handleCallback(cb: TgCallback) {
     deleteDraft(chatId);
     clearSession(chatId);
     await showClientMenu(chatId, userId, cb.from.first_name, messageId);
+    return;
+  }
+
+  if (data === "demos") {
+    const text = demosMenuText();
+    const markup = demosMenuKeyboard();
+    if (messageId) {
+      await editMessageText(chatId, messageId, text, { reply_markup: markup });
+    } else {
+      await sendMessage(chatId, text, { reply_markup: markup });
+    }
+    return;
+  }
+
+  if (data.startsWith("demo:")) {
+    const parts = data.split(":");
+    const kindRaw = parts[1] || "";
+    if (!isDemoKind(kindRaw)) return;
+    const step = parts.slice(2).join(":");
+    if (!step) {
+      const text = demoIntro(kindRaw);
+      const markup = demoKeyboard(kindRaw);
+      if (messageId) {
+        await editMessageText(chatId, messageId, text, {
+          reply_markup: markup,
+        });
+      } else {
+        await sendMessage(chatId, text, { reply_markup: markup });
+      }
+      return;
+    }
+    const next = demoStep(kindRaw, step);
+    if (!next) return;
+    if (messageId) {
+      await editMessageText(chatId, messageId, next.text, {
+        reply_markup: next.markup,
+      });
+    } else {
+      await sendMessage(chatId, next.text, { reply_markup: next.markup });
+    }
     return;
   }
 

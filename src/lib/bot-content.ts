@@ -9,7 +9,11 @@ export type StartPayload =
   | { kind: "faq" }
   | { kind: "packages" }
   | { kind: "package"; id: string }
-  | { kind: "service"; slug: string };
+  | { kind: "service"; slug: string }
+  | { kind: "demo"; demo: "booking" | "shop" }
+  | { kind: "demos" }
+  | { kind: "lead"; id: string }
+  | { kind: "support" };
 
 /** Parse /start payload (BotFather deep-link ?start=...) */
 export function parseStartPayload(text: string): StartPayload {
@@ -23,6 +27,19 @@ export function parseStartPayload(text: string): StartPayload {
   if (key === "faq") return { kind: "faq" };
   if (key === "packages" || key === "price" || key === "prices") {
     return { kind: "packages" };
+  }
+  if (key === "demos" || key === "try") return { kind: "demos" };
+  if (key === "demo_booking" || key === "booking") {
+    return { kind: "demo", demo: "booking" };
+  }
+  if (key === "demo_shop" || key === "shop") {
+    return { kind: "demo", demo: "shop" };
+  }
+  if (key === "support" || key === "retainer") return { kind: "support" };
+
+  if (key.startsWith("lead_")) {
+    const id = raw.slice(5).trim();
+    if (id) return { kind: "lead", id };
   }
 
   if (key.startsWith("pkg_")) {
