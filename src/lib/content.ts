@@ -150,7 +150,6 @@ export const SCENARIO_CASES = [
     result: "−70% ручных переписок · демо в день старта · заявки в один чат",
     href: "/keysy/salon-booking",
     demoHref: "/#demo",
-    gradient: "from-purple-neon/20 via-transparent to-cyan-neon/25",
   },
   {
     title: "Лендинг с заявкой",
@@ -161,7 +160,6 @@ export const SCENARIO_CASES = [
     result: "Первые лиды с понятной страницы",
     href: "/keysy/landing-leads",
     demoHref: null as string | null,
-    gradient: "from-cyan-neon/20 via-transparent to-purple-neon/30",
   },
   {
     title: "Кабинет статусов",
@@ -172,7 +170,6 @@ export const SCENARIO_CASES = [
     result: "Прозрачный поток задач в команде",
     href: "/keysy/status-cabinet",
     demoHref: null as string | null,
-    gradient: "from-purple-neon/25 via-transparent to-cyan-neon/20",
   },
   {
     title: "Десктоп-утилита",
@@ -183,7 +180,6 @@ export const SCENARIO_CASES = [
     result: "Меньше ручных операций у сотрудников",
     href: "/uslugi/desktop-prilozheniya",
     demoHref: null as string | null,
-    gradient: "from-cyan-neon/25 via-purple-neon/10 to-transparent",
   },
 ] as const;
 

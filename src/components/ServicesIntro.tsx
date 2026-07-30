@@ -27,20 +27,20 @@ function ServicesIntro() {
           </p>
         </Reveal>
 
-        <div className="mt-12 md:mt-14 grid gap-5 sm:grid-cols-2">
+        <div className="mt-12 md:mt-14 grid auto-rows-fr gap-5 sm:grid-cols-2">
           {SERVICE_PAGES.map((s, i) => (
-            <Reveal key={s.slug} delay={i * 0.06}>
+            <Reveal key={s.slug} delay={i * 0.06} className="h-full">
               <Link
                 href={`/uslugi/${s.slug}`}
                 onClick={() =>
                   reachGoal("open_service", { slug: s.slug })
                 }
-                className="glass block rounded-2xl p-6 transition hover:border-cyan-neon/30"
+                className="glass flex h-full flex-col rounded-2xl p-6 transition hover:border-cyan-neon/40 hover:shadow-[0_0_28px_rgba(0,240,255,0.1)]"
               >
                 <h3 className="font-display text-lg font-semibold text-white">
                   {s.name}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-zinc-400">
                   {s.description}
                 </p>
                 <p className="mt-4 text-xs uppercase tracking-wider text-cyan-neon/70">

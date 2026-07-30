@@ -88,9 +88,9 @@ function Cases() {
             <motion.article
               whileHover={hoverLift}
               transition={{ type: "spring", stiffness: 300, damping: 24 }}
-              className="glass group relative overflow-hidden rounded-2xl p-7 md:p-8"
+              className="case-card glass group relative overflow-hidden rounded-2xl p-7 md:p-8"
             >
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-cyan-neon/15 via-transparent to-purple-neon/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <div className="case-card-wash pointer-events-none absolute inset-0" />
 
               <div className="relative flex flex-wrap items-start justify-between gap-3">
                 <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-wider text-zinc-500">
@@ -147,17 +147,15 @@ function Cases() {
             </motion.article>
           </Reveal>
 
-          <div className="mt-12 md:mt-14 grid gap-5 sm:grid-cols-2">
+          <div className="mt-12 md:mt-14 grid auto-rows-fr gap-5 sm:grid-cols-2">
             {SCENARIO_CASES.map((item, i) => (
-              <Reveal key={item.title} delay={i * 0.08}>
+              <Reveal key={item.title} delay={i * 0.08} className="h-full">
                 <motion.article
                   whileHover={hoverLift}
                   transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                  className="glass group relative flex h-full flex-col overflow-hidden rounded-2xl p-7"
+                  className="case-card glass group relative flex h-full flex-col overflow-hidden rounded-2xl p-7"
                 >
-                  <div
-                    className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
-                  />
+                  <div className="case-card-wash pointer-events-none absolute inset-0" />
 
                   <div className="relative flex items-start justify-between gap-3">
                     <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-wider text-zinc-500">

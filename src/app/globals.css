@@ -405,9 +405,41 @@ html[data-theme="light"] .focus-visible\:outline-cyan-neon:focus-visible {
   outline-color: #0284c7 !important;
 }
 
-/* Sticky / float chrome */
-html[data-theme="light"] .backdrop-blur-md {
-  background-color: rgb(232 241 251 / 0.92) !important;
+/* Case cards: shared hover wash (works in dark + light) */
+.case-card {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.case-card-wash {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 240, 255, 0.14) 0%,
+    transparent 48%,
+    rgba(176, 38, 255, 0.18) 100%
+  );
+}
+.case-card:hover {
+  border-color: rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 28px rgba(0, 240, 255, 0.12);
+}
+.case-card:hover .case-card-wash {
+  opacity: 1;
+}
+
+html[data-theme="light"] .case-card:hover {
+  border-color: rgba(14, 165, 233, 0.55) !important;
+  box-shadow:
+    0 0 28px rgba(14, 165, 233, 0.22),
+    0 8px 24px rgba(139, 92, 246, 0.1) !important;
+}
+html[data-theme="light"] .case-card-wash {
+  background: linear-gradient(
+    135deg,
+    rgba(14, 165, 233, 0.16) 0%,
+    rgba(255, 255, 255, 0.4) 45%,
+    rgba(139, 92, 246, 0.14) 100%
+  );
 }
 
 /* Marquee diamonds more visible on light */
