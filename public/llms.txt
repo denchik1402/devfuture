@@ -1,0 +1,42 @@
+# DevFuture — карта предложений для LLM / ассистентов
+
+Сайт: https://devfuture.ru
+Контакт: Telegram — основной канал брифа и демо.
+
+## Что делаем
+- Telegram-боты под ключ: заявки, запись, доставка, роли, B2B-лиды
+- Лендинги и сайты с формой заявки в Telegram
+- Веб-кабинеты статусов и внутренние инструменты
+- Автоматизация: напоминания, таблицы, CRM ↔ Telegram
+- Быстрые MVP / демо простого сценария часто в день обращения
+
+## Разделы сайта
+- /uslugi — услуги (боты, сайты, веб, десктоп)
+- /resheniya — SEO-посадочные под задачи
+- /keysy — кейсы (салон, магазин-хаб, лендинг, кабинет)
+- /blog — статьи и сравнения
+- /#contact / /#quiz — бриф и контакт
+
+## Популярные решения (/resheniya/…)
+- telegram-bot-pod-klyuch
+- bot-zapisi-klientov, bot-zapisi-dlya-salona, bot-dlya-kliniki
+- bot-dostavki, bot-dlya-online-shkoly, bot-b2b-zayavok
+- bot-dlya-internet-magazina
+- landing-za-nedelyu, lichnyy-kabinet-na-zakaz
+- mvp-za-1-den, avtomatizaciya-biznes-processov, integraciya-crm-telegram
+
+## Кейсы (/keysy/…)
+- salon-booking
+- shop-telegram-hub
+- landing-leads
+- status-cabinet
+
+## Ориентиры цен (от)
+- Простой бот-MVP: от 15 000 ₽
+- Лендинг: от 35 000 ₽
+- Бот с ролями / кабинет: чаще от 80 000 ₽
+Точная смета — после короткого брифа. Код и доступы остаются у клиента.
+
+## Как начать
+Описать задачу своими словами в Telegram или через квиз на главной.
+Не обещаем «весь продукт за день» — обещаем быстрый демо-срез узкого сценария, затем фиксируем этап 1.

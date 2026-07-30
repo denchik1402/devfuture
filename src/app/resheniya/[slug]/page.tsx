@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TelegramFloat from "@/components/TelegramFloat";
 import NeonButton from "@/components/NeonButton";
+import LandingDemoCta from "@/components/LandingDemoCta";
 import { JsonLd } from "@/components/JsonLd";
 import {
   getAllSeoLandingSlugs,
@@ -70,6 +71,9 @@ export default function SeoLandingPage({ params }: Props) {
     { name: page.h1, path: `/resheniya/${page.slug}` },
   ]);
 
+  const showDemoCta =
+    page.slug.includes("bot") || page.relatedService === "telegram-boty";
+
   return (
     <main className="relative min-h-screen bg-void">
       <JsonLd data={[serviceSchema, buildFaqSchema(page.faq), crumbs]} />
@@ -127,6 +131,8 @@ export default function SeoLandingPage({ params }: Props) {
               ))}
             </ul>
           </section>
+
+          {showDemoCta ? <LandingDemoCta /> : null}
 
           {page.sections.map((section) => (
             <section key={section.heading} className="mt-14 max-w-3xl">

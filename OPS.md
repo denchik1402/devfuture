@@ -108,7 +108,31 @@ Zapier → Catch Hook → Google Sheets Create Spreadsheet Row → URL хука 
 
 ---
 
-## 3. Formspree (опциональный fallback)
+## 3. Cron ops (SLA + snooze + digest)
+
+После деплоя добавьте в `.env.local`:
+
+```
+CRON_SECRET=сгенерируйте_openssl_rand_hex_24
+```
+
+```bash
+pm2 restart devfuture --update-env
+crontab -e
+```
+
+Строки:
+
+```
+0 * * * * curl -fsS -H "x-cron-secret: ВАШ_CRON_SECRET" https://devfuture.ru/api/cron/ops >/dev/null
+0 10 * * 1 curl -fsS -H "x-cron-secret: ВАШ_CRON_SECRET" "https://devfuture.ru/api/cron/ops?digest=1" >/dev/null
+```
+
+Первая — каждый час (SLA + напоминания snooze). Вторая — понедельник 10:00 МСК-сервера (дайджест).
+
+---
+
+## 4. Formspree (опциональный fallback)
 
 Если Telegram недоступен, форма может уйти в Formspree:
 

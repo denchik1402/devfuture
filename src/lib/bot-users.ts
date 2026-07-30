@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import path from "path";
+import { atomicWriteJson } from "@/lib/atomic-write";
 
 /** Users who opened the bot — for admin broadcast */
 const dataDir = path.join(process.cwd(), ".data");
@@ -30,11 +31,10 @@ function load(): Map<number, UserRow> {
 function save(map: Map<number, UserRow>) {
   cache = map;
   try {
-    if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
     const list = Array.from(map.values())
       .sort((a, b) => b.at.localeCompare(a.at))
       .slice(0, MAX_USERS);
-    writeFileSync(usersFile, JSON.stringify(list), "utf8");
+    atomicWriteJson(usersFile, list);
   } catch (err) {
     console.error("[bot-users] save failed", err);
   }

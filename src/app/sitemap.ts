@@ -3,6 +3,7 @@ import { siteConfig } from "@/lib/site";
 import { getAllServiceSlugs } from "@/lib/services";
 import { getAllSeoLandingSlugs } from "@/lib/seo-landings";
 import { getAllBlogSlugs } from "@/lib/blog";
+import { getAllCaseSlugs } from "@/lib/cases";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
@@ -19,6 +20,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.88,
+  }));
+
+  const cases = getAllCaseSlugs().map((slug) => ({
+    url: `${siteConfig.url}/keysy/${slug}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
   }));
 
   const posts = getAllBlogSlugs().map((slug) => ({
@@ -48,6 +56,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${siteConfig.url}/keysy`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
       url: `${siteConfig.url}/blog`,
       lastModified,
       changeFrequency: "weekly",
@@ -61,6 +75,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...services,
     ...landings,
+    ...cases,
     ...posts,
   ];
 }

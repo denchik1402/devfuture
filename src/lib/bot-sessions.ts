@@ -1,10 +1,13 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import path from "path";
+import { atomicWriteJson } from "@/lib/atomic-write";
 
 export type BotSession =
   | { type: "reply"; targetChatId: number; leadId?: string }
   | { type: "broadcast"; text?: string }
-  | { type: "ask" };
+  | { type: "ask" }
+  | { type: "note"; leadId: string }
+  | { type: "find" };
 
 const dataDir = path.join(process.cwd(), ".data");
 const file = path.join(dataDir, "bot-admin-sessions.json");
@@ -33,12 +36,11 @@ function load(): Map<number, BotSession> {
 function save(map: Map<number, BotSession>) {
   cache = map;
   try {
-    if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
     const obj: Record<string, BotSession> = {};
     for (const [id, session] of Array.from(map.entries())) {
       obj[String(id)] = session;
     }
-    writeFileSync(file, JSON.stringify(obj), "utf8");
+    atomicWriteJson(file, obj);
   } catch (err) {
     console.error("[bot-sessions] save failed", err);
   }

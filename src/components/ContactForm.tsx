@@ -26,6 +26,7 @@ function ContactForm() {
   const [source, setSource] = useState("contact_form");
   const [consent, setConsent] = useState(false);
   const [continueInBot, setContinueInBot] = useState("");
+  const [leadId, setLeadId] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
     "idle"
   );
@@ -111,6 +112,7 @@ function ContactForm() {
     setError("");
     setDeliveredToBot(false);
     setContinueInBot("");
+    setLeadId("");
 
     const payload = {
       name: name.trim(),
@@ -168,6 +170,9 @@ function ContactForm() {
 
       if (data.continueInBot) {
         setContinueInBot(data.continueInBot);
+      }
+      if (data.leadId) {
+        setLeadId(data.leadId);
       }
 
       if (data.delivered && data.channel === "telegram") {
@@ -252,10 +257,25 @@ function ContactForm() {
                     ? "Мы получили сообщение в боте и скоро ответим."
                     : "Свяжемся в ближайшее время. Можно продублировать в Telegram — так быстрее."}
                 </p>
+                {leadId ? (
+                  <p className="mt-3 font-display text-xs text-zinc-500">
+                    ID заявки:{" "}
+                    <span className="text-cyan-neon/90">{leadId}</span>
+                  </p>
+                ) : null}
                 <div className="mt-6 flex flex-wrap gap-3">
                   {continueInBot ? (
-                    <NeonButton href={continueInBot} pulse>
-                      Продолжить в боте
+                    <NeonButton
+                      href={continueInBot}
+                      pulse
+                      onClick={() =>
+                        reachGoal("lead_handoff", {
+                          place: "handoff",
+                          ...(leadId ? { leadId } : {}),
+                        })
+                      }
+                    >
+                      Отслеживать в Telegram
                     </NeonButton>
                   ) : (
                     <NeonButton href={siteConfig.telegramUrl}>
@@ -267,6 +287,7 @@ function ContactForm() {
                     onClick={() => {
                       setStatus("idle");
                       setContinueInBot("");
+                      setLeadId("");
                     }}
                     className="text-sm text-zinc-500 underline-offset-4 hover:text-cyan-neon hover:underline"
                   >

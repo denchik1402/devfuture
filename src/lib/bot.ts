@@ -3,6 +3,8 @@ import {
   adminWelcomeText,
   formatAdminStats,
   formatRecentLeads,
+  formatSearchResults,
+  formatWeeklyDigest,
   isAdmin,
   leadDeleteConfirmKeyboard,
   leadNotifyMarkup,
@@ -39,10 +41,15 @@ import {
   type LeadDraft,
 } from "@/lib/bot-drafts";
 import {
+  addLeadNote,
+  addLeadTag,
   deleteLead,
   findLeadByIdPrefix,
   getLead,
   listLeads,
+  searchLeads,
+  setLeadAssignee,
+  setLeadRemindAt,
   STATUS_LABEL,
   updateLeadStatus,
 } from "@/lib/bot-leads";
@@ -257,6 +264,46 @@ async function handleMessage(message: TgMessage) {
 
   if (userId && isAdmin(userId)) {
     const session = getSession(userId);
+    if (session?.type === "note") {
+      if (text === "/cancel" || text === "отмена") {
+        clearSession(userId);
+        await sendMessage(chatId, "Заметка отменена.", {
+          reply_markup: adminKeyboard(),
+        });
+        return;
+      }
+      const lead = addLeadNote(session.leadId, text, userId);
+      clearSession(userId);
+      await sendMessage(
+        chatId,
+        lead
+          ? `📝 Заметка сохранена · <code>${escapeHtml(lead.id)}</code>`
+          : "Заявка не найдена.",
+        {
+          reply_markup: lead
+            ? leadNotifyMarkup(lead)
+            : adminKeyboard(),
+        }
+      );
+      return;
+    }
+    if (session?.type === "find") {
+      if (text === "/cancel" || text === "отмена") {
+        clearSession(userId);
+        await sendMessage(chatId, "Поиск отменён.", {
+          reply_markup: adminKeyboard(),
+        });
+        return;
+      }
+      clearSession(userId);
+      const hits = searchLeads(text, 8);
+      await sendMessage(chatId, formatSearchResults(hits, text), {
+        reply_markup: hits.length
+          ? leadsManageKeyboard(hits)
+          : adminKeyboard(),
+      });
+      return;
+    }
     if (session?.type === "reply") {
       if (text === "/cancel" || text === "отмена") {
         clearSession(userId);
@@ -715,6 +762,36 @@ async function handleAdminCallback(
     return;
   }
 
+  if (data === "admin:find") {
+    setSession(userId, { type: "find" });
+    await sendMessage(
+      chatId,
+      [
+        "<b>🔎 Поиск заявок</b>",
+        "Пришлите фрагмент: имя, контакт, тег, id или текст задачи.",
+        "Отмена: /cancel",
+      ].join("\n"),
+      {
+        reply_markup: {
+          inline_keyboard: [[{ text: "❌ Отмена", callback_data: "cancel" }]],
+        },
+      }
+    );
+    return;
+  }
+
+  if (data === "admin:digest") {
+    const text = [formatWeeklyDigest(), "", formatSlaReport(4)].join("\n\n");
+    if (messageId) {
+      await editMessageText(chatId, messageId, text, {
+        reply_markup: adminKeyboard(),
+      });
+    } else {
+      await sendMessage(chatId, text, { reply_markup: adminKeyboard() });
+    }
+    return;
+  }
+
   if (data === "admin:broadcast") {
     setSession(userId, { type: "broadcast" });
     await sendMessage(
@@ -873,9 +950,15 @@ async function handleCallback(cb: TgCallback) {
       await sendMessage(chatId, "Недостаточно прав.");
       return;
     }
-    const target = Number(data.slice("reply:".length));
+    const parts = data.slice("reply:".length).split(":");
+    const target = Number(parts[0]);
+    const leadId = parts[1];
     if (!Number.isFinite(target)) return;
-    setSession(userId, { type: "reply", targetChatId: target });
+    setSession(userId, {
+      type: "reply",
+      targetChatId: target,
+      leadId: leadId || undefined,
+    });
     await sendMessage(
       chatId,
       [
@@ -889,6 +972,90 @@ async function handleCallback(cb: TgCallback) {
           inline_keyboard: [[{ text: "❌ Отмена", callback_data: "cancel" }]],
         },
       }
+    );
+    return;
+  }
+
+  if (data.startsWith("note:")) {
+    if (!isAdmin(userId)) {
+      await sendMessage(chatId, "Недостаточно прав.");
+      return;
+    }
+    const id = data.slice(5);
+    if (!getLead(id)) {
+      await sendMessage(chatId, "Заявка не найдена.");
+      return;
+    }
+    setSession(userId, { type: "note", leadId: id });
+    await sendMessage(
+      chatId,
+      [
+        "<b>📝 Заметка к заявке</b>",
+        `<code>${escapeHtml(id)}</code>`,
+        "Напишите текст заметки одним сообщением.",
+        "Отмена: /cancel",
+      ].join("\n"),
+      {
+        reply_markup: {
+          inline_keyboard: [[{ text: "❌ Отмена", callback_data: "cancel" }]],
+        },
+      }
+    );
+    return;
+  }
+
+  if (data.startsWith("claim:")) {
+    if (!isAdmin(userId) || !userId) {
+      await sendMessage(chatId, "Недостаточно прав.");
+      return;
+    }
+    const id = data.slice(6);
+    const lead = setLeadAssignee(id, userId);
+    await sendMessage(
+      chatId,
+      lead
+        ? `🙋 Заявка <code>${escapeHtml(id)}</code> назначена на вас.`
+        : "Заявка не найдена.",
+      { reply_markup: lead ? leadNotifyMarkup(lead) : adminKeyboard() }
+    );
+    return;
+  }
+
+  if (data.startsWith("snz:")) {
+    if (!isAdmin(userId)) {
+      await sendMessage(chatId, "Недостаточно прав.");
+      return;
+    }
+    const m = data.match(/^snz:(\d+):([A-Za-z0-9]+)$/);
+    if (!m) return;
+    const days = Number(m[1]);
+    const id = m[2];
+    const when = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    const lead = setLeadRemindAt(id, when);
+    await sendMessage(
+      chatId,
+      lead
+        ? `⏳ Напомню через ${days} д. · <code>${escapeHtml(id)}</code>`
+        : "Заявка не найдена.",
+      { reply_markup: lead ? leadNotifyMarkup(lead) : adminKeyboard() }
+    );
+    return;
+  }
+
+  if (data.startsWith("tag:")) {
+    if (!isAdmin(userId)) {
+      await sendMessage(chatId, "Недостаточно прав.");
+      return;
+    }
+    const m = data.match(/^tag:([a-z0-9_-]+):([A-Za-z0-9]+)$/i);
+    if (!m) return;
+    const lead = addLeadTag(m[2], m[1]);
+    await sendMessage(
+      chatId,
+      lead
+        ? `🏷 Тег «${escapeHtml(m[1])}» · <code>${escapeHtml(m[2])}</code>`
+        : "Заявка не найдена.",
+      { reply_markup: lead ? leadNotifyMarkup(lead) : adminKeyboard() }
     );
     return;
   }

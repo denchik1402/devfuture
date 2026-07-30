@@ -1,9 +1,9 @@
 import { escapeHtml } from "@/lib/telegram";
 
-export type DemoKind = "booking" | "shop";
+export type DemoKind = "booking" | "shop" | "qualify";
 
 export function isDemoKind(v: string): v is DemoKind {
-  return v === "booking" || v === "shop";
+  return v === "booking" || v === "shop" || v === "qualify";
 }
 
 export function demoIntro(kind: DemoKind) {
@@ -13,6 +13,14 @@ export function demoIntro(kind: DemoKind) {
       "",
       "Это учебный сценарий — как у салона или клиники.",
       "Выберите услугу:",
+    ].join("\n");
+  }
+  if (kind === "qualify") {
+    return [
+      "<b>Демо: квалификация лида</b>",
+      "",
+      "Короткий опрос как на сайте — ниша и бюджет.",
+      "Выберите нишу:",
     ].join("\n");
   }
   return [
@@ -29,6 +37,16 @@ export function demoKeyboard(kind: DemoKind) {
       inline_keyboard: [
         [{ text: "✂️ Стрижка", callback_data: "demo:booking:cut" }],
         [{ text: "💅 Маникюр", callback_data: "demo:booking:nails" }],
+        [{ text: "⬅️ Меню", callback_data: "menu" }],
+      ],
+    };
+  }
+  if (kind === "qualify") {
+    return {
+      inline_keyboard: [
+        [{ text: "Салон / услуги", callback_data: "demo:qualify:salon" }],
+        [{ text: "Магазин / доставка", callback_data: "demo:qualify:shop" }],
+        [{ text: "B2B / заявки", callback_data: "demo:qualify:b2b" }],
         [{ text: "⬅️ Меню", callback_data: "menu" }],
       ],
     };
@@ -160,6 +178,85 @@ export function demoStep(
     }
   }
 
+  if (kind === "qualify") {
+    if (step === "salon" || step === "shop" || step === "b2b") {
+      const niche =
+        step === "salon"
+          ? "Салон / услуги"
+          : step === "shop"
+            ? "Магазин / доставка"
+            : "B2B / заявки";
+      return {
+        text: [
+          `<b>Ниша:</b> ${escapeHtml(niche)}`,
+          "",
+          "Ориентир по бюджету:",
+        ].join("\n"),
+        markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "15–40 тыс.",
+                callback_data: `demo:qualify:budget:${step}:15`,
+              },
+            ],
+            [
+              {
+                text: "40–100 тыс.",
+                callback_data: `demo:qualify:budget:${step}:40`,
+              },
+            ],
+            [
+              {
+                text: "от 100 тыс.",
+                callback_data: `demo:qualify:budget:${step}:100`,
+              },
+            ],
+            [{ text: "⬅️ Назад", callback_data: "demo:qualify" }],
+          ],
+        },
+      };
+    }
+    if (step.startsWith("budget:")) {
+      const parts = step.split(":");
+      const nicheKey = parts[1] || "salon";
+      const band = parts[2] || "15";
+      const niche =
+        nicheKey === "shop"
+          ? "Магазин"
+          : nicheKey === "b2b"
+            ? "B2B"
+            : "Салон";
+      const budget =
+        band === "100" ? "от 100 тыс." : band === "40" ? "40–100 тыс." : "15–40 тыс.";
+      return {
+        text: [
+          "✅ <b>Лид квалифицирован (демо)</b>",
+          "",
+          `Ниша: ${escapeHtml(niche)}`,
+          `Бюджет: ${escapeHtml(budget)}`,
+          "",
+          "Админ получил бы карточку с этими полями и кнопками статусов.",
+          "Так же собираем заявки с сайта и Mini App.",
+        ].join("\n"),
+        markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "🚀 Хочу такой опрос",
+                callback_data: "order:demo_qualify",
+              },
+            ],
+            [
+              { text: "📅 Запись", callback_data: "demo:booking" },
+              { text: "⬅️ Меню", callback_data: "menu" },
+            ],
+          ],
+        },
+      };
+    }
+  }
+
   return null;
 }
 
@@ -176,6 +273,7 @@ export function demosMenuKeyboard() {
     inline_keyboard: [
       [{ text: "📅 Запись клиентов", callback_data: "demo:booking" }],
       [{ text: "🛒 Мини-магазин", callback_data: "demo:shop" }],
+      [{ text: "🎯 Квалификация лида", callback_data: "demo:qualify" }],
       [{ text: "⬅️ Меню", callback_data: "menu" }],
     ],
   };

@@ -1,5 +1,6 @@
 import { draftsCount } from "@/lib/bot-drafts";
 import {
+  formatWeeklyDigest,
   leadStats,
   listLeads,
   STATUS_LABEL,
@@ -38,6 +39,10 @@ export function adminKeyboard() {
         { text: "📋 Заявки", callback_data: "admin:leads" },
       ],
       [
+        { text: "🔎 Поиск", callback_data: "admin:find" },
+        { text: "📈 Дайджест", callback_data: "admin:digest" },
+      ],
+      [
         { text: "📣 Рассылка", callback_data: "admin:broadcast" },
         { text: "🧹 Черновики", callback_data: "admin:drafts" },
       ],
@@ -70,10 +75,13 @@ export function formatAdminStats() {
     `Заявок всего: <b>${stats.total}</b> (сегодня: <b>${stats.today}</b>)`,
     `🆕 Новые: <b>${stats.new}</b>`,
     `🔄 В работе: <b>${stats.progress}</b>`,
+    `⏳ Ждём: <b>${stats.wait}</b>`,
     `✅ Закрыты: <b>${stats.done}</b>`,
     `Открытых черновиков: <b>${drafts}</b>`,
   ].join("\n");
 }
+
+export { formatWeeklyDigest };
 
 function formatLead(lead: BotLead, index: number) {
   const when = new Date(lead.at).toLocaleString("ru-RU", {
@@ -84,13 +92,21 @@ function formatLead(lead: BotLead, index: number) {
     : `id ${lead.fromId ?? lead.chatId}`;
   const task =
     lead.task.length > 140 ? `${lead.task.slice(0, 140)}…` : lead.task;
+  const tags = lead.tags?.length
+    ? `🏷 ${lead.tags.map((t) => escapeHtml(t)).join(", ")}`
+    : "";
+  const who = lead.assigneeId ? `👤 assignee ${lead.assigneeId}` : "";
   return [
     `<b>${index + 1}.</b> ${STATUS_LABEL[lead.status]} · ${escapeHtml(lead.name)}`,
     `${escapeHtml(when)} · ${tg}`,
     `📱 ${escapeHtml(lead.contact)}`,
+    tags,
+    who,
     escapeHtml(task),
     `<code>${escapeHtml(lead.id)}</code>`,
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export function formatRecentLeads(limit = 5) {
@@ -103,7 +119,18 @@ export function formatRecentLeads(limit = 5) {
     "",
     ...leads.map((l, i) => formatLead(l, i)),
     "",
-    "Статус — кнопками под уведомлением. Удаление — 🗑 ниже.",
+    "Статус / заметки / snooze — кнопками под уведомлением.",
+  ].join("\n\n");
+}
+
+export function formatSearchResults(leads: BotLead[], query: string) {
+  if (!leads.length) {
+    return `<b>🔎 Поиск</b>\n\nНичего по «${escapeHtml(query)}».`;
+  }
+  return [
+    `<b>🔎 Поиск:</b> ${escapeHtml(query)}`,
+    "",
+    ...leads.map((l, i) => formatLead(l, i)),
   ].join("\n\n");
 }
 
@@ -132,13 +159,26 @@ export function leadDeleteConfirmKeyboard(id: string) {
 export function leadNotifyMarkup(lead: BotLead) {
   const rows: { text: string; callback_data?: string; url?: string }[][] = [
     [
-      { text: "🆕 Новая", callback_data: `ls:new:${lead.id}` },
-      { text: "🔄 В работе", callback_data: `ls:progress:${lead.id}` },
-      { text: "✅ Закрыть", callback_data: `ls:done:${lead.id}` },
+      { text: "🆕", callback_data: `ls:new:${lead.id}` },
+      { text: "🔄", callback_data: `ls:progress:${lead.id}` },
+      { text: "⏳", callback_data: `ls:wait:${lead.id}` },
+      { text: "✅", callback_data: `ls:done:${lead.id}` },
     ],
     [
-      { text: "💬 Ответить", callback_data: `reply:${lead.chatId}` },
-      { text: "🗑 Удалить", callback_data: `ld:${lead.id}` },
+      { text: "📝 Заметка", callback_data: `note:${lead.id}` },
+      { text: "🙋 Моя", callback_data: `claim:${lead.id}` },
+    ],
+    [
+      { text: "⏰ +1д", callback_data: `snz:1:${lead.id}` },
+      { text: "⏰ +3д", callback_data: `snz:3:${lead.id}` },
+      { text: "🏷 hot", callback_data: `tag:hot:${lead.id}` },
+    ],
+    [
+      {
+        text: "💬 Ответить",
+        callback_data: `reply:${lead.chatId}:${lead.id}`,
+      },
+      { text: "🗑", callback_data: `ld:${lead.id}` },
     ],
   ];
   if (lead.username) {
@@ -160,7 +200,7 @@ export function questionNotifyMarkup(fromChatId: number) {
 export function parseLeadStatusCallback(
   data: string
 ): { status: LeadStatus; id: string } | null {
-  const m = data.match(/^ls:(new|progress|done):([A-Za-z0-9]+)$/);
+  const m = data.match(/^ls:(new|progress|wait|done):([A-Za-z0-9]+)$/);
   if (!m) return null;
   return { status: m[1] as LeadStatus, id: m[2] };
 }

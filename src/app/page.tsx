@@ -21,6 +21,9 @@ const SolutionsStrip = dynamic(() => import("@/components/SolutionsStrip"), {
 const Packages = dynamic(() => import("@/components/Packages"), {
   loading: () => sectionFallback("min-h-[24rem]"),
 });
+const BudgetEstimator = dynamic(() => import("@/components/BudgetEstimator"), {
+  loading: () => sectionFallback("min-h-[28rem]"),
+});
 const Process = dynamic(() => import("@/components/Process"), {
   loading: () => sectionFallback("min-h-[28rem]"),
 });
@@ -48,6 +51,9 @@ const Footer = dynamic(() => import("@/components/Footer"), {
 const TelegramFloat = dynamic(() => import("@/components/TelegramFloat"), {
   ssr: false,
 });
+const QuizStickyBar = dynamic(() => import("@/components/QuizStickyBar"), {
+  ssr: false,
+});
 
 export default function Home() {
   return (
@@ -60,6 +66,7 @@ export default function Home() {
       <ServicesIntro />
       <SolutionsStrip />
       <Packages />
+      <BudgetEstimator />
       <Process />
       <BotDemo />
       <Cases />
@@ -68,6 +75,7 @@ export default function Home() {
       <Testimonials />
       <ContactForm />
       <Footer />
+      <QuizStickyBar />
       <TelegramFloat />
     </main>
   );

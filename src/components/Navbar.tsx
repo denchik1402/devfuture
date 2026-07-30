@@ -10,6 +10,7 @@ import { reachGoal } from "@/lib/analytics";
 const NAV = [
   { label: "Услуги", href: "/uslugi" },
   { label: "Решения", href: "/resheniya" },
+  { label: "Кейсы", href: "/keysy" },
   { label: "Пакеты", href: "/#packages" },
   { label: "Демо", href: "/#demo" },
   { label: "Блог", href: "/blog" },

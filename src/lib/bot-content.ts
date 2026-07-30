@@ -10,7 +10,7 @@ export type StartPayload =
   | { kind: "packages" }
   | { kind: "package"; id: string }
   | { kind: "service"; slug: string }
-  | { kind: "demo"; demo: "booking" | "shop" }
+  | { kind: "demo"; demo: "booking" | "shop" | "qualify" }
   | { kind: "demos" }
   | { kind: "lead"; id: string }
   | { kind: "support" };
@@ -34,6 +34,9 @@ export function parseStartPayload(text: string): StartPayload {
   }
   if (key === "demo_shop" || key === "shop") {
     return { kind: "demo", demo: "shop" };
+  }
+  if (key === "demo_qualify" || key === "qualify") {
+    return { kind: "demo", demo: "qualify" };
   }
   if (key === "support" || key === "retainer") return { kind: "support" };
 

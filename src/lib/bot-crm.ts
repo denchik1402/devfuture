@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import path from "path";
+import { atomicWriteJson } from "@/lib/atomic-write";
 import type { BotLead } from "@/lib/bot-leads";
 
 type CrmJob = {
@@ -10,8 +11,7 @@ type CrmJob = {
   payload: Record<string, unknown>;
 };
 
-const dataDir = path.join(process.cwd(), ".data");
-const queueFile = path.join(dataDir, "crm-queue.json");
+const queueFile = path.join(process.cwd(), ".data", "crm-queue.json");
 const MAX_ATTEMPTS = 8;
 const MAX_QUEUE = 200;
 
@@ -37,8 +37,7 @@ function load(): CrmJob[] {
 function save(jobs: CrmJob[]) {
   cache = jobs;
   try {
-    if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
-    writeFileSync(queueFile, JSON.stringify(jobs, null, 2), "utf8");
+    atomicWriteJson(queueFile, jobs);
   } catch (err) {
     console.error("[bot-crm] queue save failed", err);
   }

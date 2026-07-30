@@ -69,20 +69,34 @@ function BriefQuiz() {
     return `/brief?${params.toString()}`;
   }, [type, timeline, budget, messagePrefill]);
 
-  const goToForm = () => {
-    reachGoal("quiz_complete", { type, timeline, budget, channel: "form" });
+  const persistAndSticky = (channel: string) => {
+    const payload = {
+      type,
+      timeline,
+      budget,
+      message: messagePrefill,
+      source: formatSourceTag("homepage_quiz", loadAttribution()),
+    };
     try {
-      sessionStorage.setItem(
-        "df_quiz_prefill",
-        JSON.stringify({
-          type,
-          message: messagePrefill,
-          source: formatSourceTag("homepage_quiz", loadAttribution()),
-        })
-      );
+      sessionStorage.setItem("df_quiz_prefill", JSON.stringify(payload));
     } catch {
       // ignore
     }
+    window.dispatchEvent(
+      new CustomEvent("df:quiz-sticky", {
+        detail: {
+          type,
+          timeline,
+          budget,
+          message: messagePrefill,
+        },
+      })
+    );
+    reachGoal("quiz_complete", { type, timeline, budget, channel });
+  };
+
+  const goToForm = () => {
+    persistAndSticky("form");
     const el = document.getElementById("contact");
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -139,18 +153,15 @@ function BriefQuiz() {
               <NeonButton
                 href={telegramHref}
                 variant="ghost"
-                onClick={() =>
-                  reachGoal("quiz_complete", {
-                    type,
-                    timeline,
-                    budget,
-                    channel: "telegram",
-                  })
-                }
+                onClick={() => persistAndSticky("telegram")}
               >
                 Открыть в Telegram
               </NeonButton>
-              <NeonButton href={briefPdfHref} variant="ghost">
+              <NeonButton
+                href={briefPdfHref}
+                variant="ghost"
+                onClick={() => persistAndSticky("brief")}
+              >
                 Скачать бриф (PDF)
               </NeonButton>
             </div>

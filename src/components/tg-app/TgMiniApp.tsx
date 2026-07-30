@@ -1,21 +1,38 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { FAQ_ITEMS, PACKAGES } from "@/lib/content";
 import { SERVICE_PAGES } from "@/lib/services";
 import { formatSourceTag, loadAttribution } from "@/lib/attribution";
+import type { BotLead, LeadStatus } from "@/lib/bot-leads";
 import { useTelegramWebApp } from "./useTelegramWebApp";
 
-type Tab = "home" | "offer" | "demo" | "faq" | "lead";
+type Tab = "home" | "offer" | "demo" | "faq" | "lead" | "admin";
 
-const TABS: { id: Tab; label: string }[] = [
+const BASE_TABS: { id: Tab; label: string }[] = [
   { id: "home", label: "Главная" },
   { id: "offer", label: "Пакеты" },
   { id: "demo", label: "Демо" },
   { id: "faq", label: "FAQ" },
   { id: "lead", label: "Заявка" },
 ];
+
+const STATUS_PILLS: { id: LeadStatus; label: string }[] = [
+  { id: "new", label: "new" },
+  { id: "progress", label: "progress" },
+  { id: "wait", label: "wait" },
+  { id: "done", label: "done" },
+];
+
+type LeadStats = {
+  total: number;
+  today: number;
+  new: number;
+  progress: number;
+  wait: number;
+  done: number;
+};
 
 const DEMO_CARDS = [
   {
@@ -44,6 +61,20 @@ const DEMO_CARDS = [
   },
 ] as const;
 
+function statusPillClass(status: LeadStatus, active: boolean) {
+  if (!active) return "border-white/10 text-zinc-500";
+  switch (status) {
+    case "new":
+      return "border-cyan-neon/40 bg-cyan-neon/15 text-cyan-neon";
+    case "progress":
+      return "border-amber-400/40 bg-amber-400/15 text-amber-300";
+    case "wait":
+      return "border-violet-400/40 bg-violet-400/15 text-violet-300";
+    case "done":
+      return "border-emerald-400/40 bg-emerald-400/15 text-emerald-300";
+  }
+}
+
 export default function TgMiniApp() {
   const { webApp, user, initData } = useTelegramWebApp();
   const [tab, setTab] = useState<Tab>("home");
@@ -58,6 +89,53 @@ export default function TgMiniApp() {
     "idle"
   );
   const [error, setError] = useState("");
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [leads, setLeads] = useState<BotLead[]>([]);
+  const [leadStatsView, setLeadStatsView] = useState<LeadStats | null>(null);
+  const [crmLoading, setCrmLoading] = useState(false);
+  const [crmBusyId, setCrmBusyId] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
+
+  const tabs = useMemo(() => {
+    if (!isAdminUser) return BASE_TABS;
+    return [...BASE_TABS, { id: "admin" as const, label: "CRM" }];
+  }, [isAdminUser]);
+
+  const loadCrm = useCallback(async () => {
+    if (!initData) return false;
+    setCrmLoading(true);
+    try {
+      const res = await fetch("/api/admin/leads?limit=20", {
+        headers: { "x-telegram-init-data": initData },
+      });
+      if (!res.ok) {
+        setIsAdminUser(false);
+        return false;
+      }
+      const data = (await res.json()) as {
+        leads?: BotLead[];
+        stats?: LeadStats;
+      };
+      setIsAdminUser(true);
+      setLeads(Array.isArray(data.leads) ? data.leads : []);
+      setLeadStatsView(data.stats ?? null);
+      return true;
+    } catch {
+      setIsAdminUser(false);
+      return false;
+    } finally {
+      setCrmLoading(false);
+    }
+  }, [initData]);
+
+  useEffect(() => {
+    if (!initData) return;
+    void loadCrm();
+  }, [initData, loadCrm]);
+
+  useEffect(() => {
+    if (!isAdminUser && tab === "admin") setTab("home");
+  }, [isAdminUser, tab]);
 
   useEffect(() => {
     if (!user) return;
@@ -81,7 +159,43 @@ export default function TgMiniApp() {
   const go = (next: Tab) => {
     setTab(next);
     webApp?.HapticFeedback?.impactOccurred("light");
+    if (next === "admin" && isAdminUser) void loadCrm();
   };
+
+  async function patchLead(
+    id: string,
+    patch: {
+      status?: LeadStatus;
+      note?: string;
+      tag?: string;
+      assigneeSelf?: boolean;
+    }
+  ) {
+    if (!initData) return;
+    setCrmBusyId(id);
+    try {
+      const res = await fetch("/api/admin/leads", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-telegram-init-data": initData,
+        },
+        body: JSON.stringify({ id, ...patch }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        lead?: BotLead;
+        error?: string;
+      };
+      if (!res.ok || !data.lead) return;
+      setLeads((prev) =>
+        prev.map((l) => (l.id === data.lead!.id ? data.lead! : l))
+      );
+      webApp?.HapticFeedback?.impactOccurred("light");
+      if (patch.status || patch.assigneeSelf) void loadCrm();
+    } finally {
+      setCrmBusyId(null);
+    }
+  }
 
   const openLeadFromDemo = (demoMessage: string) => {
     setMessage(demoMessage);
@@ -513,11 +627,176 @@ export default function TgMiniApp() {
             )}
           </section>
         )}
+
+        {tab === "admin" && isAdminUser && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-lg font-semibold text-white">
+                CRM
+              </h2>
+              <button
+                type="button"
+                onClick={() => void loadCrm()}
+                className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400"
+              >
+                Обновить
+              </button>
+            </div>
+
+            {leadStatsView ? (
+              <div className="glass grid grid-cols-4 gap-2 rounded-2xl p-3 text-center">
+                {(
+                  [
+                    ["new", leadStatsView.new],
+                    ["progress", leadStatsView.progress],
+                    ["wait", leadStatsView.wait],
+                    ["done", leadStatsView.done],
+                  ] as const
+                ).map(([key, n]) => (
+                  <div key={key}>
+                    <p className="font-display text-lg text-white">{n}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-zinc-500">
+                      {key}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {crmLoading && !leads.length ? (
+              <p className="text-sm text-zinc-500">Загрузка…</p>
+            ) : null}
+
+            {!crmLoading && !leads.length ? (
+              <div className="glass rounded-2xl p-5 text-sm text-zinc-400">
+                Заявок пока нет.
+              </div>
+            ) : null}
+
+            {leads.map((lead) => {
+              const busy = crmBusyId === lead.id;
+              return (
+                <article key={lead.id} className="glass rounded-2xl p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-display text-base font-semibold text-white">
+                        {lead.name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-zinc-500">
+                        {lead.username ? `@${lead.username}` : `id ${lead.fromId ?? lead.chatId}`}
+                        {" · "}
+                        {new Date(lead.at).toLocaleString("ru-RU", {
+                          timeZone: "Europe/Moscow",
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider ${statusPillClass(lead.status, true)}`}
+                    >
+                      {lead.status}
+                    </span>
+                  </div>
+
+                  <p className="mt-2 text-sm text-zinc-300">{lead.contact}</p>
+                  <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-400">
+                    {lead.task}
+                  </p>
+
+                  {lead.tags?.length ? (
+                    <p className="mt-2 text-xs text-amber-300/80">
+                      {lead.tags.map((t) => `#${t}`).join(" ")}
+                    </p>
+                  ) : null}
+                  {lead.assigneeId ? (
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      assignee {lead.assigneeId}
+                    </p>
+                  ) : null}
+                  {lead.notes?.[0] ? (
+                    <p className="mt-2 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 text-xs text-zinc-400">
+                      {lead.notes[0].text}
+                    </p>
+                  ) : null}
+
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {STATUS_PILLS.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        disabled={busy || lead.status === s.id}
+                        onClick={() => void patchLead(lead.id, { status: s.id })}
+                        className={`rounded-full border px-2.5 py-1 text-[11px] disabled:opacity-40 ${statusPillClass(s.id, lead.status === s.id)}`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        void patchLead(lead.id, { assigneeSelf: true })
+                      }
+                      className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-300 disabled:opacity-40"
+                    >
+                      Моя
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy || lead.tags?.includes("hot")}
+                      onClick={() => void patchLead(lead.id, { tag: "hot" })}
+                      className="rounded-full border border-amber-400/30 px-3 py-1.5 text-xs text-amber-300 disabled:opacity-40"
+                    >
+                      hot
+                    </button>
+                  </div>
+
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      value={noteDraft[lead.id] ?? ""}
+                      onChange={(e) =>
+                        setNoteDraft((prev) => ({
+                          ...prev,
+                          [lead.id]: e.target.value,
+                        }))
+                      }
+                      placeholder="Заметка…"
+                      className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs outline-none focus:border-cyan-neon/40"
+                    />
+                    <button
+                      type="button"
+                      disabled={busy || !(noteDraft[lead.id] || "").trim()}
+                      onClick={async () => {
+                        const text = (noteDraft[lead.id] || "").trim();
+                        if (!text) return;
+                        await patchLead(lead.id, { note: text });
+                        setNoteDraft((prev) => ({ ...prev, [lead.id]: "" }));
+                      }}
+                      className="shrink-0 rounded-full bg-neon-gradient px-3 py-2 text-xs font-semibold text-void disabled:opacity-40"
+                    >
+                      +
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        )}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-[#0a0a0a]/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-sm">
-        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1 px-2">
-          {TABS.map((t) => (
+        <div
+          className={`mx-auto grid max-w-lg gap-1 px-2 ${
+            isAdminUser ? "grid-cols-6" : "grid-cols-5"
+          }`}
+        >
+          {tabs.map((t) => (
             <button
               key={t.id}
               type="button"
