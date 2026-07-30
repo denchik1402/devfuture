@@ -58,22 +58,19 @@ function Hero() {
       />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-16 pt-24 text-center">
-        <p className="hero-fade-up mb-4 font-display text-xs uppercase tracking-[0.35em] text-cyan-neon/80">
-          Цифровые продукты под ключ
-        </p>
-
         <p className="hero-fade-up font-display text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl">
           Dev<span className="text-neon">Future</span>
         </p>
 
         <h1 className="hero-fade-up hero-fade-up-delay-1 mt-6 max-w-4xl font-display text-2xl font-semibold leading-snug text-zinc-100 sm:text-3xl md:text-4xl">
-          Сайты, боты и автоматизация —{" "}
-          <span className="text-neon">с демо часто в день обращения</span>
+          Мы решаем задачи,{" "}
+          <span className="text-neon">которые не могут другие</span>
         </h1>
 
         <p className="hero-fade-up hero-fade-up-delay-2 mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-          Разбираем задачу, фиксируем смету и собираем рабочий продукт без
-          лишней сложности.
+          Сайты, веб-приложения, Telegram-боты, автоматизация и AI — под ключ.
+          Простой бот или MVP можем показать уже в день обращения: ценим ваше
+          время.
         </p>
 
         <div className="hero-fade-up hero-fade-up-delay-3 mt-10 flex flex-wrap items-center justify-center gap-4">
