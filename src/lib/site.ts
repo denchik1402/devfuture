@@ -23,11 +23,20 @@ export const siteConfig = {
   email:
     process.env.NEXT_PUBLIC_LEGAL_EMAIL?.trim() || "help@devfuture.ru",
   telegramUsername,
-  telegramUrl:
-    process.env.NEXT_PUBLIC_TELEGRAM_URL ?? `https://t.me/${telegramUsername}`,
+  /**
+   * Публичный Telegram — всегда бот.
+   * Личный менеджер: только NEXT_PUBLIC_TELEGRAM_USERNAME (не для CTA).
+   */
+  telegramUrl: `https://t.me/${
+    process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, "") ||
+    "dfuture_bot"
+  }`,
   sameAs: [
-    process.env.NEXT_PUBLIC_TELEGRAM_URL ?? `https://t.me/${telegramUsername}`,
-  ].filter((u): u is string => Boolean(u && u.length > 12)),
+    `https://t.me/${
+      process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, "") ||
+      "dfuture_bot"
+    }`,
+  ],
   description:
     "DevFuture — разработка сайтов, веб-приложений, десктопных программ, Telegram-ботов и AI-решений. Анализ, дизайн, разработка и поддержка под ключ.",
   shortDescription:
@@ -77,28 +86,32 @@ export const siteConfig = {
 
 export type SiteConfig = typeof siteConfig;
 
-/** Deep-link with prefilled brief for Telegram (личный аккаунт менеджера) */
+/** Deep-link with prefilled brief — через бота (не личный аккаунт) */
 export function telegramBriefLink(text: string) {
-  const encoded = encodeURIComponent(text);
-  return `https://t.me/${siteConfig.telegramUsername}?text=${encoded}`;
+  // У ботов нет ?text= как у личных чатов — открываем /start с меткой
+  void text;
+  return telegramBotStartLink("order");
 }
 
-/** One-click «хочу связаться» message */
+/** One-click «хочу связаться» → бот @dfuture_bot */
 export function telegramContactLink() {
-  return telegramBriefLink(
-    "Здравствуйте! Хочу обсудить проект с DevFuture."
-  );
+  return telegramBotStartLink("order");
 }
 
 /**
- * Username бота (не личного аккаунта). Для deep-link /start.
- * NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=dfuture_bot
+ * Username бота для всех публичных CTA.
+ * По умолчанию dfuture_bot — не подставляем личный аккаунт менеджера.
  */
 export function telegramBotUsername() {
   return (
     process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, "") ||
-    siteConfig.telegramUsername
+    "dfuture_bot"
   );
+}
+
+/** Публичный URL бота (для кнопок и sameAs) */
+export function telegramBotUrl() {
+  return `https://t.me/${telegramBotUsername()}`;
 }
 
 /** Deep-link в бота: https://t.me/bot?start=payload */

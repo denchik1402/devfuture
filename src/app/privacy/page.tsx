@@ -59,7 +59,7 @@ export default function PrivacyPage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Telegram @{siteConfig.telegramUsername}
+              Telegram @dfuture_bot
             </a>
           )}
           .
