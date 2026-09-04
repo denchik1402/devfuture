@@ -17,11 +17,16 @@ export function LegalRequisitesBlock({
   if (legalConfig.entityName) {
     rows.push({
       label: "Исполнитель",
-      value:
-        legalConfig.entityType === "самозанятый"
-          ? `${legalConfig.entityName} (самозанятый)`
-          : legalConfig.entityName,
+      value: legalConfig.entityName,
     });
+  }
+  if (legalConfig.entityType === "самозанятый") {
+    rows.push({
+      label: "Статус",
+      value: "плательщик НПД (самозанятый)",
+    });
+  } else if (legalConfig.entityType) {
+    rows.push({ label: "Статус", value: legalConfig.entityType });
   }
   if (legalConfig.inn) {
     rows.push({ label: "ИНН", value: legalConfig.inn });
