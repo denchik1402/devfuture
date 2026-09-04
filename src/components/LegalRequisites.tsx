@@ -6,6 +6,9 @@ export function LegalRequisitesBlock({ className = "" }: { className?: string })
   if (legalConfig.entityName) {
     rows.push({ label: "Исполнитель", value: legalConfig.entityName });
   }
+  if (legalConfig.entityType) {
+    rows.push({ label: "Статус", value: legalConfig.entityType });
+  }
   if (legalConfig.inn) {
     rows.push({ label: "ИНН", value: legalConfig.inn });
   }

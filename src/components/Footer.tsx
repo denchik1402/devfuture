@@ -66,11 +66,6 @@ function Footer() {
               Контакты и реквизиты
             </p>
             <LegalRequisitesBlock />
-            {!legalConfig.inn && (
-              <p className="mt-2 text-xs text-zinc-600">
-                Реквизиты публикуются после заполнения данных исполнителя.
-              </p>
-            )}
           </div>
 
           <div className="flex flex-col gap-6">
