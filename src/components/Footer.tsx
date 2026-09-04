@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import { Send, Phone, Mail } from "lucide-react";
+import { Send, Phone, Mail, ChevronDown } from "lucide-react";
 import NeonButton from "./NeonButton";
 import Reveal from "./Reveal";
 import { LegalRequisitesBlock } from "./LegalRequisites";
@@ -60,17 +60,47 @@ function Footer() {
           </div>
         </Reveal>
 
-        <div className="mt-12 grid gap-8 border-t border-white/5 pt-8 md:grid-cols-[1.2fr_1fr]">
-          <div>
-            <p className="mb-3 font-display text-xs uppercase tracking-[0.25em] text-zinc-500">
-              Контакты и реквизиты
+        <div className="mt-12 grid gap-8 border-t border-white/5 pt-8 md:grid-cols-[1.1fr_1fr]">
+          <div className="space-y-4">
+            <p className="font-display text-xs uppercase tracking-[0.25em] text-zinc-500">
+              Контакты
             </p>
-            <LegalRequisitesBlock />
-            {legalConfig.entityType === "самозанятый" && (
-              <p className="mt-2 text-xs text-zinc-600">
-                Плательщик налога на профессиональный доход (самозанятый)
-              </p>
-            )}
+            <ul className="space-y-2 text-sm text-zinc-400">
+              {legalConfig.email && (
+                <li>
+                  <a
+                    href={`mailto:${legalConfig.email}`}
+                    className="text-zinc-300 transition hover:text-cyan-neon"
+                  >
+                    {legalConfig.email}
+                  </a>
+                </li>
+              )}
+              {legalConfig.phone && legalConfig.phoneTel && (
+                <li>
+                  <a
+                    href={legalConfig.phoneTel}
+                    className="text-zinc-300 transition hover:text-cyan-neon"
+                  >
+                    {legalConfig.phone}
+                  </a>
+                </li>
+              )}
+            </ul>
+
+            {/* Реквизиты в HTML всегда есть (для ЗОЗПП / сканеров), визуально — по клику */}
+            <details className="group rounded-xl border border-white/10 bg-white/[0.02] open:bg-white/[0.03]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm text-zinc-500 transition hover:text-zinc-300 [&::-webkit-details-marker]:hidden">
+                <span>Реквизиты исполнителя</span>
+                <ChevronDown
+                  className="h-4 w-4 shrink-0 transition group-open:rotate-180"
+                  strokeWidth={1.5}
+                />
+              </summary>
+              <div className="border-t border-white/5 px-4 py-3">
+                <LegalRequisitesBlock variant="identity" />
+              </div>
+            </details>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -140,8 +170,7 @@ function Footer() {
         </div>
 
         <p className="mt-10 text-xs text-zinc-600">
-          © {new Date().getFullYear()} {legalConfig.entityName}. 0+ · Все права
-          защищены.
+          © {new Date().getFullYear()} DevFuture. 0+ · Все права защищены.
         </p>
       </div>
     </footer>

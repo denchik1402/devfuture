@@ -1,7 +1,18 @@
 import { legalConfig } from "@/lib/legal";
 
+type Variant = "full" | "identity";
+
+type Props = {
+  className?: string;
+  /** full — всё; identity — ФИО/ИНН/адрес без контактов (они снаружи) */
+  variant?: Variant;
+};
+
 /** Блок реквизитов для документов и подвала */
-export function LegalRequisitesBlock({ className = "" }: { className?: string }) {
+export function LegalRequisitesBlock({
+  className = "",
+  variant = "full",
+}: Props) {
   const rows: { label: string; value: string }[] = [];
   if (legalConfig.entityName) {
     rows.push({
@@ -24,11 +35,13 @@ export function LegalRequisitesBlock({ className = "" }: { className?: string })
   if (legalConfig.address) {
     rows.push({ label: "Адрес", value: legalConfig.address });
   }
-  if (legalConfig.email) {
-    rows.push({ label: "Email", value: legalConfig.email });
-  }
-  if (legalConfig.phone) {
-    rows.push({ label: "Телефон", value: legalConfig.phone });
+  if (variant === "full") {
+    if (legalConfig.email) {
+      rows.push({ label: "Email", value: legalConfig.email });
+    }
+    if (legalConfig.phone) {
+      rows.push({ label: "Телефон", value: legalConfig.phone });
+    }
   }
 
   if (rows.length === 0) return null;
