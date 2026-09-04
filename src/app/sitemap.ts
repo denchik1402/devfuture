@@ -91,6 +91,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.3,
     },
+    {
+      url: `${siteConfig.url}/oferta`,
+      lastModified,
+      changeFrequency: "yearly",
+      priority: 0.35,
+    },
+    {
+      url: `${siteConfig.url}/vozvrat`,
+      lastModified,
+      changeFrequency: "yearly",
+      priority: 0.35,
+    },
     ...services,
     ...landings,
     ...cases,

@@ -5,6 +5,7 @@ import { buildOrganizationSchema, buildWebsiteSchema } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 import { YandexMetrika } from "@/components/YandexMetrika";
 import { AttributionCapture } from "@/components/AttributionCapture";
+import CookieConsent from "@/components/CookieConsent";
 import { MotionProvider } from "@/components/MotionProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { themeInitScript } from "@/lib/theme-script";
@@ -47,6 +48,7 @@ export default function RootLayout({
           <MotionProvider>
             <AttributionCapture />
             <YandexMetrika />
+            <CookieConsent />
             {children}
           </MotionProvider>
         </ThemeProvider>

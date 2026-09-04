@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/site";
+import { legalConfig } from "@/lib/legal";
 
 export function buildOrganizationSchema() {
   return {
@@ -6,11 +7,38 @@ export function buildOrganizationSchema() {
     "@type": "ProfessionalService",
     "@id": `${siteConfig.url}/#organization`,
     name: siteConfig.name,
-    legalName: siteConfig.legalName,
+    legalName: legalConfig.entityName,
     url: siteConfig.url,
     description: siteConfig.description,
-    ...(siteConfig.phone
-      ? { telephone: siteConfig.phone.replace(/[^\d+]/g, "") }
+    ...(legalConfig.phone
+      ? { telephone: legalConfig.phone.replace(/[^\d+]/g, "") }
+      : {}),
+    ...(legalConfig.email ? { email: legalConfig.email } : {}),
+    ...(legalConfig.address
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: legalConfig.address,
+            addressCountry: "RU",
+          },
+        }
+      : {}),
+    ...(legalConfig.inn
+      ? {
+          taxID: legalConfig.inn,
+          identifier: [
+            { "@type": "PropertyValue", name: "ИНН", value: legalConfig.inn },
+            ...(legalConfig.ogrn
+              ? [
+                  {
+                    "@type": "PropertyValue",
+                    name: legalConfig.ogrn.length === 15 ? "ОГРНИП" : "ОГРН",
+                    value: legalConfig.ogrn,
+                  },
+                ]
+              : []),
+          ],
+        }
       : {}),
     image: `${siteConfig.url}/opengraph-image`,
     logo: {

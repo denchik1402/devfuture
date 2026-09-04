@@ -1,18 +1,31 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Script from "next/script";
 import { getMetrikaId } from "@/lib/analytics";
+import { analyticsAllowed } from "@/lib/cookie-consent";
+import type { CookieConsentValue } from "@/lib/legal";
 
 /**
- * Yandex Metrika counter. Set NEXT_PUBLIC_YANDEX_METRIKA_ID in .env.local
- * Goals to create in Metrika UI: click_telegram, click_phone, submit_brief,
- * open_packages, open_service, open_demo, click_package, scroll_75, quiz_complete,
- * open_contact, lead_handoff, open_estimator, view_resheniya, view_case, view_blog,
- * funnel_cta
+ * Yandex Metrika — только после согласия на аналитику (cookie-баннер).
+ * Goals: см. METRIKA.md
  */
 export function YandexMetrika() {
   const id = getMetrikaId();
-  if (!id) return null;
+  const [allowed, setAllowed] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setAllowed(analyticsAllowed());
+    sync();
+    const onConsent = (e: Event) => {
+      const detail = (e as CustomEvent<CookieConsentValue>).detail;
+      setAllowed(detail === "accepted");
+    };
+    window.addEventListener("df:cookie-consent", onConsent);
+    return () => window.removeEventListener("df:cookie-consent", onConsent);
+  }, []);
+
+  if (!id || !allowed) return null;
 
   const snippet = `
     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -29,20 +42,8 @@ export function YandexMetrika() {
   `;
 
   return (
-    <>
-      <Script id="yandex-metrika" strategy="lazyOnload">
-        {snippet}
-      </Script>
-      <noscript>
-        <div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`https://mc.yandex.ru/watch/${id}`}
-            style={{ position: "absolute", left: "-9999px" }}
-            alt=""
-          />
-        </div>
-      </noscript>
-    </>
+    <Script id="yandex-metrika" strategy="afterInteractive">
+      {snippet}
+    </Script>
   );
 }

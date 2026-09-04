@@ -1,173 +1,235 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import {
+  LegalDoc,
+  LegalSection,
+} from "@/components/LegalDoc";
+import { LegalRequisitesBlock } from "@/components/LegalRequisites";
+import { legalConfig } from "@/lib/legal";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
   description:
-    "Как DevFuture обрабатывает персональные данные, полученные через сайт и Telegram-бота.",
+    "Политика обработки персональных данных DevFuture: 152-ФЗ, 420-ФЗ, cookie, инциденты, права субъектов.",
   alternates: { canonical: "/privacy" },
   robots: { index: true, follow: true },
 };
 
 export default function PrivacyPage() {
   return (
-    <main className="relative min-h-screen bg-void">
-      <Navbar />
-      <article className="relative mx-auto max-w-3xl px-6 pb-24 pt-28 md:pt-32">
-        <p className="font-display text-xs uppercase tracking-[0.3em] text-cyan-neon/80">
-          Legal
+    <LegalDoc title="Политика конфиденциальности">
+      <LegalSection title="1. Общие положения">
+        <p>
+          Настоящая Политика определяет порядок обработки персональных данных
+          (ПДн) на сайте {siteConfig.url}, в Telegram-боте и Mini App студии{" "}
+          {siteConfig.name} в соответствии с Федеральным законом от 27.07.2006
+          № 152-ФЗ «О персональных данных», изменениями, внесёнными Федеральным
+          законом от 30.11.2024 № 420-ФЗ (положения о порядке и сроках
+          реагирования на инциденты и усилении ответственности операторов,
+          вступившие в силу 30.05.2025), и иными нормами РФ.
         </p>
-        <h1 className="mt-3 font-display text-3xl font-bold text-white md:text-4xl">
-          Политика конфиденциальности
-        </h1>
-        <p className="mt-4 text-sm text-zinc-500">
-          Актуально на {new Date().toLocaleDateString("ru-RU")} ·{" "}
-          {siteConfig.name} ({siteConfig.url})
+        <p>
+          Используя сайт, отправляя заявку или продолжая взаимодействие после
+          ознакомления с Политикой, вы подтверждаете, что прочитали её условия.
+          Согласие на обработку ПДн при отправке форм и на аналитические cookie
+          запрашивается отдельно (чекбокс / cookie-баннер).
         </p>
+      </LegalSection>
 
-        <div className="prose-invert mt-10 space-y-8 text-sm leading-relaxed text-zinc-300">
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              1. Кто обрабатывает данные
-            </h2>
-            <p>
-              Оператор: студия {siteConfig.name}. Контакт для вопросов по
-              данным:{" "}
-              <a
-                className="text-cyan-neon hover:underline"
-                href={siteConfig.telegramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Telegram @{siteConfig.telegramUsername}
-              </a>
-              .
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              2. Какие данные собираем
-            </h2>
-            <p>При обращении через сайт, бота или Mini App можем получить:</p>
-            <ul className="list-disc space-y-1 pl-5 text-zinc-400">
-              <li>имя или обращение;</li>
-              <li>контакт (Telegram, телефон, email);</li>
-              <li>текст задачи / заявки;</li>
-              <li>
-                технические метки источника (страница, UTM, идентификаторы
-                рекламных кликов);
-              </li>
-              <li>
-                в Telegram — id чата, username и имя, которые передаёт
-                мессенджер.
-              </li>
-            </ul>
-            <p className="text-zinc-400">
-              Не запрашиваем паспортные данные и не ведём обработку специальных
-              категорий ПДн без отдельного основания.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              3. Зачем
-            </h2>
-            <p>
-              Данные нужны, чтобы ответить на заявку, оценить задачу, заключить
-              договор на разработку и сопровождать проект. Аналитика сайта
-              (например, Яндекс Метрика) помогает улучшать страницы — при
-              включённых счётчиках.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              4. Правовые основания
-            </h2>
-            <p>
-              Обработка ведётся на основании вашего согласия (отправка формы /
-              заявки в боте) и/или для подготовки и исполнения договора по вашему
-              запросу (ст. 6 152-ФЗ).
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              5. Где храним и кому передаём
-            </h2>
-            <p>
-              Заявки обрабатываются на сервере проекта и дублируются в Telegram
-              администраторам. По желанию оператора заявка может уходить во
-              внешний CRM-webhook (таблицы / Make / Zapier). Хостинг и мессенджер
-              выступают обработчиками в рамках их политик.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              6. Срок хранения
-            </h2>
-            <p>
-              Заявки хранятся столько, сколько нужно для коммуникации и учёта
-              проектов, либо до вашего отзыва — если нет иных законных
-              оснований продолжать обработку. Технические логи ротируются в
-              разумные сроки.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              7. Ваши права
-            </h2>
-            <p>
-              Вы можете запросить уточнение, ограничение или удаление данных,
-              отозвать согласие и получить информацию об обработке — напишите в{" "}
-              <a
-                className="text-cyan-neon hover:underline"
-                href={siteConfig.telegramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Telegram
-              </a>
-              . Отзыв согласия не влияет на законность обработки до момента
-              отзыва.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              8. Cookies и метрика
-            </h2>
-            <p>
-              Сайт может использовать необходимые cookie и счётчик аналитики.
-              Отключить персонализированную аналитику можно настройками
-              браузера / блокировщиками и средствами Яндекс Метрики.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold text-white">
-              9. Изменения
-            </h2>
-            <p>
-              Актуальная версия всегда на этой странице. Существенные изменения
-              отразим датой обновления выше.
-            </p>
-          </section>
-        </div>
-
-        <p className="mt-12 text-sm text-zinc-500">
-          <Link href="/" className="text-cyan-neon hover:underline">
-            ← На главную
-          </Link>
+      <LegalSection title="2. Оператор персональных данных">
+        <p>
+          Оператор:{" "}
+          <strong className="text-zinc-200">{legalConfig.entityName}</strong>.
         </p>
-      </article>
-      <Footer />
-    </main>
+        <LegalRequisitesBlock />
+        <p>
+          Вопросы по ПДн:{" "}
+          {legalConfig.email ? (
+            <a
+              className="text-cyan-neon hover:underline"
+              href={`mailto:${legalConfig.email}`}
+            >
+              {legalConfig.email}
+            </a>
+          ) : (
+            <a
+              className="text-cyan-neon hover:underline"
+              href={siteConfig.telegramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Telegram @{siteConfig.telegramUsername}
+            </a>
+          )}
+          .
+        </p>
+        <p className="text-zinc-500">
+          Оператор направляет уведомление в Роскомнадзор об обработке ПДн в
+          случаях, предусмотренных ст. 22 152-ФЗ (реестр операторов
+          персональных данных), либо действует в рамках предусмотренных законом
+          исключений. Актуальный статус регистрации уточняйте у Оператора по
+          запросу.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="3. Какие данные обрабатываем">
+        <p>При обращении через сайт, бота или Mini App можем получить:</p>
+        <ul className="list-disc space-y-1 pl-5 text-zinc-400">
+          <li>имя или обращение;</li>
+          <li>контакт (Telegram, телефон, email);</li>
+          <li>текст задачи / заявки и связанные материалы;</li>
+          <li>
+            технические метки источника (страница, UTM, идентификаторы
+            рекламных кликов) — в localStorage браузера;
+          </li>
+          <li>
+            в Telegram — id чата, username и имя, которые передаёт мессенджер;
+          </li>
+          <li>
+            данные cookie и счётчиков аналитики — только после согласия (см.
+            раздел 8).
+          </li>
+        </ul>
+        <p className="text-zinc-400">
+          Не запрашиваем паспортные данные и не обрабатываем специальные
+          категории ПДн без отдельного законного основания.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="4. Цели и правовые основания">
+        <p>
+          Цели: ответ на заявку, оценка задачи, заключение и исполнение
+          договора на разработку и сопровождение, улучшение сайта (аналитика),
+          исполнение обязанностей по закону.
+        </p>
+        <p>
+          Основания (ст. 6 152-ФЗ): согласие субъекта; подготовка и исполнение
+          договора по запросу субъекта; законные интересы Оператора при условии
+          соблюдения прав субъекта.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="5. Хранение, передача, трансграничная передача">
+        <p>
+          Заявки обрабатываются на сервере проекта (хостинг в РФ или ином
+          регионе по договору с провайдером) и дублируются администраторам в
+          Telegram. По решению Оператора заявка может уходить во внешний
+          CRM-webhook (таблицы / Make / Zapier и т.п.).
+        </p>
+        <p>
+          Сторонние обработчики (хостинг, Telegram, платёжные и почтовые
+          сервисы, Яндекс Метрика при согласии) действуют в рамках своих
+          политик. При использовании сервисов, инфраструктура которых может
+          находиться за пределами РФ, возможна трансграничная передача ПДн.
+          Оператор обеспечивает меры, предусмотренные ст. 12 152-ФЗ (оценка
+          обеспечения защиты, уведомление РКН при необходимости, договоры с
+          обработчиками).
+        </p>
+      </LegalSection>
+
+      <LegalSection title="6. Срок хранения">
+        <p>
+          Заявки хранятся столько, сколько нужно для коммуникации, исполнения
+          договора и учёта, либо до отзыва согласия — если нет иных законных
+          оснований. Технические логи ротируются в разумные сроки. Cookie
+          аналитики — в сроки, заданные соответствующими сервисами и
+          настройками браузера.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="7. Права субъекта ПДн">
+        <p>
+          Вы можете запросить доступ, уточнение, ограничение или удаление
+          данных, отозвать согласие и получить информацию об обработке —
+          напишите на контакт Оператора (раздел 2). Ответ предоставляется в
+          сроки, установленные 152-ФЗ. Отзыв согласия не влияет на законность
+          обработки до момента отзыва.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="8. Cookies и аналитика">
+        <p>
+          <strong className="text-zinc-200">Необходимые:</strong> тема
+          оформления, согласие на cookie, технические параметры сессии —
+          нужны для работы сайта, не требуют отдельного согласия на аналитику.
+        </p>
+        <p>
+          <strong className="text-zinc-200">Аналитические:</strong> Яндекс
+          Метрика (и аналоги при подключении) — только после нажатия «Принять»
+          в cookie-баннере. Отказ («Только необходимые») отключает загрузку
+          счётчика. Изменить выбор можно, очистив данные сайта в браузере
+          (ключ {`df-cookie-consent`}) и обновив страницу.
+        </p>
+        <p>
+          Подробнее о Метрике:{" "}
+          <a
+            className="text-cyan-neon hover:underline"
+            href="https://yandex.ru/legal/metrica_termsofuse/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            условия Яндекса
+          </a>
+          .
+        </p>
+      </LegalSection>
+
+      <LegalSection title="9. Меры защиты и уведомление об инцидентах">
+        <p>
+          Оператор применяет организационные и технические меры: ограничение
+          доступа к заявкам, защищённый канал HTTPS, разграничение прав
+          администраторов, резервное копирование рабочих данных.
+        </p>
+        <p>
+          При установлении факта неправомерной или случайной передачи
+          (предоставления, распространения, доступа) ПДн, повлёкшей нарушение
+          прав субъектов (инцидент), Оператор действует по ст. 21.1 152-ФЗ (в
+          ред. с учётом 420-ФЗ):
+        </p>
+        <ul className="list-disc space-y-1 pl-5 text-zinc-400">
+          <li>
+            в течение <strong className="text-zinc-300">24 часов</strong> с
+            момента обнаружения — уведомляет Роскомнадзор о инциденте;
+          </li>
+          <li>
+            в течение <strong className="text-zinc-300">72 часов</strong> —
+            предоставляет результаты внутреннего расследования и сведения о
+            лицах, действиях которых стали причиной инцидента (при наличии);
+          </li>
+          <li>
+            принимает меры по устранению последствий, информирует затронутых
+            субъектов при необходимости и ведёт учёт инцидентов.
+          </li>
+        </ul>
+        <p>
+          Сообщения об инцидентах и подозрениях направляйте на контакт Оператора
+          (раздел 2) с пометкой «Инцидент ПДн».
+        </p>
+      </LegalSection>
+
+      <LegalSection title="10. Связанные документы">
+        <ul className="list-disc space-y-1 pl-5 text-zinc-400">
+          <li>
+            <Link href="/oferta" className="text-cyan-neon hover:underline">
+              Публичная оферта
+            </Link>
+          </li>
+          <li>
+            <Link href="/vozvrat" className="text-cyan-neon hover:underline">
+              Правила отказа и возврата
+            </Link>
+          </li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="11. Изменения Политики">
+        <p>
+          Актуальная версия всегда на этой странице. Дата обновления указана в
+          шапке. Существенные изменения отражаются новой датой; при необходимости
+          Оператор запросит повторное согласие.
+        </p>
+      </LegalSection>
+    </LegalDoc>
   );
 }
