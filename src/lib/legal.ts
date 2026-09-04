@@ -61,3 +61,12 @@ export const LEGAL_LINKS = [
   { href: "/oferta", label: "Публичная оферта" },
   { href: "/vozvrat", label: "Правила отказа и возврата" },
 ] as const;
+
+/** Текст согласия у форм (сайт / Mini App); ссылка на /privacy — рядом в UI */
+export const CONSENT_LABEL =
+  "Согласен(на) на обработку персональных данных, в том числе на передачу данных в Telegram для ответа на заявку.";
+
+/** Короткая строка для бота (HTML) */
+export function consentBotHtml(privacyUrl: string) {
+  return `Отправляя данные, вы соглашаетесь с <a href="${privacyUrl}">политикой конфиденциальности</a> и передачей контакта в Telegram для связи по заявке.`;
+}

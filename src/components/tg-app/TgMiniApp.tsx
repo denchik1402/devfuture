@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FAQ_ITEMS, PACKAGES } from "@/lib/content";
 import { SERVICE_PAGES } from "@/lib/services";
 import { formatSourceTag, loadAttribution } from "@/lib/attribution";
+import { CONSENT_LABEL } from "@/lib/legal";
 import type { BotLead, LeadStatus } from "@/lib/bot-leads";
 import { REPLY_TEMPLATES } from "@/lib/reply-templates";
 import { useTelegramWebApp } from "./useTelegramWebApp";
@@ -649,7 +650,7 @@ export default function TgMiniApp() {
                     required
                   />
                   <span>
-                    Согласен на обработку данных.{" "}
+                    {CONSENT_LABEL}{" "}
                     <Link
                       href="/privacy"
                       className="text-cyan-neon underline-offset-2 hover:underline"

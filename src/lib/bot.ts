@@ -65,6 +65,7 @@ import { listUserChatIds, touchUser, usersCount } from "@/lib/bot-users";
 import { getReplyTemplate } from "@/lib/reply-templates";
 import { PACKAGES } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
+import { consentBotHtml } from "@/lib/legal";
 import { SERVICE_PAGES } from "@/lib/services";
 import {
   answerCallbackQuery,
@@ -231,7 +232,7 @@ async function startOrder(
     [
       head.trimEnd(),
       "",
-      `Отправляя данные, вы соглашаетесь с <a href="${privacy}">политикой конфиденциальности</a>.`,
+      consentBotHtml(privacy),
       "",
       "Как к вам обращаться? <b>Напишите имя:</b>",
     ].join("\n"),

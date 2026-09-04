@@ -14,6 +14,7 @@ import {
 } from "@/lib/site";
 import { formatSourceTag, loadAttribution } from "@/lib/attribution";
 import { reachGoal } from "@/lib/analytics";
+import { CONSENT_LABEL } from "@/lib/legal";
 
 type BriefType = (typeof BRIEF_TYPES)[number]["value"];
 
@@ -471,7 +472,7 @@ function ContactForm() {
                     required
                   />
                   <span>
-                    Согласен на обработку персональных данных.{" "}
+                    {CONSENT_LABEL}{" "}
                     <Link
                       href="/privacy"
                       className="text-cyan-neon underline-offset-2 hover:underline"
