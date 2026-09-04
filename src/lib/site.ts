@@ -3,7 +3,8 @@
 const telegramUsername =
   process.env.NEXT_PUBLIC_TELEGRAM_USERNAME?.replace(/^@/, "") || "devfuture";
 
-const phoneRaw = process.env.NEXT_PUBLIC_PHONE?.trim() || "";
+const phoneRaw =
+  process.env.NEXT_PUBLIC_PHONE?.trim() || "+7 (985) 490-48-80";
 
 export const siteConfig = {
   name: "DevFuture",
@@ -18,6 +19,9 @@ export const siteConfig = {
   phoneTel: phoneRaw
     ? `tel:${phoneRaw.replace(/[^\d+]/g, "")}`
     : undefined,
+  /** Публичный email для связи и претензий */
+  email:
+    process.env.NEXT_PUBLIC_LEGAL_EMAIL?.trim() || "help@devfuture.ru",
   telegramUsername,
   telegramUrl:
     process.env.NEXT_PUBLIC_TELEGRAM_URL ?? `https://t.me/${telegramUsername}`,
@@ -61,6 +65,7 @@ export const siteConfig = {
   language: string;
   phone: string | undefined;
   phoneTel: string | undefined;
+  email: string;
   telegramUsername: string;
   telegramUrl: string;
   sameAs: string[];

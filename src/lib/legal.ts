@@ -20,7 +20,7 @@ export const legalConfig = {
   ogrn: env("NEXT_PUBLIC_LEGAL_OGRN"),
   /** Юридический адрес */
   address: env("NEXT_PUBLIC_LEGAL_ADDRESS"),
-  email: env("NEXT_PUBLIC_LEGAL_EMAIL"),
+  email: env("NEXT_PUBLIC_LEGAL_EMAIL") || siteConfig.email,
   phone: env("NEXT_PUBLIC_PHONE") || siteConfig.phone || "",
   phoneTel: siteConfig.phoneTel,
   /** Дата актуальности документов (ISO YYYY-MM-DD) */
