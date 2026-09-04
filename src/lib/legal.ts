@@ -1,6 +1,6 @@
 /**
  * Реквизиты и контакты для ЗОЗПП / 152-ФЗ.
- * Заполняются через NEXT_PUBLIC_* — иначе блок реквизитов скрыт.
+ * Публичные значения по умолчанию; переопределяются через NEXT_PUBLIC_*.
  */
 
 import { siteConfig } from "@/lib/site";
@@ -11,15 +11,19 @@ function env(name: string): string {
 }
 
 export const legalConfig = {
-  /** ООО «…» / ИП Иванов И.И. */
-  entityName: env("NEXT_PUBLIC_LEGAL_ENTITY") || siteConfig.legalName,
+  /** Для самозанятого — ФИО плательщика НПД */
+  entityName:
+    env("NEXT_PUBLIC_LEGAL_ENTITY") || "Дубков Денис Степанович",
   /** ИП | ООО | самозанятый */
-  entityType: env("NEXT_PUBLIC_LEGAL_TYPE") || "",
-  inn: env("NEXT_PUBLIC_LEGAL_INN"),
-  /** ОГРН или ОГРНИП */
+  entityType: env("NEXT_PUBLIC_LEGAL_TYPE") || "самозанятый",
+  inn: env("NEXT_PUBLIC_LEGAL_INN") || "263111879019",
+  /** ОГРН / ОГРНИП — у самозанятого без статуса ИП пусто */
   ogrn: env("NEXT_PUBLIC_LEGAL_OGRN"),
-  /** Юридический адрес */
-  address: env("NEXT_PUBLIC_LEGAL_ADDRESS"),
+  /**
+   * Адрес для ЗОЗПП: у самозанятого — адрес регистрации / регион деятельности.
+   * Уточните полный адрес регистрации при необходимости.
+   */
+  address: env("NEXT_PUBLIC_LEGAL_ADDRESS") || "г. Москва",
   email: env("NEXT_PUBLIC_LEGAL_EMAIL") || siteConfig.email,
   phone: env("NEXT_PUBLIC_PHONE") || siteConfig.phone || "",
   phoneTel: siteConfig.phoneTel,

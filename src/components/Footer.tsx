@@ -66,6 +66,11 @@ function Footer() {
               Контакты и реквизиты
             </p>
             <LegalRequisitesBlock />
+            {legalConfig.entityType === "самозанятый" && (
+              <p className="mt-2 text-xs text-zinc-600">
+                Плательщик налога на профессиональный доход (самозанятый)
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-6">

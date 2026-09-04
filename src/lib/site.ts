@@ -8,7 +8,7 @@ const phoneRaw =
 
 export const siteConfig = {
   name: "DevFuture",
-  legalName: "DevFuture",
+  legalName: "Дубков Денис Степанович",
   tagline: "Цифровые продукты под ключ",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://devfuture.ru",
   locale: "ru_RU",

@@ -4,10 +4,13 @@ import { legalConfig } from "@/lib/legal";
 export function LegalRequisitesBlock({ className = "" }: { className?: string }) {
   const rows: { label: string; value: string }[] = [];
   if (legalConfig.entityName) {
-    rows.push({ label: "Исполнитель", value: legalConfig.entityName });
-  }
-  if (legalConfig.entityType) {
-    rows.push({ label: "Статус", value: legalConfig.entityType });
+    rows.push({
+      label: "Исполнитель",
+      value:
+        legalConfig.entityType === "самозанятый"
+          ? `${legalConfig.entityName} (самозанятый)`
+          : legalConfig.entityName,
+    });
   }
   if (legalConfig.inn) {
     rows.push({ label: "ИНН", value: legalConfig.inn });
