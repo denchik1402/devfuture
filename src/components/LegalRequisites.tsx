@@ -6,12 +6,15 @@ type Props = {
   className?: string;
   /** full — всё; identity — ФИО/ИНН/адрес без контактов (они снаружи) */
   variant?: Variant;
+  /** Подсветка значений cyan-neon, как у email/телефона */
+  accent?: boolean;
 };
 
 /** Блок реквизитов для документов и подвала */
 export function LegalRequisitesBlock({
   className = "",
   variant = "full",
+  accent = false,
 }: Props) {
   const rows: { label: string; value: string }[] = [];
   if (legalConfig.entityName) {
@@ -51,6 +54,8 @@ export function LegalRequisitesBlock({
 
   if (rows.length === 0) return null;
 
+  const valueClass = accent ? "text-cyan-neon" : "text-zinc-300";
+
   return (
     <dl className={`space-y-2 text-sm text-zinc-400 ${className}`}>
       {rows.map((r) => (
@@ -61,7 +66,7 @@ export function LegalRequisitesBlock({
           <dt className="shrink-0 font-medium text-zinc-500 sm:w-28">
             {r.label}
           </dt>
-          <dd className="text-zinc-300">
+          <dd className={valueClass}>
             {r.label === "Email" ? (
               <a
                 href={`mailto:${r.value}`}

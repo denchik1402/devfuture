@@ -22,6 +22,9 @@ const LINKS = [
   { label: "Заявка", href: "/brief" },
 ];
 
+const legalLinkClass =
+  "text-sm text-zinc-500 transition-colors hover:text-cyan-neon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon";
+
 function Footer() {
   return (
     <footer className="relative border-t border-white/5 pt-16 pb-10">
@@ -61,46 +64,42 @@ function Footer() {
         </Reveal>
 
         <div className="mt-12 grid gap-8 border-t border-white/5 pt-8 md:grid-cols-[1.1fr_1fr]">
-          <div className="space-y-4">
-            <p className="font-display text-xs uppercase tracking-[0.25em] text-zinc-500">
+          <div>
+            <p className="mb-3 font-display text-xs uppercase tracking-[0.25em] text-zinc-500">
               Контакты
             </p>
-            <ul className="space-y-2 text-sm text-zinc-400">
+            <dl className="space-y-2 text-sm text-zinc-400">
               {legalConfig.email && (
-                <li>
-                  <a
-                    href={`mailto:${legalConfig.email}`}
-                    className="text-zinc-300 transition hover:text-cyan-neon"
-                  >
-                    {legalConfig.email}
-                  </a>
-                </li>
+                <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
+                  <dt className="shrink-0 font-medium text-zinc-500 sm:w-28">
+                    Email
+                  </dt>
+                  <dd>
+                    <a
+                      href={`mailto:${legalConfig.email}`}
+                      className="text-cyan-neon hover:underline"
+                    >
+                      {legalConfig.email}
+                    </a>
+                  </dd>
+                </div>
               )}
               {legalConfig.phone && legalConfig.phoneTel && (
-                <li>
-                  <a
-                    href={legalConfig.phoneTel}
-                    className="text-zinc-300 transition hover:text-cyan-neon"
-                  >
-                    {legalConfig.phone}
-                  </a>
-                </li>
+                <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
+                  <dt className="shrink-0 font-medium text-zinc-500 sm:w-28">
+                    Телефон
+                  </dt>
+                  <dd>
+                    <a
+                      href={legalConfig.phoneTel}
+                      className="text-cyan-neon hover:underline"
+                    >
+                      {legalConfig.phone}
+                    </a>
+                  </dd>
+                </div>
               )}
-            </ul>
-
-            {/* Реквизиты в HTML всегда есть (для ЗОЗПП / сканеров), визуально — по клику */}
-            <details className="group rounded-xl border border-white/10 bg-white/[0.02] open:bg-white/[0.03]">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm text-zinc-500 transition hover:text-zinc-300 [&::-webkit-details-marker]:hidden">
-                <span>Реквизиты исполнителя</span>
-                <ChevronDown
-                  className="h-4 w-4 shrink-0 transition group-open:rotate-180"
-                  strokeWidth={1.5}
-                />
-              </summary>
-              <div className="border-t border-white/5 px-4 py-3">
-                <LegalRequisitesBlock variant="identity" />
-              </div>
-            </details>
+            </dl>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -109,30 +108,39 @@ function Footer() {
               aria-label="Навигация в подвале"
             >
               {LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm text-zinc-500 transition-colors hover:text-cyan-neon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
-                >
+                <Link key={link.href} href={link.href} className={legalLinkClass}>
                   {link.label}
                 </Link>
               ))}
             </nav>
 
-            <nav
-              className="flex flex-wrap gap-x-6 gap-y-2"
-              aria-label="Правовая информация"
-            >
-              {LEGAL_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm text-zinc-500 transition-colors hover:text-cyan-neon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+            <div aria-label="Правовая информация">
+              <nav className="flex flex-wrap gap-x-6 gap-y-2">
+                {LEGAL_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={legalLinkClass}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <details className="group relative inline-block">
+                  <summary
+                    className={`${legalLinkClass} inline-flex cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden`}
+                  >
+                    Реквизиты исполнителя
+                    <ChevronDown
+                      className="h-3.5 w-3.5 shrink-0 opacity-70 transition group-open:rotate-180"
+                      strokeWidth={1.75}
+                    />
+                  </summary>
+                  <div className="absolute left-0 top-full z-20 mt-2 w-[min(100vw-2rem,22rem)] rounded-xl border border-white/10 bg-void/95 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md">
+                    <LegalRequisitesBlock variant="identity" accent />
+                  </div>
+                </details>
+              </nav>
+            </div>
 
             <div className="flex items-center gap-3">
               {legalConfig.phoneTel && (
