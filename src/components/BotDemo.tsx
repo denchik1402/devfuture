@@ -4,7 +4,8 @@ import { memo, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Check, ChevronRight } from "lucide-react";
 import { reachGoal } from "@/lib/analytics";
-import { siteConfig } from "@/lib/site";
+import { CTA } from "@/lib/cta";
+import { telegramBotStartLink } from "@/lib/site";
 import NeonButton from "./NeonButton";
 
 const DEMO_STEPS = [
@@ -83,11 +84,11 @@ function BotDemo() {
           </p>
           <div className="mt-8">
             <NeonButton
-              href={siteConfig.telegramUrl}
+              href={telegramBotStartLink("order")}
               pulse
               onClick={() => reachGoal("click_telegram", { place: "bot_demo" })}
             >
-              Хочу такого бота
+              {CTA.telegram}
             </NeonButton>
           </div>
         </div>

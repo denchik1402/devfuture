@@ -10,21 +10,29 @@ import {
 function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
-    setVisible(readCookieConsent() === null);
-  }, []);
-
-  if (!visible) return null;
-
   const accept = () => {
     writeCookieConsent("accepted");
     setVisible(false);
+    delete document.body.dataset.cookieBanner;
+    window.dispatchEvent(new Event("df:cookie-banner"));
   };
 
   const reject = () => {
     writeCookieConsent("rejected");
     setVisible(false);
+    delete document.body.dataset.cookieBanner;
+    window.dispatchEvent(new Event("df:cookie-banner"));
   };
+
+  useEffect(() => {
+    const open = readCookieConsent() === null;
+    setVisible(open);
+    if (open) document.body.dataset.cookieBanner = "1";
+    else delete document.body.dataset.cookieBanner;
+    window.dispatchEvent(new Event("df:cookie-banner"));
+  }, []);
+
+  if (!visible) return null;
 
   return (
     <div

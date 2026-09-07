@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
 import { PACKAGES } from "@/lib/content";
+import { CTA } from "@/lib/cta";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
@@ -79,16 +80,31 @@ function Packages() {
                       </li>
                     ))}
                   </ul>
-                  <NeonButton
-                    href={botHref}
-                    variant={pkg.highlight ? "primary" : "ghost"}
-                    className="mt-6 w-full text-center"
-                    onClick={() =>
-                      reachGoal("click_package", { package: pkg.id })
-                    }
-                  >
-                    Написать в Telegram
-                  </NeonButton>
+                  <div className="mt-6 flex flex-col gap-2">
+                    <NeonButton
+                      href={botHref}
+                      variant={pkg.highlight ? "primary" : "ghost"}
+                      className="w-full text-center"
+                      onClick={() =>
+                        reachGoal("click_package", { package: pkg.id })
+                      }
+                    >
+                      {CTA.telegram}
+                    </NeonButton>
+                    <NeonButton
+                      href="/#quiz"
+                      variant="ghost"
+                      className="w-full text-center"
+                      onClick={() =>
+                        reachGoal("open_contact", {
+                          place: "packages_describe",
+                          package: pkg.id,
+                        })
+                      }
+                    >
+                      {CTA.describe}
+                    </NeonButton>
+                  </div>
                 </article>
               </Reveal>
             );

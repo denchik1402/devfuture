@@ -4,6 +4,7 @@ import { memo, useMemo, useState } from "react";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
 import { PACKAGES } from "@/lib/content";
+import { CTA } from "@/lib/cta";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
@@ -180,7 +181,7 @@ function BudgetEstimator() {
                     reachGoal("click_package", { package: pkg.id });
                   }}
                 >
-                  Написать в Telegram
+                  {CTA.telegram}
                 </NeonButton>
                 <NeonButton
                   href="#contact"
@@ -189,7 +190,7 @@ function BudgetEstimator() {
                     reachGoal("open_packages", { package: pkg.id })
                   }
                 >
-                  Форма на сайте
+                  {CTA.describe}
                 </NeonButton>
                 <NeonButton href="/brief" variant="ghost">
                   Печать заявки
@@ -219,13 +220,18 @@ function Step({
   return (
     <div className={className}>
       <p className="font-display text-sm font-semibold text-white">{title}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div
+        className="mt-3 flex flex-wrap gap-2"
+        role="group"
+        aria-label={title}
+      >
         {options.map((opt) => {
           const active = opt.id === value;
           return (
             <button
               key={opt.id}
               type="button"
+              aria-pressed={active}
               onClick={() => onChange(opt.id)}
               className={`rounded-full border px-3.5 py-2 text-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon ${
                 active

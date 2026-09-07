@@ -611,6 +611,19 @@ function clampScore(n: number) {
   return Math.max(0, Math.min(10, n));
 }
 
+function nicheTag(niche: string): string | undefined {
+  const n = niche.toLowerCase();
+  if (/салон|красот|маник|парик/.test(n)) return "niche:salon";
+  if (/клиник|мед|врач|стомат|пациент/.test(n)) return "niche:clinic";
+  if (/магазин|e-?com|товар|доставк/.test(n)) return "niche:shop";
+  if (/школ|курс|обучен|вебинар/.test(n)) return "niche:edu";
+  if (/лендинг|сайт|landing/.test(n)) return "niche:site";
+  if (/бот|telegram|телеграм/.test(n)) return "niche:bot";
+  if (/кабинет|crm|учёт|учет/.test(n)) return "niche:cabinet";
+  if (niche.trim()) return "niche:other";
+  return undefined;
+}
+
 function scoreUrgency(urgency: string): number {
   const u = urgency.toLowerCase();
   if (/asap|скорее|сегодня/.test(u)) return 3;
@@ -715,6 +728,7 @@ async function handleDraftStep(
     const urgency = (draft.urgency || "").trim();
     const budget = draft.budget.trim();
     const { score, tag } = qualifyScore(niche, urgency, budget);
+    const nicheT = nicheTag(niche);
 
     const baseTask = (draft.task || "").trim();
     const task = [
@@ -734,7 +748,7 @@ async function handleDraftStep(
     const source = draft.source;
     deleteDraft(chatId);
 
-    await ingestLeadAndNotify({
+    const lead = await ingestLeadAndNotify({
       chatId,
       name,
       contact,
@@ -743,16 +757,18 @@ async function handleDraftStep(
       username: from?.username,
       source,
       title: "🆕 <b>Заявка из Telegram-бота</b>",
-      tags: [tag],
+      tags: [tag, nicheT].filter(Boolean) as string[],
       score,
     });
 
+    const statusUrl = `https://devfuture.ru/status/${lead.id}`;
     await sendMessage(
       chatId,
       [
         "✅ <b>Заявка принята!</b>",
         "",
         thankByTag(tag),
+        `Статус заявки: <a href="${statusUrl}">${statusUrl}</a>`,
         "Можно также задать вопрос через меню бота.",
       ].join("\n"),
       { reply_markup: mainKeyboard(isAdmin(from?.id)) }

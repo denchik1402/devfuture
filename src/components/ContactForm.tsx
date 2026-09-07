@@ -265,6 +265,13 @@ function ContactForm() {
                   <p className="mt-3 font-display text-xs text-zinc-500">
                     ID заявки:{" "}
                     <span className="text-cyan-neon/90">{leadId}</span>
+                    {" · "}
+                    <Link
+                      href={`/status/${encodeURIComponent(leadId)}`}
+                      className="text-cyan-neon underline-offset-4 hover:underline"
+                    >
+                      Смотреть статус
+                    </Link>
                   </p>
                 ) : null}
                 <div className="mt-6 flex flex-wrap gap-3">

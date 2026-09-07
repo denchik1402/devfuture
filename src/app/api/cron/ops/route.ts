@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { formatWeeklyDigest, listDueReminders, setLeadRemindAt } from "@/lib/bot-leads";
 import { flushCrmQueue } from "@/lib/bot-crm";
-import { formatSlaReport, maybePingSla, maybePingSla24 } from "@/lib/bot-sla";
+import { formatSlaReport, maybePingSla, maybePingSla24, maybePingWaitClients } from "@/lib/bot-sla";
 import { notifyAdmins } from "@/lib/bot-notify";
 import { escapeHtml, sendMessage } from "@/lib/telegram";
 
@@ -32,6 +32,7 @@ export async function GET(request: Request) {
 
   await maybePingSla(4);
   await maybePingSla24();
+  await maybePingWaitClients(3);
   await flushCrmQueue();
 
   const due = listDueReminders();

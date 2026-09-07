@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import NeonButton from "./NeonButton";
+import { CTA } from "@/lib/cta";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
 
@@ -113,7 +114,7 @@ function QuizStickyBar() {
                   reachGoal("click_telegram", { place: "quiz_sticky" })
                 }
               >
-                Написать в Telegram
+                {CTA.telegram}
               </NeonButton>
               <NeonButton
                 href="#contact"
@@ -121,7 +122,7 @@ function QuizStickyBar() {
                 className="!px-4 !py-2.5 text-xs sm:text-sm"
                 onClick={goToContact}
               >
-                Форма на сайте
+                {CTA.describe}
               </NeonButton>
               <a
                 href={printHref}

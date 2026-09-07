@@ -79,6 +79,7 @@ export async function ingestLeadAndNotify(input: {
     escapeHtml(input.task),
     "",
     `ID: <code>${escapeHtml(lead.id)}</code>`,
+    `Статус: https://devfuture.ru/status/${encodeURIComponent(lead.id)}`,
   ]
     .filter(Boolean)
     .join("\n");

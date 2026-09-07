@@ -138,6 +138,11 @@ export function getLead(id: string): BotLead | undefined {
   return load().find((l) => l.id === id);
 }
 
+/** Alias for public status pages and API consumers */
+export function getLeadById(id: string): BotLead | undefined {
+  return getLead(id);
+}
+
 export function updateLeadStatus(
   id: string,
   status: LeadStatus

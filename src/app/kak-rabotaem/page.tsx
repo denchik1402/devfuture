@@ -170,7 +170,7 @@ export default function KakRabotaemPage() {
                 <NeonButton href={telegramBotStartLink("support")} pulse>
                   Обсудить сопровождение
                 </NeonButton>
-                <NeonButton href="/#packages" variant="ghost">
+                <NeonButton href="/pakety" variant="ghost">
                   Все пакеты
                 </NeonButton>
               </div>

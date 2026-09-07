@@ -16,10 +16,11 @@ const LINKS = [
   { label: "Кейсы", href: "/keysy" },
   { label: "Как работаем", href: "/kak-rabotaem" },
   { label: "Собрать сценарий", href: "/sobrat-scenarij" },
-  { label: "Пакеты", href: "/#packages" },
+  { label: "Пакеты", href: "/pakety" },
   { label: "Демо", href: "/#demo" },
   { label: "Блог", href: "/blog" },
   { label: "Заявка", href: "/brief" },
+  { label: "Партнёрам", href: "/partner" },
 ];
 
 const legalLinkClass =
@@ -125,7 +126,7 @@ function Footer() {
                     {link.label}
                   </Link>
                 ))}
-                <details className="group relative inline-block">
+                <details className="group relative inline-block max-sm:block max-sm:w-full">
                   <summary
                     className={`${legalLinkClass} inline-flex cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden`}
                   >
@@ -135,7 +136,7 @@ function Footer() {
                       strokeWidth={1.75}
                     />
                   </summary>
-                  <div className="absolute left-0 top-full z-20 mt-2 w-[min(100vw-2rem,22rem)] rounded-xl border border-white/10 bg-void/95 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md">
+                  <div className="z-20 mt-2 w-full rounded-xl border border-white/10 bg-void/95 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md max-sm:static max-sm:mt-2 md:absolute md:left-0 md:right-auto md:top-full md:w-[min(100vw-2rem,22rem)]">
                     <LegalRequisitesBlock variant="identity" accent />
                   </div>
                 </details>

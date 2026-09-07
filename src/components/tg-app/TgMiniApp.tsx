@@ -6,6 +6,7 @@ import { FAQ_ITEMS, PACKAGES } from "@/lib/content";
 import { SERVICE_PAGES } from "@/lib/services";
 import { formatSourceTag, loadAttribution } from "@/lib/attribution";
 import { CONSENT_LABEL } from "@/lib/legal";
+import { CTA } from "@/lib/cta";
 import type { BotLead, LeadStatus } from "@/lib/bot-leads";
 import { REPLY_TEMPLATES } from "@/lib/reply-templates";
 import { useTelegramWebApp } from "./useTelegramWebApp";
@@ -101,6 +102,8 @@ export default function TgMiniApp() {
   const [crmStatus, setCrmStatus] = useState<LeadStatus | "all">("all");
   const [crmTag, setCrmTag] = useState<"all" | "hot" | "warm" | "cold">("all");
   const [crmStaleOnly, setCrmStaleOnly] = useState(false);
+  const [offerSub, setOfferSub] = useState<"packages" | "services">("packages");
+  const [leadIdOk, setLeadIdOk] = useState<string | null>(null);
 
   const tabs = useMemo(() => {
     if (!isAdminUser) return BASE_TABS;
@@ -276,6 +279,7 @@ export default function TgMiniApp() {
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         error?: string;
+        leadId?: string;
       };
       if (!res.ok || !data.ok) {
         setStatus("error");
@@ -283,6 +287,7 @@ export default function TgMiniApp() {
         return;
       }
       setStatus("ok");
+      setLeadIdOk(data.leadId || null);
       setMessage("");
       setConsent(false);
       webApp?.HapticFeedback?.impactOccurred("medium");
@@ -382,10 +387,32 @@ export default function TgMiniApp() {
 
         {tab === "offer" && (
           <section className="space-y-4">
-            <h2 className="font-display text-lg font-semibold text-white">
-              Пакеты
-            </h2>
-            {PACKAGES.map((pkg) => (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setOfferSub("packages")}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium ${
+                  offerSub === "packages"
+                    ? "bg-cyan-neon/15 text-cyan-neon"
+                    : "text-zinc-500"
+                }`}
+              >
+                Пакеты
+              </button>
+              <button
+                type="button"
+                onClick={() => setOfferSub("services")}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium ${
+                  offerSub === "services"
+                    ? "bg-cyan-neon/15 text-cyan-neon"
+                    : "text-zinc-500"
+                }`}
+              >
+                Услуги
+              </button>
+            </div>
+            {offerSub === "packages" &&
+              PACKAGES.map((pkg) => (
               <article key={pkg.id} className="glass rounded-2xl p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -409,15 +436,13 @@ export default function TgMiniApp() {
                   }}
                   className="mt-4 w-full rounded-full border border-cyan-neon/30 py-2 text-sm text-cyan-neon"
                 >
-                  Заявка на пакет
+                  {CTA.describe}
                 </button>
               </article>
             ))}
 
-            <h2 className="pt-2 font-display text-lg font-semibold text-white">
-              Услуги
-            </h2>
-            {SERVICE_PAGES.map((s) => (
+            {offerSub === "services" &&
+              SERVICE_PAGES.map((s) => (
               <article key={s.slug} className="glass rounded-2xl p-4">
                 <div className="flex items-start justify-between gap-3">
                   <p className="font-display text-base font-semibold text-white">
@@ -436,7 +461,7 @@ export default function TgMiniApp() {
                   }}
                   className="mt-4 w-full rounded-full border border-white/10 py-2 text-sm text-zinc-200"
                 >
-                  Заявка по услуге
+                  {CTA.describe}
                 </button>
               </article>
             ))}
@@ -576,24 +601,51 @@ export default function TgMiniApp() {
             </p>
 
             {status === "ok" ? (
-              <div className="glass mt-5 rounded-2xl p-5">
+              <div
+                className="glass mt-5 rounded-2xl p-5"
+                role="status"
+                aria-live="polite"
+              >
                 <p className="font-display text-lg text-white">Заявка ушла ✅</p>
                 <p className="mt-2 text-sm text-zinc-400">
                   Мы получили её и скоро ответим.
                 </p>
+                {leadIdOk ? (
+                  <p className="mt-3 text-xs text-zinc-500">
+                    Статус:{" "}
+                    <a
+                      href={`/status/${leadIdOk}`}
+                      className="text-cyan-neon underline-offset-2 hover:underline"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      /status/{leadIdOk}
+                    </a>
+                  </p>
+                ) : null}
                 <button
                   type="button"
-                  onClick={() => setStatus("idle")}
+                  onClick={() => {
+                    setStatus("idle");
+                    setLeadIdOk(null);
+                  }}
                   className="mt-4 rounded-full bg-neon-gradient px-5 py-2.5 text-sm font-semibold text-void"
                 >
                   Отправить ещё
                 </button>
               </div>
             ) : (
-              <form onSubmit={submitLead} className="mt-5 space-y-3">
-                <label className="block">
+              <form
+                onSubmit={submitLead}
+                className="mt-5 space-y-3"
+                aria-busy={status === "loading"}
+              >
+                <label className="block" htmlFor="tg-lead-name">
                   <span className="mb-1.5 block text-xs text-zinc-500">Имя</span>
                   <input
+                    id="tg-lead-name"
+                    name="name"
+                    autoComplete="name"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -601,11 +653,14 @@ export default function TgMiniApp() {
                     placeholder="Как к вам обращаться"
                   />
                 </label>
-                <label className="block">
+                <label className="block" htmlFor="tg-lead-contact">
                   <span className="mb-1.5 block text-xs text-zinc-500">
                     Telegram или телефон
                   </span>
                   <input
+                    id="tg-lead-contact"
+                    name="contact"
+                    autoComplete="tel"
                     required
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
@@ -613,9 +668,11 @@ export default function TgMiniApp() {
                     placeholder="@username или +7…"
                   />
                 </label>
-                <label className="block">
+                <label className="block" htmlFor="tg-lead-type">
                   <span className="mb-1.5 block text-xs text-zinc-500">Тип</span>
                   <select
+                    id="tg-lead-type"
+                    name="type"
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                     className="w-full rounded-xl border border-white/10 bg-[#121216] px-3 py-3 text-sm outline-none focus:border-cyan-neon/40"
@@ -627,11 +684,13 @@ export default function TgMiniApp() {
                     ))}
                   </select>
                 </label>
-                <label className="block">
+                <label className="block" htmlFor="tg-lead-message">
                   <span className="mb-1.5 block text-xs text-zinc-500">
                     Что нужно сделать
                   </span>
                   <textarea
+                    id="tg-lead-message"
+                    name="message"
                     required
                     minLength={10}
                     rows={4}
@@ -641,8 +700,13 @@ export default function TgMiniApp() {
                     placeholder="2–3 предложения о задаче"
                   />
                 </label>
-                <label className="flex items-start gap-3 text-sm text-zinc-400">
+                <label
+                  className="flex items-start gap-3 text-sm text-zinc-400"
+                  htmlFor="tg-lead-consent"
+                >
                   <input
+                    id="tg-lead-consent"
+                    name="consent"
                     type="checkbox"
                     checked={consent}
                     onChange={(e) => setConsent(e.target.checked)}
@@ -660,7 +724,9 @@ export default function TgMiniApp() {
                   </span>
                 </label>
                 {error ? (
-                  <p className="text-sm text-red-400">{error}</p>
+                  <p className="text-sm text-red-400" role="alert">
+                    {error}
+                  </p>
                 ) : null}
                 <button
                   type="submit"
@@ -680,13 +746,48 @@ export default function TgMiniApp() {
               <h2 className="font-display text-lg font-semibold text-white">
                 CRM
               </h2>
-              <button
-                type="button"
-                onClick={() => void loadCrm()}
-                className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400"
-              >
-                Обновить
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rows = filteredLeads.map((l) =>
+                      [
+                        l.id,
+                        l.status,
+                        l.at,
+                        JSON.stringify(l.name || ""),
+                        JSON.stringify(l.contact || ""),
+                        JSON.stringify(l.source || ""),
+                        JSON.stringify((l.tags || []).join("|")),
+                        JSON.stringify((l.task || "").slice(0, 200)),
+                      ].join(",")
+                    );
+                    const csv = [
+                      "id,status,at,name,contact,source,tags,task",
+                      ...rows,
+                    ].join("\n");
+                    const blob = new Blob([csv], {
+                      type: "text/csv;charset=utf-8",
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `leads-${new Date().toISOString().slice(0, 10)}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400"
+                >
+                  CSV
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void loadCrm()}
+                  className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400"
+                >
+                  Обновить
+                </button>
+              </div>
             </div>
 
             {leadStatsView ? (

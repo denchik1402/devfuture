@@ -24,7 +24,7 @@ function NeonButton({
   onClick,
 }: NeonButtonProps) {
   const base =
-    "relative inline-flex items-center justify-center px-7 py-3.5 font-display text-sm font-semibold tracking-wide rounded-full select-none will-change-transform";
+    "relative inline-flex items-center justify-center px-7 py-3.5 font-display text-sm font-semibold tracking-wide rounded-full select-none will-change-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon";
 
   const styles =
     variant === "primary"

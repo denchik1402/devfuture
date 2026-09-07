@@ -1,10 +1,12 @@
 import { listLeads, type BotLead } from "@/lib/bot-leads";
 import { notifyAdmins } from "@/lib/bot-notify";
-import { escapeHtml } from "@/lib/telegram";
+import { escapeHtml, sendMessage } from "@/lib/telegram";
+import { siteConfig } from "@/lib/site";
 
 const DEFAULT_HOURS = 4;
 let lastSlaPingAt = 0;
 let lastSla24PingAt = 0;
+let lastWaitClientPingAt = 0;
 
 export function listStaleNewLeads(hours = DEFAULT_HOURS): BotLead[] {
   const cutoff = Date.now() - hours * 60 * 60 * 1000;
@@ -44,6 +46,32 @@ export async function maybePingSla(hours = DEFAULT_HOURS) {
   const stale = listStaleNewLeads(hours);
   if (!stale.length) return;
   await notifyAdmins(formatSlaReport(hours));
+}
+
+/** Напоминание клиенту, если заявка в wait дольше N дней */
+export async function maybePingWaitClients(days = 3) {
+  const now = Date.now();
+  if (now - lastWaitClientPingAt < 20 * 60 * 60 * 1000) return;
+  lastWaitClientPingAt = now;
+
+  const cutoff = now - days * 24 * 60 * 60 * 1000;
+  const waiting = listLeads(80).filter((l) => {
+    if (l.status !== "wait" || !l.chatId) return false;
+    const t = Date.parse(l.at);
+    return Number.isFinite(t) && t < cutoff;
+  });
+
+  for (const lead of waiting.slice(0, 15)) {
+    const statusUrl = `${siteConfig.url}/status/${lead.id}`;
+    await sendMessage(
+      String(lead.chatId),
+      [
+        `${escapeHtml(lead.name)}, заявка всё ещё на паузе.`,
+        `Статус: <a href="${statusUrl}">открыть</a>`,
+        "Если срочность изменилась — ответьте сюда, продолжим.",
+      ].join("\n")
+    );
+  }
 }
 
 /** At most once per ~20h — escalate leads without answer > 24h */

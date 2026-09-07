@@ -1,9 +1,11 @@
 "use client";
 
 import { memo, useMemo, useState } from "react";
+import Link from "next/link";
 import Reveal from "./Reveal";
 import NeonButton from "./NeonButton";
 import { BRIEF_TYPES } from "@/lib/content";
+import { CTA } from "@/lib/cta";
 import { telegramBriefLink } from "@/lib/site";
 import { formatSourceTag, loadAttribution } from "@/lib/attribution";
 import { reachGoal } from "@/lib/analytics";
@@ -20,7 +22,21 @@ const BUDGETS = [
   { id: "100+", label: "от 100 тыс. ₽" },
 ] as const;
 
+const RELATED_CASES: Record<
+  (typeof BRIEF_TYPES)[number]["value"],
+  { label: string; href: string }[]
+> = {
+  bot: [{ label: "Бот записи для салона", href: "/keysy/salon-booking" }],
+  landing: [{ label: "Лендинг с заявками", href: "/keysy/landing-leads" }],
+  web: [{ label: "Кабинет статусов", href: "/keysy/status-cabinet" }],
+  desktop: [
+    { label: "Десктопные приложения", href: "/uslugi/desktop-prilozheniya" },
+  ],
+  other: [{ label: "Все кейсы", href: "/keysy" }],
+};
+
 function BriefQuiz() {
+  const [step, setStep] = useState(1);
   const [type, setType] = useState<(typeof BRIEF_TYPES)[number]["value"]>(
     BRIEF_TYPES[0].value
   );
@@ -34,6 +50,8 @@ function BriefQuiz() {
     TIMELINES.find((t) => t.id === timeline)?.label ?? timeline;
   const budgetLabel =
     BUDGETS.find((b) => b.id === budget)?.label ?? budget;
+
+  const related = RELATED_CASES[type] ?? RELATED_CASES.other;
 
   const briefText = useMemo(() => {
     return [
@@ -122,6 +140,13 @@ function BriefQuiz() {
 
         <Reveal delay={0.08} className="mt-12 md:mt-14">
           <div className="glass rounded-2xl p-6 md:p-8">
+            <p
+              className="mb-6 font-display text-xs uppercase tracking-[0.25em] text-cyan-neon/80"
+              aria-live="polite"
+            >
+              Шаг {step} из 3
+            </p>
+
             <Step
               title="1. Что нужно?"
               options={BRIEF_TYPES.map((t) => ({
@@ -129,21 +154,46 @@ function BriefQuiz() {
                 label: t.label,
               }))}
               value={type}
-              onChange={(v) => setType(v as typeof type)}
+              onChange={(v) => {
+                setType(v as typeof type);
+                setStep(1);
+              }}
             />
+            <div className="mt-4">
+              <p className="text-xs text-zinc-500">Похожие кейсы</p>
+              <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                {related.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="text-sm text-cyan-neon/90 underline-offset-4 hover:underline"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <Step
               className="mt-8"
               title="2. Когда нужен результат?"
               options={TIMELINES.map((t) => ({ id: t.id, label: t.label }))}
               value={timeline}
-              onChange={(v) => setTimeline(v as typeof timeline)}
+              onChange={(v) => {
+                setTimeline(v as typeof timeline);
+                setStep(2);
+              }}
             />
             <Step
               className="mt-8"
               title="3. Ориентир по бюджету?"
               options={BUDGETS.map((b) => ({ id: b.id, label: b.label }))}
               value={budget}
-              onChange={(v) => setBudget(v as typeof budget)}
+              onChange={(v) => {
+                setBudget(v as typeof budget);
+                setStep(3);
+              }}
             />
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -152,10 +202,10 @@ function BriefQuiz() {
                 pulse
                 onClick={() => persistAndSticky("telegram")}
               >
-                Написать в Telegram
+                {CTA.telegram}
               </NeonButton>
               <NeonButton href="#contact" variant="ghost" onClick={goToForm}>
-                Форма на сайте
+                {CTA.describe}
               </NeonButton>
               <a
                 href={briefPdfHref}

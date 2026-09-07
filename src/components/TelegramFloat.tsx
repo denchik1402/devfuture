@@ -5,10 +5,12 @@ import { Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
+import { CTA } from "@/lib/cta";
 
 function TelegramFloat() {
   const [hidden, setHidden] = useState(false);
   const [stickyUp, setStickyUp] = useState(false);
+  const [cookieUp, setCookieUp] = useState(false);
 
   useEffect(() => {
     const contact = document.getElementById("contact");
@@ -25,17 +27,28 @@ function TelegramFloat() {
   }, []);
 
   useEffect(() => {
-    const sync = () => {
+    const syncSticky = () => {
       setStickyUp(document.body.dataset.quizSticky === "1");
     };
-    sync();
-    window.addEventListener("df:quiz-sticky-vis", sync);
-    return () => window.removeEventListener("df:quiz-sticky-vis", sync);
+    const syncCookie = () => {
+      setCookieUp(document.body.dataset.cookieBanner === "1");
+    };
+    syncSticky();
+    syncCookie();
+    window.addEventListener("df:quiz-sticky-vis", syncSticky);
+    window.addEventListener("df:cookie-banner", syncCookie);
+    return () => {
+      window.removeEventListener("df:quiz-sticky-vis", syncSticky);
+      window.removeEventListener("df:cookie-banner", syncCookie);
+    };
   }, []);
 
-  const bottom = stickyUp
-    ? "max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem))"
-    : "max(1.5rem, env(safe-area-inset-bottom))";
+  let bottom = "max(1.5rem, env(safe-area-inset-bottom))";
+  if (cookieUp) {
+    bottom = "max(9rem, calc(env(safe-area-inset-bottom) + 8rem))";
+  } else if (stickyUp) {
+    bottom = "max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem))";
+  }
 
   return (
     <AnimatePresence>
@@ -65,7 +78,7 @@ function TelegramFloat() {
             strokeWidth={1.75}
           />
           <span className="hidden font-display text-sm font-semibold sm:inline">
-            Telegram
+            {CTA.telegram}
           </span>
         </motion.a>
       )}

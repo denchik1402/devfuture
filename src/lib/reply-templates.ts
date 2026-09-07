@@ -24,6 +24,11 @@ export const REPLY_TEMPLATES = [
     title: "Закрытие",
     text: "Закрываем заявку на нашей стороне. Если понадобится доработка или сопровождение — напишите, подключим retainer.",
   },
+  {
+    id: "offer",
+    title: "КП / оферта",
+    text: "Кратко по задаче: можем стартовать с MVP по пакету, смета фиксируется до работ. Оферта: https://devfuture.ru/oferta · пакеты и ориентиры: https://devfuture.ru/pakety — напишите, какой вариант ближе, уточним сроки.",
+  },
 ] as const;
 
 export type ReplyTemplateId = (typeof REPLY_TEMPLATES)[number]["id"];

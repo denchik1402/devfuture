@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { telegramBotStartLink } from "@/lib/site";
 import { reachGoal } from "@/lib/analytics";
+import { CTA } from "@/lib/cta";
 import ThemeToggle from "./ThemeToggle";
 
 const NAV = [
@@ -13,7 +14,7 @@ const NAV = [
   { label: "Решения", href: "/resheniya" },
   { label: "Кейсы", href: "/keysy" },
   { label: "Как работаем", href: "/kak-rabotaem" },
-  { label: "Пакеты", href: "/#packages" },
+  { label: "Пакеты", href: "/pakety" },
   { label: "Демо", href: "/#demo" },
   { label: "Блог", href: "/blog" },
 ];
@@ -89,7 +90,7 @@ function Navbar() {
             onClick={() => reachGoal("click_telegram", { place: "nav" })}
             className="rounded-full bg-neon-gradient px-4 py-2 text-sm font-semibold text-void transition-transform hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
-            Telegram
+            {CTA.telegram}
           </a>
         </nav>
 
@@ -153,14 +154,14 @@ function Navbar() {
                 }}
                 className="mt-2 rounded-full bg-neon-gradient px-4 py-3 text-center text-sm font-semibold text-void"
               >
-                Написать в Telegram
+                {CTA.telegram}
               </a>
               <Link
                 href="/#quiz"
                 onClick={() => setOpen(false)}
                 className="rounded-lg px-3 py-3 text-center text-sm text-zinc-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-neon"
               >
-                Описать задачу
+                {CTA.describe}
               </Link>
             </nav>
           </motion.div>

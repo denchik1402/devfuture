@@ -74,10 +74,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.75,
     },
     {
-      url: `${siteConfig.url}/brief`,
+      url: `${siteConfig.url}/pakety`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteConfig.url}/partner`,
       lastModified,
       changeFrequency: "monthly",
-      priority: 0.55,
+      priority: 0.5,
     },
     {
       url: `${siteConfig.url}/blog`,
