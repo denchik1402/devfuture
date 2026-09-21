@@ -2,6 +2,8 @@ import dns from "node:dns";
 import http from "node:http";
 import https from "node:https";
 import { URL } from "node:url";
+import { SocksProxyAgent } from "socks-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 /** Many VPS prefer broken IPv6 routes — force IPv4 first */
 try {
@@ -15,6 +17,20 @@ function telegramApiBase() {
   return (
     process.env["TELEGRAM_API_BASE"]?.trim() || "https://api.telegram.org"
   ).replace(/\/$/, "");
+}
+
+/** socks5://… or http(s)://… — VPN/gost outbound to api.telegram.org */
+function telegramProxyUrl() {
+  return process.env["TELEGRAM_PROXY_URL"]?.trim() || "";
+}
+
+function proxyAgentFor(urlStr: string) {
+  const proxy = telegramProxyUrl();
+  if (!proxy) return undefined;
+  if (/^socks/i.test(proxy)) {
+    return new SocksProxyAgent(proxy);
+  }
+  return new HttpsProxyAgent(proxy);
 }
 
 export function getBotToken() {
@@ -50,6 +66,7 @@ function postJson(
   return new Promise((resolve, reject) => {
     const url = new URL(urlStr);
     const lib = url.protocol === "https:" ? https : http;
+    const agent = proxyAgentFor(urlStr);
     const req = lib.request(
       {
         hostname: url.hostname,
@@ -60,7 +77,7 @@ function postJson(
           ...headers,
           "content-length": Buffer.byteLength(body),
         },
-        family: 4,
+        ...(agent ? { agent } : { family: 4 }),
         servername: url.hostname,
         timeout: 25_000,
       },
@@ -132,7 +149,7 @@ export async function tgApi(
       method,
       "network error:",
       message,
-      `(api=${api}). Check TELEGRAM_API_BASE / TELEGRAM_PROXY_SECRET.`
+      `(api=${api}). Check TELEGRAM_PROXY_URL / TELEGRAM_API_BASE.`
     );
     return { ok: false, description: message };
   }

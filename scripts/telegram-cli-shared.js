@@ -47,6 +47,19 @@ function proxyHeaders() {
   return ["-H", `X-Telegram-Proxy-Secret: ${secret}`];
 }
 
+function curlProxyArgs() {
+  const proxy = process.env.TELEGRAM_PROXY_URL?.trim();
+  if (!proxy) return [];
+  // socks5h = resolve DNS via proxy (needed when VPS can't resolve/reach TG)
+  if (/^socks5h?:\/\//i.test(proxy)) {
+    return ["--proxy", proxy.replace(/^socks5:\/\//i, "socks5h://")];
+  }
+  if (/^socks/i.test(proxy)) {
+    return ["--proxy", proxy];
+  }
+  return ["--proxy", proxy];
+}
+
 /**
  * Prefer curl -4 (IPv4): Node fetch often hangs on broken IPv6 to Telegram from VPS.
  */
@@ -56,6 +69,7 @@ function curlJson(url, { method = "GET", body } = {}) {
     "-sS",
     "--max-time",
     "25",
+    ...curlProxyArgs(),
     "-H",
     "Content-Type: application/json",
     ...proxyHeaders(),
