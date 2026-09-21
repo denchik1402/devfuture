@@ -19,9 +19,12 @@ function telegramApiBase() {
   ).replace(/\/$/, "");
 }
 
-/** socks5://… or http(s)://… — VPN/gost outbound to api.telegram.org */
+/** socks5h://… (prefer) / socks5://… / http(s)://… — VPN/gost to api.telegram.org */
 function telegramProxyUrl() {
-  return process.env["TELEGRAM_PROXY_URL"]?.trim() || "";
+  const raw = process.env["TELEGRAM_PROXY_URL"]?.trim() || "";
+  // Remote DNS via proxy — plain socks5:// often hangs from restricted VPS networks
+  if (/^socks5:\/\//i.test(raw)) return raw.replace(/^socks5:\/\//i, "socks5h://");
+  return raw;
 }
 
 function proxyAgentFor(urlStr: string) {

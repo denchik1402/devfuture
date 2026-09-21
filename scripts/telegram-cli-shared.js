@@ -50,9 +50,12 @@ function proxyHeaders() {
 function curlProxyArgs() {
   const proxy = process.env.TELEGRAM_PROXY_URL?.trim();
   if (!proxy) return [];
-  // socks5h = resolve DNS via proxy (needed when VPS can't resolve/reach TG)
-  if (/^socks5h?:\/\//i.test(proxy)) {
-    return ["--proxy", proxy.replace(/^socks5:\/\//i, "socks5h://")];
+  // socks5h = resolve DNS via proxy (plain socks5 often hangs on FirstByte)
+  if (/^socks5:\/\//i.test(proxy)) {
+    return ["--socks5-hostname", proxy.replace(/^socks5:\/\//i, "")];
+  }
+  if (/^socks5h:\/\//i.test(proxy)) {
+    return ["--socks5-hostname", proxy.replace(/^socks5h:\/\//i, "")];
   }
   if (/^socks/i.test(proxy)) {
     return ["--proxy", proxy];
