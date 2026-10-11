@@ -57,6 +57,15 @@ if [ -f .env.local ] && grep -q '^TELEGRAM_BOT_TOKEN=.\+' .env.local 2>/dev/null
   else
     echo "warn: TELEGRAM_WEBHOOK_SECRET missing — skip set-webhook"
   fi
+  if grep -q '^TELEGRAM_MODE=polling' .env.local 2>/dev/null; then
+    echo "==> restart telegram poller"
+    if pm2 describe "$APP_NAME-tg-poll" >/dev/null 2>&1; then
+      pm2 restart "$APP_NAME-tg-poll" --update-env
+    else
+      pm2 start scripts/telegram-poll.js --name "$APP_NAME-tg-poll" --cwd "$APP_DIR"
+      pm2 save
+    fi
+  fi
   echo "==> telegram menu button (Mini App)"
   npm run tg:menu-button || echo "warn: menu-button failed"
 fi

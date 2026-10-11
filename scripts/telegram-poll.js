@@ -1,108 +1,131 @@
 /**
- * Local long-polling for the bot (when api.telegram.org is reachable).
- * Use this ONLY for local testing. On the server prefer webhook.
+ * Long-polling relay: getUpdates via TELEGRAM_PROXY_URL → local Next webhook.
  *
- *   npm run tg:poll
+ * Use when Telegram cannot reach the server inbound (webhook → Connection timed out).
+ * Production: run under pm2 with TELEGRAM_MODE=polling in .env.local
+ *   pm2 start scripts/telegram-poll.js --name devfuture-tg-poll --cwd /var/www/devfuture
+ * Local: npm run tg:poll
  *
- * Stop with Ctrl+C. Do not run poll + webhook at the same time.
+ * Do not run poll + webhook at the same time — this script removes the webhook.
  */
 
-const fs = require("fs");
-const path = require("path");
+const https = require("https");
+const { loadEnvFiles } = require("./telegram-cli-shared");
 
-function loadEnvLocal() {
-  const envPath = path.join(process.cwd(), ".env.local");
-  if (!fs.existsSync(envPath)) return;
-  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    const key = trimmed.slice(0, eq).trim();
-    let value = trimmed.slice(eq + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    if (!process.env[key]) process.env[key] = value;
+function proxyAgent() {
+  const raw = process.env.TELEGRAM_PROXY_URL?.trim();
+  if (!raw) return undefined;
+  if (/^socks/i.test(raw)) {
+    const { SocksProxyAgent } = require("socks-proxy-agent");
+    return new SocksProxyAgent(raw.replace(/^socks5:\/\//i, "socks5h://"));
   }
+  const { HttpsProxyAgent } = require("https-proxy-agent");
+  return new HttpsProxyAgent(raw);
 }
 
-async function api(token, method, body) {
-  const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body || {}),
+function api(token, method, body, timeoutMs) {
+  const payload = JSON.stringify(body || {});
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname: "api.telegram.org",
+        path: `/bot${token}/${method}`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(payload),
+        },
+        agent: proxyAgent(),
+        timeout: timeoutMs,
+      },
+      (res) => {
+        let d = "";
+        res.on("data", (c) => (d += c));
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(d));
+          } catch {
+            reject(new Error(`Non-JSON ${res.statusCode}: ${d.slice(0, 120)}`));
+          }
+        });
+      }
+    );
+    req.on("timeout", () => req.destroy(new Error("timeout")));
+    req.on("error", reject);
+    req.end(payload);
   });
-  return res.json();
 }
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
-  loadEnvLocal();
+  loadEnvFiles();
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
   if (!token) {
     console.error("Нет TELEGRAM_BOT_TOKEN в .env.local");
     process.exit(1);
   }
-
-  // Clear webhook so getUpdates works
-  await api(token, "deleteWebhook", { drop_pending_updates: false });
-  console.log("Webhook снят. Long polling… Пишите боту /start");
-  console.log("Остановка: Ctrl+C\n");
-
-  // Dynamic import of compiled bot is hard from plain node.
-  // Call Next.js API by posting updates to local webhook instead if server runs —
-  // but for standalone we inline minimal start reply here and forward to local server.
-
+  const secret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim();
   const localWebhook =
     process.env.TG_LOCAL_WEBHOOK || "http://127.0.0.1:3000/api/telegram/webhook";
+
+  for (;;) {
+    try {
+      const r = await api(token, "deleteWebhook", { drop_pending_updates: false }, 20_000);
+      if (r.ok) break;
+      console.error("deleteWebhook:", r.description);
+    } catch (err) {
+      console.error("deleteWebhook network:", err.message);
+    }
+    await sleep(5000);
+  }
+  console.log(`[tg-poll] webhook removed, polling → ${localWebhook}`);
 
   let offset = 0;
   for (;;) {
     let data;
     try {
-      data = await api(token, "getUpdates", {
-        offset,
-        timeout: 30,
-        allowed_updates: ["message", "callback_query"],
-      });
+      data = await api(
+        token,
+        "getUpdates",
+        { offset, timeout: 30, allowed_updates: ["message", "callback_query"] },
+        45_000
+      );
     } catch (err) {
-      console.error("Сеть/Telegram API недоступны:", err.message || err);
-      console.error("Нужен VPN или запуск на сервере с доступом к api.telegram.org");
-      await new Promise((r) => setTimeout(r, 5000));
+      console.error("[tg-poll] getUpdates network:", err.message);
+      await sleep(5000);
       continue;
     }
 
     if (!data.ok) {
-      console.error(data);
-      await new Promise((r) => setTimeout(r, 3000));
+      console.error("[tg-poll] getUpdates:", data.description);
+      await sleep(5000);
       continue;
     }
 
     for (const update of data.result || []) {
-      offset = update.update_id + 1;
+      // Keep offset on the failed update so getUpdates redelivers it (app restarting)
       try {
         const res = await fetch(localWebhook, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(secret ? { "X-Telegram-Bot-Api-Secret-Token": secret } : {}),
+          },
           body: JSON.stringify(update),
         });
-        if (!res.ok) {
-          console.error("Local webhook HTTP", res.status);
-        } else {
-          const kind = update.message?.text || update.callback_query?.data || "?";
-          console.log("handled:", kind);
+        if (res.status >= 500 || res.status === 429) {
+          console.error("[tg-poll] local webhook HTTP", res.status, "— retry");
+          await sleep(3000);
+          break;
         }
+        if (!res.ok) console.error("[tg-poll] local webhook HTTP", res.status);
       } catch (err) {
-        console.error(
-          "Не удалось достучаться до",
-          localWebhook,
-          "— запущен ли npm run dev?",
-          err.message || err
-        );
+        console.error("[tg-poll] local webhook unreachable:", err.message, "— retry");
+        await sleep(3000);
+        break;
       }
+      offset = update.update_id + 1;
     }
   }
 }

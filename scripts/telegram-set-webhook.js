@@ -22,6 +22,13 @@ async function main() {
     process.exit(1);
   }
 
+  if (process.env.TELEGRAM_MODE?.trim() === "polling") {
+    console.log(
+      "TELEGRAM_MODE=polling — webhook не ставим (апдейты забирает scripts/telegram-poll.js)."
+    );
+    return;
+  }
+
   let url = webhookOverride || "";
   if (!url) {
     if (!site || site.includes("localhost")) {
